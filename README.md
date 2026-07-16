@@ -337,49 +337,6 @@ journalctl \
 
 ### server
 
-```bash
-mkdir -p /var/lib/rancher/k3s/server/manifests;
-${EDITOR:-nano} /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
-```
-
-Coloque isso em `/var/lib/rancher/k3s/server/manifests/traefik-config.yaml`:
-
-```yaml
-apiVersion: helm.cattle.io/v1
-kind: HelmChartConfig
-metadata:
-  name: traefik
-  namespace: kube-system
-
-spec:
-  valuesContent: |-
-    providers:
-      kubernetesGateway:
-        enabled: true
-
-    gateway:
-      enabled: false
-
-    ports:
-      web:
-        port: 80
-        exposedPort: 80
-        expose:
-          default: true
-
-      websecure:
-        port: 443
-        exposedPort: 443
-        expose:
-          default: true
-```
-
-Ajuste as permissões:
-
-```sh
-chmod 644 /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
-```
-
 #### Iniciar o cluster
 
 Para gerar um token seguro para o nó:
@@ -420,6 +377,40 @@ bash <<'EOF'
   kubectl wait --for=condition=Ready node/${K3S_NODE_NAME} --timeout=120s
 
   echo "cluster instalado."
+EOF
+```
+
+Configurar traefik:
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+
+    gateway:
+      enabled: false
+
+    ports:
+      web:
+        port: 80
+        exposedPort: 80
+        expose:
+          default: true
+
+      websecure:
+        port: 443
+        exposedPort: 443
+        expose:
+          default: true
 EOF
 ```
 
@@ -536,4 +527,14 @@ helm upgrade \
   --create-namespace \
   --wait \
   ;
+```
+
+Para acessar a interface web do Longhorn por port-forward:
+
+```bash
+kubectl --namespace longhorn-system port-forward service/longhorn-frontend 8080:80
+```
+
+```bash
+ssh -N -L 8080:127.0.0.1:8080 usuario@ip-do-servidor
 ```
