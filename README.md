@@ -30,7 +30,7 @@ ports:
 Evite publicar apenas como 5432:5432, pois isso normalmente faz bind em todas as interfaces disponíveis.
 
 #### Caso use ufw para controlar as regras
-  
+
 Negar qualquer entrada, permitir qualquer saída.
 
 ```bash
@@ -66,6 +66,7 @@ ufw enable
 # caso já tenha habilitado, só fazer o reload
 ufw reload
 ```
+
 </details>
 
 #### Caso use firewalld para controlar as regras
@@ -242,4 +243,43 @@ helm upgrade \
   ]' \
   --wait \
 ;
+```
+
+### longhorn
+
+Veja antes os requisitos: <https://longhorn.io/docs/1.12.0/deploy/install/#installation-requirements>.
+
+> A container runtime compatible with Kubernetes (Docker v1.13+, containerd v1.3.7+, etc.)
+>
+> - Kubernetes >= v1.25
+> - RWX support requires that each node has a NFSv4 client installed.
+>   - For installing a NFSv4 client, refer to Install NFSv4 client.
+> - bash, curl, findmnt, grep, awk, blkid, lsblk must be installed.
+> - Mount propagation must be enabled.
+
+O longhorn disponibiliza o `longhornctl` para ajudar com algumas operações, veja mais em: <https://longhorn.io/docs/1.12.0/advanced-resources/longhornctl/> e em <https://github.com/longhorn/cli>.
+
+```bash
+# identificar possíveis problemas antes do uso
+longhornctl check preflight
+
+# instalar depedências antes do uso
+longhornctl install preflight
+```
+
+Para instalar o longhornctl:
+
+```bash
+curl -sfL https://raw.githubusercontent.com/guesant/cluster-management-notes/refs/heads/main/scripts/install/longhornctl.sh | bash -
+```
+
+```bash
+helm upgrade \
+  --repo https://charts.longhorn.io longhorn \
+  --version 1.12.0 \
+  --install longhorn \
+  --namespace longhorn-system \
+  --create-namespace \
+  --wait \
+  ;
 ```
