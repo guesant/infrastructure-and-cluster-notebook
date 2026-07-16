@@ -519,10 +519,23 @@ apt install -y bash curl findmnt grep gawk util-linux
 
 ```sh
 apt install -y nfs-common cryptsetup dmsetup open-iscsi
+
+systemctl enable --now iscsid.socket
+systemctl start iscsid.service
 ```
 
 ```sh
 modprobe iscsi_tcp
+modprobe nfs
+modprobe dm_crypt
+```
+
+```bash
+cat >/etc/modules-load.d/longhorn.conf <<'EOF'
+nfs
+dm_crypt
+iscsi_tcp
+EOF
 ```
 
 ```bash
