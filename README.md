@@ -47,7 +47,9 @@ Cada bloco shell informa onde deve ser executado:
 5. Instalar os CRDs da Gateway API e configurar o Traefik.
 6. Adicionar os demais servidores e agentes.
 7. Instalar cert-manager, Longhorn e Argo CD.
-8. Configurar backups e registrar o procedimento de atualização.
+8. Conectar o Argo CD ao repositório GitOps e aplicar a Application `root`.
+9. Modelar NetworkPolicies em homologação e permitir explicitamente os fluxos necessários.
+10. Configurar backups e registrar o procedimento de atualização.
 
 ## Sumário
 
@@ -56,24 +58,32 @@ Cada bloco shell informa onde deve ser executado:
   - [Hardening do SSH](#hardening-do-ssh)
   - [Fail2Ban](#fail2ban)
 - [Gestão dos nós K3s](#gestão-dos-nós-k3s)
+  - [O que é e como o cluster se organiza](#o-que-é-e-como-o-cluster-se-organiza)
   - [Planejamento e segredos](#planejamento-e-segredos)
   - [Primeiro servidor](#primeiro-servidor)
   - [Gateway API e Traefik](#gateway-api-e-traefik)
+    - [O que são e como se relacionam](#o-que-são-e-como-se-relacionam)
+  - [Isolamento de rede com NetworkPolicy](#isolamento-de-rede-com-networkpolicy)
   - [Servidor adicional](#servidor-adicional)
   - [Agente](#agente)
   - [Backup, atualização e remoção](#backup-atualização-e-remoção)
 - [Ferramentas de linha de comando](#ferramentas-de-linha-de-comando)
 - [Serviços básicos](#serviços-básicos)
   - [cert-manager](#cert-manager)
+    - [Como o cert-manager trabalha](#como-o-cert-manager-trabalha)
   - [Longhorn](#longhorn)
+    - [Como o Longhorn fornece armazenamento](#como-o-longhorn-fornece-armazenamento)
   - [Argo CD](#argo-cd)
+    - [O que é e para que serve](#o-que-é-e-para-que-serve)
+    - [Próximo passo: conectar o repositório GitOps](#próximo-passo-conectar-o-repositório-gitops)
+- [Templates copiáveis](#templates-copiáveis)
 - [Checklist operacional](#checklist-operacional)
 
 ## Configuração dos hosts
 
 ### Firewall
 
-Por padrão, bloqueie conexões de entrada e permita apenas o que for necessário.
+O firewall do host controla quais conexões de rede podem chegar aos serviços da máquina. Ele é a primeira barreira contra portas expostas desnecessariamente, mas não substitui autenticação, atualização dos serviços nem políticas de acesso dentro do Kubernetes. Por padrão, bloqueie conexões de entrada e permita apenas o que for necessário.
 
 #### Portas publicadas pelo Docker
 
@@ -198,6 +208,8 @@ ufw status verbose
 TODO.
 
 ### Hardening do SSH
+
+Hardening é a redução deliberada da superfície de ataque de um serviço. Nesta seção, o SSH continuará aceitando administração remota por chave pública, mas recusará senhas, login direto de `root`, usuários fora do grupo autorizado e funcionalidades que não forem necessárias. Essa configuração reduz as formas de entrada; ela não substitui o firewall nem a proteção da chave privada usada pelo administrador.
 
 #### Preparação
 
@@ -375,6 +387,16 @@ Somente encerre a sessão SSH original depois que a nova conexão por chave func
 
 ### Fail2Ban
 
+O Fail2Ban observa os logs de autenticação, identifica endereços que repetem falhas dentro de uma janela e solicita ao firewall um bloqueio temporário. Ele complementa o firewall e o hardening do SSH, mas não torna uma senha fraca segura e não deve ser a única proteção de um serviço exposto.
+
+As camadas usadas neste guia têm responsabilidades diferentes:
+
+| Camada | Responsabilidade |
+| --- | --- |
+| Firewall | Permitir somente origens, protocolos e portas necessários |
+| Hardening do SSH | Restringir usuários, métodos de autenticação e funcionalidades do servidor SSH |
+| Fail2Ban | Reagir a tentativas repetidas registradas nos logs |
+
 Instale os pacotes:
 
 > **Executar em:** nó alvo protegido pelo Fail2Ban, como `root`.
@@ -483,6 +505,52 @@ journalctl --unit fail2ban --since "1 hour ago" | grep -E 'Ban|Unban'
 
 ## Gestão dos nós K3s
 
+### O que é e como o cluster se organiza
+
+Kubernetes mantém aplicações em containers de acordo com recursos declarativos enviados à sua API. Em vez de descrever uma sequência de comandos para criar cada processo, o usuário declara o **estado desejado** em objetos como Deployments e Services. Controllers observam continuamente esses objetos, comparam o estado desejado com o estado atual e executam ações para aproximar os dois; esse ciclo é chamado de **reconciliação**.
+
+Alguns recursos aparecem repetidamente neste guia e nos templates:
+
+| Recurso ou conceito | Função |
+| --- | --- |
+| Pod | Menor unidade executável do Kubernetes; reúne um ou mais containers que compartilham rede e volumes |
+| Deployment | Mantém a quantidade desejada de réplicas de uma aplicação e coordena atualizações dos Pods |
+| Service | Fornece um nome e um endereço estáveis para alcançar um conjunto variável de Pods |
+| Namespace | Separa logicamente recursos e ajuda a delimitar nomes, políticas e permissões |
+| Secret | Armazena dados sensíveis usados por recursos do cluster; não é criptografado automaticamente apenas por existir como Secret |
+| CRD | Estende a API Kubernetes com um novo tipo de recurso, como `Certificate`, `Gateway` ou `Application` |
+| Controller | Observa recursos e reconcilia o sistema; Traefik, cert-manager, Longhorn e Argo CD adicionam controllers ao cluster |
+
+O K3s é uma distribuição Kubernetes que empacota o control plane, o runtime de containers e componentes de rede e operação em uma instalação simplificada. Os recursos e as APIs continuam sendo Kubernetes; ferramentas como `kubectl`, Helm e Argo CD não precisam de um modo especial para trabalhar com K3s.
+
+Um nó **server**, chamado de **manager** neste guia, executa a API Kubernetes, scheduler, controllers e o datastore, além dos componentes de agent. Por isso, um manager também pode executar Pods, salvo quando forem aplicados taints ou outras restrições de agendamento. Um nó **agent** executa kubelet, runtime de containers e componentes de rede, mas não hospeda o control plane nem o datastore.
+
+O primeiro servidor deste guia usa `cluster-init: true`, portanto inicializa etcd embarcado. Os servidores adicionais participam do mesmo control plane e do quorum do etcd; os agents registram-se pelo endpoint estável da API e executam os workloads atribuídos pelo Kubernetes.
+
+```mermaid
+flowchart TB
+    Admin["Estação administrativa<br/>kubectl, Helm e Argo CD CLI"]
+    Endpoint["Endpoint estável da API<br/>TCP 6443"]
+
+    subgraph Managers["Nós manager / server"]
+        ControlPlane["API, scheduler e controllers"]
+        Etcd[("etcd embarcado")]
+        ManagerRuntime["kubelet, containerd e Pods"]
+        ControlPlane <--> Etcd
+        ControlPlane <--> ManagerRuntime
+    end
+
+    subgraph Agents["Nós agent"]
+        AgentRuntime["kubelet, containerd e Pods"]
+    end
+
+    Admin --> Endpoint
+    Endpoint --> ControlPlane
+    ControlPlane <--> AgentRuntime
+```
+
+Referência: [arquitetura do K3s](https://docs.k3s.io/architecture).
+
 ### Planejamento e segredos
 
 Antes da instalação:
@@ -587,6 +655,40 @@ EOF
 
 ### Gateway API e Traefik
 
+#### O que são e como se relacionam
+
+A Gateway API é uma especificação de recursos para configurar entrada e roteamento de tráfego no Kubernetes. Instalar seus CRDs ensina a API Kubernetes a armazenar objetos como `GatewayClass`, `Gateway` e `HTTPRoute`, mas os CRDs sozinhos não abrem portas nem encaminham tráfego. É necessário um controller que implemente a especificação.
+
+O Traefik é o controller de entrada usado pelo K3s neste guia. Com o provider `kubernetesGateway` habilitado, ele observa os recursos da Gateway API, configura listeners HTTP/HTTPS e encaminha as requisições aceitas para Services Kubernetes.
+
+| Recurso | Escopo e responsabilidade |
+| --- | --- |
+| `GatewayClass` | Recurso do cluster que identifica qual implementação controla um conjunto de Gateways; neste caso, Traefik |
+| `Gateway` | Recurso de namespace que declara listeners, portas, protocolos, certificados e quais Routes podem se conectar |
+| `HTTPRoute` | Recurso de namespace que associa hostnames, caminhos, filtros e regras aos Services de destino |
+| `Service` | Backend estável que seleciona os Pods da aplicação |
+
+O fluxo abaixo separa o caminho percorrido pela requisição das relações declarativas que configuram esse caminho:
+
+```mermaid
+flowchart LR
+    Client["Cliente"] -->|"HTTP ou HTTPS"| Traefik["Traefik"]
+    Traefik --> Service["Service"]
+    Service --> Pod["Pod da aplicação"]
+
+    GatewayClass["GatewayClass"] -.->|"controllerName"| Traefik
+    Gateway["Gateway"] -->|"gatewayClassName"| GatewayClass
+    HTTPRoute["HTTPRoute"] -->|"parentRefs"| Gateway
+    HTTPRoute -->|"backendRefs"| Service
+
+    CertManager["cert-manager"] -->|"observa e reconcilia"| Certificate["Certificate"]
+    Certificate -->|"issuerRef"| Issuer["Issuer ou ClusterIssuer"]
+    CertManager -->|"grava certificado e chave"| TLSSecret["Secret TLS"]
+    Gateway -->|"certificateRefs"| TLSSecret
+```
+
+Um `HTTPRoute` somente é aceito quando referencia um Gateway compatível e um listener desse Gateway permite a associação. A separação possibilita que a equipe responsável pela infraestrutura controle Gateways e certificados enquanto as equipes das aplicações mantêm suas próprias rotas. Referências: [introdução à Gateway API](https://gateway-api.sigs.k8s.io/docs/introduction/) e [provider Gateway API do Traefik](https://doc.traefik.io/traefik/reference/install-configuration/providers/kubernetes/kubernetes-gateway/).
+
 Instale primeiro os CRDs Standard da Gateway API. O cert-manager e o provider Gateway API do Traefik dependem deles.
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso administrativo à API.
@@ -655,6 +757,51 @@ kubectl --namespace kube-system logs deployment/traefik --tail=100
 ```
 
 O chart não cria um `Gateway` por padrão. Crie `GatewayClass`, `Gateway` e rotas de acordo com a topologia do ambiente.
+
+### Isolamento de rede com NetworkPolicy
+
+O modelo de rede Kubernetes permite comunicação entre Pods por padrão. Uma `NetworkPolicy` seleciona Pods por labels e determina quais conexões de entrada (`Ingress`) e saída (`Egress`) são aceitas nas camadas de rede e transporte. O K3s inclui um controller de NetworkPolicy baseado no kube-router; as políticas deixam de ser efetivas se o cluster for iniciado com `--disable-network-policy`.
+
+As políticas são limitadas ao namespace em que existem e são aditivas. Um `default-deny-all` com `podSelector: {}` isola todos os Pods daquele namespace, enquanto outras políticas acrescentam fluxos permitidos. Para uma conexão entre dois Pods isolados funcionar, o egress da origem e o ingress do destino precisam permitir simultaneamente o protocolo e a porta.
+
+```mermaid
+flowchart LR
+    Traefik["Traefik<br/>kube-system"] -->|"Ingress permitido<br/>TCP/8080"| Web["Pod web<br/>namespace da aplicação"]
+    Frontend["Pod frontend"] -->|"Egress + Ingress permitidos<br/>TCP/8080"| Backend["Pod backend"]
+    Frontend -. "Bloqueado por padrão" .-> Other["Outro Pod"]
+```
+
+O baseline mínimo normalmente contém:
+
+| Política | Seleção | Permissão |
+| --- | --- | --- |
+| `default-deny-all` | Todos os Pods do namespace | Nenhuma; ativa isolamento de ingress e egress |
+| `allow-dns` | Todos os Pods do namespace | Egress UDP/TCP 53 somente para CoreDNS |
+| Fluxo de aplicação | Pods identificados por labels | Origem, destino, protocolo e porta necessários |
+| Traefik para workload | Pods publicados | Ingress vindo apenas dos Pods Traefik na porta do workload |
+
+Uma regra permitindo Traefik deve ser criada no namespace do workload publicado. Não crie isoladamente uma política egress selecionando Traefik em `kube-system`: a existência dessa política passaria a isolar o egress do Traefik e poderia interromper todas as rotas ainda não permitidas. Se os Pods Traefik não estiverem isolados para egress, basta liberar o ingress no destino.
+
+O template [`templates/gitops/apps/security/network-policies`](templates/gitops/apps/security/network-policies/) oferece manifests independentes e um script que gera três tipos de configuração sem aplicar nada no cluster:
+
+- `baseline`: deny de ingress/egress e liberação de DNS para um namespace;
+- `flow`: egress na origem e ingress no destino para comunicação entre workloads isolados;
+- `traefik`: ingress no workload para o tráfego encaminhado pelo Traefik.
+
+Copie o template GitOps, entre no diretório e execute o gerador interativo:
+
+> **Executar em:** estação administrativa, no repositório GitOps de destino.
+
+```bash
+cd gitops/apps/security/network-policies
+./generate.sh baseline
+./generate.sh flow
+./generate.sh traefik
+```
+
+Os arquivos são gravados em `manifests/<namespace>/`. Revise labels, portas e namespaces, valide em homologação e somente depois habilite `applications/network-policies.yaml.example` no App-of-Apps. Não aplique primeiro em namespaces de infraestrutura como `kube-system`, `cert-manager`, `longhorn-system` e `argocd`, pois DNS, webhooks, métricas, acesso à API e APIs externas precisarão de permissões explícitas.
+
+NetworkPolicy não seleciona Services por nome e não interpreta hostnames, URLs HTTP ou identidades de usuário. Ela também não substitui TLS, autenticação, RBAC ou backups. Consulte o [guia completo do template](templates/gitops/apps/security/network-policies/README.md), a [documentação de NetworkPolicy do Kubernetes](https://kubernetes.io/docs/concepts/services-networking/network-policies/) e a [documentação de rede do K3s](https://docs.k3s.io/networking/networking-services#network-policy-controller).
 
 ### Servidor adicional
 
@@ -776,6 +923,10 @@ kubectl get nodes -o wide
 
 ### Acesso remoto ao cluster
 
+O `kubectl` não precisa ser executado em um nó do cluster. Ele envia requisições HTTPS para a API Kubernetes e usa um **kubeconfig** para descobrir o endpoint, a autoridade certificadora, a identidade do usuário e o contexto selecionado. Portanto, qualquer máquina com conectividade até a API e credenciais autorizadas pode administrar o cluster.
+
+Um contexto combina cluster, usuário e namespace padrão. O arquivo gerado pelo K3s para o administrador possui privilégios amplos; copiar esse arquivo equivale a copiar uma credencial administrativa, não apenas uma configuração de endereço. Use somente kubeconfigs confiáveis, mantenha permissões restritas e crie identidades com privilégios menores para outros usuários e automações. Referência: [organização de acesso com kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).
+
 Copie `/etc/rancher/k3s/k3s.yaml` para `~/.kube/config` na estação administrativa, substitua o endereço `127.0.0.1` pelo endpoint estável da API e proteja o arquivo:
 
 > **Executar em:** estação administrativa onde o kubeconfig foi copiado e que possui acesso à API.
@@ -792,6 +943,10 @@ kubectl auth can-i '*' '*' --all-namespaces
 ### Backup, atualização e remoção
 
 #### Snapshot do etcd
+
+O etcd é o datastore consistente usado pelo control plane para guardar o estado da API Kubernetes: objetos, configurações, metadados e Secrets. Em um cluster com etcd embarcado, os managers mantêm cópias coordenadas desse estado e só podem confirmar mudanças enquanto existe quorum. Com três managers, o cluster tolera a indisponibilidade de um membro; adicionar apenas um quarto membro não aumenta essa tolerância e amplia a quantidade de membros necessários para o quorum.
+
+Um snapshot do etcd permite recuperar o estado Kubernetes, mas não contém os dados gravados dentro dos volumes Longhorn, arquivos externos ao cluster nem imagens de containers. Por isso, snapshot do etcd, backup dos volumes e cópia segura do token do K3s são proteções diferentes e todas podem ser necessárias para uma restauração completa.
 
 Em clusters com etcd embarcado, crie e liste um snapshot antes de alterações:
 
@@ -875,9 +1030,13 @@ kubectl delete node nome-do-no
 
 ## Ferramentas de linha de comando
 
+As ferramentas desta seção são clientes administrativos. Elas podem ser instaladas em um manager ou em uma estação externa; pertencer ao cluster não é requisito. Para operar recursos remotamente, a máquina precisa alcançar a API correspondente e possuir credenciais com as permissões necessárias.
+
 Os scripts deste repositório instalam binários em `/usr/local/bin` e usam `sudo` quando necessário. Revise o conteúdo antes de executar um script remoto. Para maior controle, clone o repositório e execute o arquivo localmente.
 
 ### kubectl
+
+`kubectl` é o cliente principal da API Kubernetes. Ele cria, consulta, altera e remove objetos, acompanha logs e eventos e auxilia no diagnóstico de workloads. O comando lê o kubeconfig para decidir com qual cluster e identidade trabalhar; portanto, confira o contexto antes de qualquer alteração. O `kubectl` não acessa diretamente o banco do K3s nem os containers: suas operações passam pela API e pelas regras de autorização do Kubernetes. Referência: [introdução ao kubectl](https://kubernetes.io/docs/reference/kubectl/introduction/).
 
 O instalador baixa a versão estável indicada por `dl.k8s.io` e valida o SHA-256:
 
@@ -891,6 +1050,10 @@ curl -sfL \
 
 ### Helm
 
+Helm é um gerenciador de pacotes para Kubernetes. Um **chart** reúne templates de manifests, valores padrão e metadados; um arquivo `values.yaml` ou opções `--set` personalizam esses templates; uma **release** é uma instalação identificada desse chart em um cluster. `helm upgrade --install` cria a release quando ela não existe ou gera uma nova revisão quando existe, permitindo consultar o histórico e realizar rollback.
+
+Helm renderiza manifests e os envia à API Kubernetes usando o kubeconfig, mas não mantém um controller próprio reconciliando continuamente a release. Depois da instalação, uma alteração manual no cluster não é corrigida por Helm até uma nova operação; essa é uma diferença importante em relação ao Argo CD. Referência: [introdução ao Helm](https://helm.sh/docs/intro/introduction/).
+
 O instalador usa o script oficial da linha Helm 3:
 
 > **Executar em:** máquina onde a CLI será instalada.
@@ -903,6 +1066,8 @@ curl -sfL \
 
 ### Argo CD CLI
 
+`argocd` é o cliente da API do Argo CD. Ele permite autenticar no servidor Argo CD, cadastrar repositórios, consultar diferenças e controlar sincronizações. Não substitui `kubectl`: a CLI `argocd` opera os conceitos do Argo CD, enquanto `kubectl` opera qualquer recurso exposto pela API Kubernetes, inclusive os CRDs `Application`.
+
 O instalador baixa a versão do canal `stable` para `amd64` ou `arm64`:
 
 > **Executar em:** máquina onde a CLI será instalada.
@@ -914,6 +1079,8 @@ curl -sfL \
 ```
 
 ### longhornctl
+
+`longhornctl` auxilia na preparação e no diagnóstico do Longhorn, principalmente por meio dos testes de preflight usados neste guia. Ele não monta volumes para as aplicações e não substitui a interface CSI; os Pods continuam solicitando armazenamento por PVCs Kubernetes.
 
 Fixe a CLI na mesma versão do chart Longhorn:
 
@@ -941,6 +1108,14 @@ longhornctl version
 Os comandos desta seção podem ser executados em um servidor ou em uma estação administrativa que tenha `kubectl`, Helm, acesso à API e um kubeconfig válido.
 
 ### cert-manager
+
+#### Como o cert-manager trabalha
+
+O cert-manager é um controller que automatiza solicitação, emissão e renovação de certificados. Um `Issuer` representa uma autoridade ou um método de emissão limitado a um namespace; um `ClusterIssuer` oferece essa capacidade ao cluster inteiro. Um recurso `Certificate` declara nomes DNS, validade desejada, Secret de destino e qual Issuer deve ser usado. Quando a emissão termina, o cert-manager grava o certificado e a chave privada em um Secret e tenta renová-los antes do vencimento.
+
+Com ACME e desafio DNS-01, o cert-manager comprova o controle de um domínio criando temporariamente um registro DNS TXT pelo provedor configurado. Esse método também pode emitir certificados wildcard e não exige que o serviço solicitado já esteja publicamente acessível. A credencial do provedor DNS pode alterar registros e deve permanecer em um Secret ou em um gerenciador de segredos, nunca no repositório Git.
+
+Instalar o cert-manager não emite certificados por si só. Depois da instalação ainda é necessário criar um `Issuer` ou `ClusterIssuer` e recursos `Certificate`, como nos templates GitOps deste repositório. O Secret TLS resultante pode ser referenciado por um listener HTTPS do Gateway, conforme o diagrama da seção anterior. Referências: [configuração de Issuers](https://cert-manager.io/docs/configuration/) e [recurso Certificate](https://cert-manager.io/docs/usage/certificate/).
 
 Os CRDs da Gateway API devem existir antes da instalação. Se forem instalados depois, reinicie o deployment do cert-manager para que a integração seja detectada.
 
@@ -987,6 +1162,25 @@ kubectl --namespace cert-manager rollout status deployment/cert-manager --timeou
 Referência: [cert-manager com Gateway API](https://cert-manager.io/docs/usage/gateway/).
 
 ### Longhorn
+
+#### Como o Longhorn fornece armazenamento
+
+Containers e Pods são substituíveis; os dados que precisam sobreviver a essa substituição devem ficar em armazenamento persistente. No Kubernetes, uma aplicação cria um `PersistentVolumeClaim` (PVC) para solicitar capacidade e características de armazenamento. Uma `StorageClass` indica qual provisionador atende à solicitação, e o provisionador cria um `PersistentVolume` (PV) que é associado ao PVC.
+
+Longhorn é um sistema de armazenamento distribuído em blocos e um provisionador CSI para Kubernetes. Para cada volume, ele executa um engine associado ao workload e mantém réplicas síncronas em discos elegíveis, preferencialmente em nós diferentes. Se uma réplica fica indisponível e ainda há uma cópia saudável, o Longhorn pode reconstruí-la em outro local.
+
+```mermaid
+flowchart LR
+    Pod["Pod"] -->|"monta"| PVC["PersistentVolumeClaim"]
+    PVC -->|"solicita pela StorageClass"| CSI["CSI do Longhorn"]
+    CSI --> PV["PersistentVolume / volume Longhorn"]
+    PV --> Engine["Engine do volume"]
+    Engine -->|"escrita síncrona"| Replica1["Réplica no nó A"]
+    Engine -->|"escrita síncrona"| Replica2["Réplica no nó B"]
+    Engine -->|"escrita síncrona"| Replica3["Réplica no nó C"]
+```
+
+O provisionador `local-storage` foi desabilitado na configuração K3s deste guia para que ele não se torne acidentalmente a classe padrão: seus dados ficam vinculados ao disco de um único nó e não recebem replicação Longhorn. Replicação, contudo, não é backup. Exclusão acidental, corrupção lógica ou credenciais comprometidas podem afetar todas as réplicas; mantenha backups em um destino independente do cluster. Referência: [arquitetura e conceitos do Longhorn](https://longhorn.io/docs/1.12.0/concepts/).
 
 Consulte os [requisitos do Longhorn 1.12.0](https://longhorn.io/docs/1.12.0/deploy/install/) antes de preparar os nós. Todos os nós que receberão volumes precisam cumprir os requisitos.
 
@@ -1122,6 +1316,14 @@ O túnel depende de encaminhamento SSH; ele não funcionará se `DisableForwardi
 
 ### Argo CD
 
+#### O que é e para que serve
+
+O Argo CD é um controlador de entrega contínua para Kubernetes baseado em GitOps. Em vez de usar a estação administrativa para reaplicar os manifests a cada mudança, o Argo CD observa o estado desejado registrado em um repositório Git, compara esse conteúdo com os recursos existentes no cluster e informa quando há diferenças. Dependendo da política configurada, ele pode sincronizar essas diferenças automaticamente e corrigir alterações feitas diretamente no cluster.
+
+O principal recurso do Argo CD é a `Application`. Cada `Application` informa qual repositório, revisão e caminho devem ser observados, em qual cluster e namespace o conteúdo será aplicado e qual política de sincronização será usada. Assim, o Git passa a registrar o estado desejado e o histórico das mudanças, enquanto o Argo CD faz a reconciliação com o cluster.
+
+O Argo CD não substitui a revisão de código, o controle de acesso ao repositório nem um gerenciador de segredos. Não versione credenciais em manifests: forneça ao Argo CD apenas a credencial necessária para ler o repositório privado e use o mecanismo de segredos adotado pelo ambiente para os dados das aplicações.
+
 Instale uma versão fixa do chart. O servidor permanece com TLS habilitado e sem Ingress; o acesso inicial será por port-forward.
 
 > **Executar em:** qualquer máquina com `KUBECONFIG`, Helm e acesso administrativo à API.
@@ -1192,6 +1394,97 @@ Depois de trocar a senha, remova o secret inicial caso ele ainda exista:
 kubectl --namespace argocd delete secret argocd-initial-admin-secret
 ```
 
+#### Próximo passo: conectar o repositório GitOps
+
+Depois da instalação, o próximo passo é fazer o Argo CD observar um repositório que contenha o estado desejado do cluster. O modelo disponível neste repositório usa o padrão App-of-Apps: uma `Application` chamada `root` observa o diretório `gitops/applications/`, e cada arquivo YAML desse diretório define uma `Application` independente para uma funcionalidade que o usuário decidiu instalar.
+
+```mermaid
+flowchart TD
+    Argo["Argo CD"] -->|"reconcilia"| Root["Application root"]
+    Root -->|"lê no Git"| Applications["gitops/applications/"]
+
+    Applications --> GatewayApp["Application gateway-resources"]
+    Applications --> MonitoringApp["Application monitoring"]
+    Applications --> RancherApp["Application rancher"]
+
+    GatewayApp -->|"lê no Git"| GatewayChart["apps/system/gateway-resources/"]
+    MonitoringApp -->|"lê no Git"| MonitoringChart["apps/monitoring/kube-prometheus-stack/"]
+    RancherApp -->|"lê no Git"| RancherChart["apps/management/rancher/"]
+
+    GatewayChart --> Cluster["Recursos no cluster"]
+    MonitoringChart --> Cluster
+    RancherChart --> Cluster
+```
+
+O termo `root` não indica um tipo especial de repositório no Argo CD. Ele é apenas o nome da Application de bootstrap. Seu manifesto aponta para `gitops/applications/`; as Applications encontradas nesse diretório passam a observar seus próprios caminhos em `gitops/apps/`. Como os manifests são independentes, mantenha somente os arquivos das aplicações que deseja usar.
+
+Siga esta sequência:
+
+1. Crie um repositório Git para a configuração do cluster ou escolha um repositório existente.
+2. Copie [`templates/gitops`](templates/gitops/) para o diretório `gitops/` desse repositório.
+3. Remova de `gitops/applications/` as Applications que não deseja instalar e remova também os respectivos diretórios em `gitops/apps/`.
+4. Substitua `https://github.com/example/cluster-config.git` em `gitops/root/application.yaml` e nas Applications mantidas pela URL real do repositório. Revise também os domínios, versões, namespaces e valores dos charts.
+5. Valide, faça commit e envie a estrutura para a branch indicada por `targetRevision`, que nos exemplos é `main`.
+6. Se o repositório for privado, cadastre no Argo CD uma credencial somente de leitura. Um repositório público normalmente pode ser clonado diretamente pela URL informada nas Applications.
+7. Aplique uma única vez a Application `root`; a partir dela, o Argo CD descobrirá e reconciliará as demais Applications.
+
+Para um repositório privado acessado por SSH, registre uma chave de leitura dedicada depois de autenticar a CLI do Argo CD. Não reutilize uma chave administrativa pessoal:
+
+> **Executar em:** estação administrativa com a CLI do Argo CD autenticada e acesso à chave de leitura do repositório.
+
+```bash
+argocd repo add git@github.com:ORGANIZACAO/REPOSITORIO.git \
+  --ssh-private-key-path ~/.ssh/argocd_gitops
+```
+
+Depois de enviar o conteúdo personalizado para o Git, faça o bootstrap:
+
+> **Executar em:** qualquer máquina com `KUBECONFIG` e acesso administrativo à API, na raiz do repositório GitOps clonado.
+
+```bash
+kubectl apply -f gitops/root/application.yaml
+```
+
+Confira se a Application raiz e as Applications escolhidas foram criadas e observe as colunas de sincronização e saúde:
+
+> **Executar em:** qualquer máquina com `KUBECONFIG` e acesso à API.
+
+```bash
+kubectl --namespace argocd get applications.argoproj.io
+kubectl --namespace argocd describe application root
+```
+
+Os templates começam com `prune: false`: o Argo CD corrige recursos alterados quando `selfHeal` está habilitado, mas não exclui automaticamente do cluster um recurso removido do Git. Revise os diffs e o comportamento de cada Application antes de habilitar `prune`, pois a exclusão no repositório poderá resultar na exclusão correspondente no cluster.
+
+## Templates copiáveis
+
+O diretório [`templates/gitops`](templates/gitops/) contém uma estrutura GitOps completa para ser copiada para outro repositório. Ela reaproveita as ideias encontradas em `.tmp`, mas remove referências a ambientes específicos, segredos versionados e charts `.tgz` gerados.
+
+Os exemplos são opcionais e independentes: estar disponível em `templates/` não significa que um componente seja requisito do cluster. Escolha somente o que atende ao ambiente e revise capacidade, segurança, persistência e política de atualização antes de habilitar a respectiva Application.
+
+| Template | O que apresenta | Para que serve |
+| --- | --- | --- |
+| `root/` | Application raiz | Iniciar o App-of-Apps no Argo CD |
+| `applications/` | Manifests Argo CD independentes | Permitir que cada usuário selecione quais componentes serão reconciliados |
+| `apps/system/gateway-resources/` | GatewayClass opcional, Gateways, Certificates, ClusterIssuer e HTTPRoutes | Publicar serviços e automatizar certificados usando os controllers instalados anteriormente |
+| `apps/security/network-policies/` | Deny por padrão, DNS, Traefik e fluxos explícitos entre workloads | Gerar e versionar isolamento de rede por namespace sem aplicar políticas automaticamente |
+| `apps/monitoring/kube-prometheus-stack/` | Prometheus Operator, Prometheus, Alertmanager, Grafana, exporters e rotas de exemplo | Coletar métricas, consultar séries temporais, visualizar dashboards e encaminhar alertas |
+| `apps/management/rancher/` | Rancher com TLS terminado no Gateway e HTTPRoute | Oferecer uma interface e uma camada adicional de administração para clusters Kubernetes |
+
+No template de monitoring, o Prometheus coleta métricas numéricas de endpoints e as armazena como séries temporais; o Grafana consulta essas métricas e as apresenta em dashboards; o Alertmanager recebe alertas gerados por regras, agrupa notificações e as encaminha aos destinos configurados. Essa pilha não substitui coleta de logs, backup nem monitoramento externo do próprio cluster. Antes de produção, defina retenção, armazenamento persistente, regras úteis e receptores reais. Referências: [visão geral do Prometheus](https://prometheus.io/docs/introduction/overview/) e [introdução ao Grafana](https://grafana.com/docs/grafana/latest/introduction/).
+
+O Rancher é opcional. Ele adiciona interface, autenticação e recursos de gestão sobre Kubernetes e pode centralizar vários clusters, mas não é necessário para que K3s, `kubectl` ou Argo CD funcionem. Rancher e Argo CD também não têm o mesmo papel: Rancher oferece administração ampla do cluster, enquanto Argo CD reconcilia aplicações a partir do Git. Referência: [visão geral do Rancher](https://ranchermanager.docs.rancher.com/getting-started/overview).
+
+Para iniciar outro repositório:
+
+> **Executar em:** estação administrativa, na raiz deste repositório.
+
+```bash
+cp -R templates/gitops /caminho/do/seu-repositorio/gitops
+```
+
+Leia [`templates/gitops/README.md`](templates/gitops/README.md) antes do bootstrap. Os domínios `example.com`, a URL `example/cluster-config`, as versões das dependências e os nomes dos Services são exemplos e devem ser revisados no repositório de destino.
+
 ## Checklist operacional
 
 Antes de considerar a instalação concluída:
@@ -1202,7 +1495,9 @@ Antes de considerar a instalação concluída:
 - [ ] Todos os nós K3s estão `Ready` e possuem nomes únicos.
 - [ ] O endpoint estável da API funciona a partir dos nós e da estação administrativa.
 - [ ] Os CRDs da Gateway API existem e o Traefik não registra erros do provider.
+- [ ] Os namespaces isolados possuem deny por padrão, DNS funcional e permissões explícitas testadas para cada fluxo necessário.
 - [ ] cert-manager, Longhorn e Argo CD possuem pods saudáveis.
+- [ ] A Application `root` e as Applications selecionadas estão sincronizadas e saudáveis no Argo CD.
 - [ ] O preflight do Longhorn passa em todos os nós de armazenamento.
 - [ ] Um snapshot do etcd foi criado e copiado para fora do cluster.
 - [ ] O token do K3s e o kubeconfig administrativo estão protegidos.
