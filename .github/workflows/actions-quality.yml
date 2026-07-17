@@ -22,43 +22,36 @@ jobs:
       contents: read
     steps:
       - name: Baixar repositório
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
-      - name: Preparar actionlint
-        run: >-
-          docker build
-          --file .github/docker/actionlint/Dockerfile
-          --tag actionlint:ci
-          .github/docker/actionlint
-
-      - name: Validar workflows
-        run: >-
-          docker run --rm
-          --volume "${GITHUB_WORKSPACE}:/repo"
-          --workdir /repo
-          actionlint:ci
-          -color
+      - uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # 1.72.0
 
   zizmor:
     name: zizmor
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      security-events: write
       contents: read
+      actions: read
     steps:
       - name: Baixar repositório
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
       - name: Auditar GitHub Actions
         uses: zizmorcore/zizmor-action@6599ee8b7a49aef6a770f63d261d214911a7ce02 # v0.6.0
         with:
-          advanced-security: false
           annotations: true
+          advanced-security: true
+
+          min-severity: informational
+          min-confidence: low
+
           config: .github/zizmor.yml
-          min-severity: low
+
           persona: auditor
           version: 1.27.0
