@@ -1,0 +1,9 @@
+apps/**/charts/
+**/*.secret.yaml
+**/*.secret.yml
+**/*.plain.yaml
+**/*.plain.yml
+**/*.decrypted.yaml
+**/*.decrypted.yml
+**/universal-auth-credentials.yaml
+**/universal-auth-credentials.yml
