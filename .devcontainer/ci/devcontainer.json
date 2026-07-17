@@ -1,0 +1,9 @@
+{
+	"name": "infrastructure-and-cluster-notebook-ci",
+	"build": {
+		"dockerfile": "../Dockerfile",
+		"context": "..",
+		"target": "ci"
+	},
+	"postCreateCommand": "npm ci"
+}

@@ -1,6 +1,10 @@
 {
 	"name": "infrastructure-and-cluster-notebook",
-	"image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+	"build": {
+		"dockerfile": "../Dockerfile",
+		"context": "..",
+		"target": "code"
+	},
 	"postCreateCommand": "npm ci",
 	"forwardPorts": [4321],
 	"portsAttributes": {
