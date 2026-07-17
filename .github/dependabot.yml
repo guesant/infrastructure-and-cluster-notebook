@@ -30,16 +30,3 @@ updates:
     commit-message:
       prefix: chore(mkdocs)
     open-pull-requests-limit: 2
-
-  - package-ecosystem: docker
-    directory: /.github/docker/actionlint
-    schedule:
-      interval: weekly
-      day: monday
-      time: "09:30"
-      timezone: America/Sao_Paulo
-    cooldown:
-      default-days: 7
-    commit-message:
-      prefix: chore(actionlint)
-    open-pull-requests-limit: 2

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 site_name: cluster-management-notes
-site_description: Runbook para preparar hosts Linux e operar um cluster K3s.
+site_description: Anotações sobre clusters K3s de nó único ou multinó, com conceitos, melhores práticas, guias passo a passo e scripts.
 site_url: https://guesant.github.io/cluster-management-notes/
 
 repo_name: guesant/cluster-management-notes

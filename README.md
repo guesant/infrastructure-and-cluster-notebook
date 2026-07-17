@@ -3,7 +3,7 @@
 [![Documentação](https://github.com/guesant/cluster-management-notes/actions/workflows/docs.yml/badge.svg)](https://github.com/guesant/cluster-management-notes/actions/workflows/docs.yml)
 [![Qualidade dos workflows](https://github.com/guesant/cluster-management-notes/actions/workflows/actions-quality.yml/badge.svg)](https://github.com/guesant/cluster-management-notes/actions/workflows/actions-quality.yml)
 
-Runbook para preparar hosts Linux, criar e operar um cluster K3s e instalar os serviços básicos usados pelo cluster.
+Minhas anotações sobre como criar e operar clusters K3s de nó único (*single-node*) ou multinó (*multi-node*), reunindo conceitos, melhores práticas, guias passo a passo e scripts reutilizáveis.
 
 ## Documentação
 
@@ -18,36 +18,16 @@ Runbook para preparar hosts Linux, criar e operar um cluster K3s e instalar os s
 
 ## Validar a documentação com Docker
 
-O build usa a imagem definida em [`.github/docker/mkdocs/Dockerfile`](.github/docker/mkdocs/Dockerfile) e não instala dependências na máquina:
+O build usa a imagem definida em [`.github/docker/mkdocs/Dockerfile`](.github/docker/mkdocs/Dockerfile) e não instala dependências na máquina. Para validar e gerar o site em `site/`:
 
 ```bash
-docker build \
-  --file .github/docker/mkdocs/Dockerfile \
-  --tag cluster-management-notes-docs:local \
-  .github/docker/mkdocs
-
-docker run --rm \
-  --user "$(id -u):$(id -g)" \
-  --env HOME=/tmp \
-  --volume "${PWD}:/docs" \
-  cluster-management-notes-docs:local \
-  build --strict
+just docs-build
 ```
 
 Para visualizar o site em `http://localhost:8000`:
 
 ```bash
-docker build \
-  --file .github/docker/mkdocs/Dockerfile \
-  --tag cluster-management-notes-docs:local \
-  .github/docker/mkdocs
-
-docker run --rm \
-  --user "$(id -u):$(id -g)" \
-  --env HOME=/tmp \
-  --publish 8000:8000 \
-  --volume "${PWD}:/docs" \
-  cluster-management-notes-docs:local
+just docs-serve
 ```
 
 O deploy ocorre pelo workflow [`.github/workflows/docs.yml`](.github/workflows/docs.yml) após alterações na documentação entrarem na branch `main`.
