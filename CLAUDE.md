@@ -4,6 +4,7 @@
 
 - Nunca execute comandos diretamente no host.
 - Toda ferramenta, script, validação, build, teste, lint ou comando auxiliar deve ser executado dentro de um contêiner Docker ou Podman.
+- **Use sempre o runner `./jail-exec.sh` na raiz do repositório** — ele já aplica todas as regras abaixo (detecção de Podman/Docker, menor privilégio, sem rede por padrão, idempotência dentro de contêiner). Só monte um comando `docker run`/`podman run` manual se o `jail-exec.sh` não cobrir o caso, mantendo os mesmos princípios.
 - Prefira Podman quando estiver disponível e for compatível com o fluxo existente.
 - Use imagens oficiais, confiáveis, versionadas e tão pequenas quanto possível.
 - Nunca utilize `--privileged`.
@@ -49,51 +50,35 @@ wget -qO- URL | bash
 
 ## Comportamento esperado
 
+Use o runner do repositório para qualquer comando:
+
+```bash
+# comando padrão (sem rede, mínimo privilégio)
+./jail-exec.sh npm run build
+
+# rede é opt-in (necessária para npm install, npm audit etc.)
+JAIL_NETWORK=1 ./jail-exec.sh npm install
+
+# servidor de desenvolvimento com porta publicada em 127.0.0.1
+JAIL_PUBLISH=4321 ./jail-exec.sh npm run dev -- --host 0.0.0.0
+
+# trocar a imagem quando a tarefa exigir outra ferramenta
+JAIL_IMAGE=docker.io/koalaman/shellcheck:v0.10.0 ./jail-exec.sh shellcheck /workspace/jail-exec.sh
+```
+
+Comportamento do runner:
+
+- Detecta o modo de execução automaticamente: dentro de contêiner → direto (`bare`); senão Podman (preferido), Docker ou Bubblewrap (`bwrap`); com Docker sem acesso ao socket, tenta `sudo docker` com aviso.
+- `JAIL_MODE=auto|bare|podman|docker|bwrap` força o modo de execução.
+- O modo `bwrap` sandboxa binários do host (user namespaces, sem sudo/daemon/imagem): filesystem mínimo somente leitura, `/home` invisível, sem rede por padrão. O comando precisa existir no host e a versão não é fixada — prefira podman/docker quando a imagem importa.
+- `ALLOW_RUN_COMMANDS_IN_HOST=1` (atalho para `JAIL_MODE=bare`) pula o contêiner — use somente com autorização explícita do usuário.
+- Padrões: imagem fixada, `--cap-drop=ALL`, `--security-opt=no-new-privileges`, rootfs somente leitura, tmpfs em `/tmp`, limites de pids/memória, `--network=none`.
+
 Antes de executar qualquer comando:
 
-1. Identifique a imagem de contêiner adequada.
-2. Determine os menores privilégios necessários.
-3. Defina somente os mounts indispensáveis.
-4. Prefira mounts somente leitura.
-5. Remova todas as capabilities e adicione apenas as estritamente necessárias.
-6. Evite acesso à rede, salvo quando necessário.
-7. Mostre claramente qualquer operação destrutiva antes de executá-la.
-
-Exemplo preferencial com Podman:
-
-```bash
-podman run \
-  --rm \
-  --userns=keep-id \
-  --cap-drop=ALL \
-  --security-opt=no-new-privileges \
-  --read-only \
-  --tmpfs /tmp:rw,noexec,nosuid,size=128m \
-  --network=none \
-  --mount type=bind,src="$PWD",dst=/workspace,ro \
-  --workdir /workspace \
-  IMAGE:VERSAO \
-  COMANDO
-```
-
-Exemplo preferencial com Docker:
-
-```bash
-docker run \
-  --rm \
-  --user "$(id -u):$(id -g)" \
-  --cap-drop=ALL \
-  --security-opt=no-new-privileges \
-  --read-only \
-  --tmpfs /tmp:rw,noexec,nosuid,size=128m \
-  --network=none \
-  --mount type=bind,src="$PWD",dst=/workspace,readonly \
-  --workdir /workspace \
-  IMAGE:VERSAO \
-  COMANDO
-```
-
-Os exemplos devem ser adaptados à tarefa, preservando o princípio de menor privilégio.
+1. Habilite rede ou portas apenas se a tarefa exigir (`JAIL_NETWORK`/`JAIL_PUBLISH`).
+2. Troque a imagem (`JAIL_IMAGE`) em vez de instalar ferramentas no contêiner ou no host.
+3. Mostre claramente qualquer operação destrutiva antes de executá-la.
 
 ## Exceções
 
@@ -103,5 +88,6 @@ Caso uma tarefa não possa ser realizada dentro de um contêiner:
 - Explique qual limitação impede o uso de Docker ou Podman.
 - Apresente o comando necessário apenas como instrução para revisão manual.
 - Aguarde autorização explícita antes de qualquer ação que afete o host.
+- Com autorização explícita, a execução no host pode ser feita via `ALLOW_RUN_COMMANDS_IN_HOST=1 ./jail-exec.sh COMANDO`, mantendo o fluxo único do runner.
 
 A conveniência nunca deve prevalecer sobre o isolamento, a reprodutibilidade e o princípio de menor privilégio.
