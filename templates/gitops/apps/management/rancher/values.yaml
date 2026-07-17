@@ -13,14 +13,12 @@ rancher:
   hostname: rancher.internal.example.com
   ingress:
     enabled: false
-  # O Gateway termina TLS; restrinja acesso direto ao Service HTTP.
   tls: external
-  # Use 1 somente em laboratório; para HA mantenha múltiplas réplicas e nós.
-  replicas: 3
+  replicas: 1
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
+      cpu: 250m
       memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
