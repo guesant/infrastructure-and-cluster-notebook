@@ -99,7 +99,7 @@ function MonacoPane({
 		<div className="overflow-hidden rounded-md border border-border">
 			<div ref={hostRef} className="min-h-24">
 				{!ready && (
-					<pre className="m-0 overflow-x-auto p-3 font-mono text-[13px] leading-relaxed">
+					<pre className="m-0 overflow-x-auto whitespace-pre-wrap break-words p-3 font-mono text-[13px] leading-relaxed">
 						{value}
 					</pre>
 				)}

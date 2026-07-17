@@ -57,6 +57,10 @@ const baseEditorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 	theme: THEME_NAME,
 	minimap: { enabled: false },
 	wordWrap: 'on',
+	// 'advanced' mede a largura real de cada caractere; o padrão ('simple')
+	// assume largura fixa e erra a coluna de quebra nesta fonte, deixando
+	// linhas mais longas que o host e exigindo scroll horizontal.
+	wrappingStrategy: 'advanced',
 	scrollBeyondLastLine: false,
 	automaticLayout: true,
 	folding: false,
@@ -92,5 +96,9 @@ export function createShellEditor(
 			: {}),
 	});
 	autoGrow(editor, host);
+	// Na primeira criação o host pode ainda não ter a largura final (ex.: dentro
+	// do <dialog>, que só aplica seu próprio layout depois deste tick). Sem isso
+	// o wrap fica calculado para uma largura errada e nunca é refeito sozinho.
+	requestAnimationFrame(() => editor.layout());
 	return editor;
 }
