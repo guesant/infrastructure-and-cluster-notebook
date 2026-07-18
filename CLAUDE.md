@@ -48,6 +48,12 @@ wget -qO- URL | bash
 - Não interrompa, reinicie ou altere serviços do host.
 - Não remova arquivos ou volumes persistentes sem autorização explícita.
 
+## Política de código
+
+- Zero comentários em código (shell, TS/TSX, CSS, YAML, justfile etc.): o código deve ser limpo, organizado e legível por si mesmo — nomes descritivos, funções pequenas e estrutura clara no lugar de comentários.
+- Diretivas funcionais não são comentários e devem ser mantidas quando necessárias (ex.: `# syntax=` em Containerfile, `// @ts-check`, `eslint-disable`).
+- Documentação de uso pertence a arquivos de documentação (README, docs), não a comentários no código.
+
 ## Comportamento esperado
 
 Use o runner do repositório para qualquer comando:
@@ -66,7 +72,7 @@ JAIL_PUBLISH=4321 ./jail-exec.sh bun run dev -- --host 0.0.0.0
 JAIL_IMAGE=docker.io/koalaman/shellcheck:v0.10.0 ./jail-exec.sh shellcheck /workspace/jail-exec.sh
 ```
 
-A imagem padrão é construída do target `jail` de `.container/Dockerfile` (único Dockerfile do projeto, compartilhado com o devcontainer e a CI): Bun como gerenciador de pacotes (`bun install`/`bun.lock`) e Node como runtime de build (`bun run build` usa o Node da imagem pelos shebangs dos bins).
+A imagem padrão é construída do target `jail` de `.container/Containerfile` (único Containerfile do projeto; os devcontainers usam o serviço único `app` de `.container/compose.yml`, com o override `.container/compose.ci.yml` na CI): Bun como gerenciador de pacotes e runtime — a imagem tem um symlink `node -> bun`, então bins com shebang de node (astro etc.) rodam no runtime do Bun.
 
 Comportamento do runner:
 

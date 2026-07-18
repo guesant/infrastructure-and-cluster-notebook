@@ -13,12 +13,14 @@
 #   ./jail-exec.sh bun run build
 #   JAIL_PUBLISH=4321 ./jail-exec.sh bun run dev -- --host 0.0.0.0
 #   JAIL_MODE=docker ./jail-exec.sh bun run lint
+#   JAIL_MODE=compose ./jail-exec.sh bun run dev -- --host 0.0.0.0
 #   ALLOW_RUN_COMMANDS_IN_HOST=1 ./jail-exec.sh bun run lint
 #
 # Variáveis:
-#   JAIL_MODE     auto (padrão) | bare | podman | docker | bwrap — força o modo
+#   JAIL_MODE     auto (padrão) | bare | podman | docker | bwrap | compose —
+#                 força o modo
 #   JAIL_IMAGE    imagem a usar em podman/docker; por padrão constrói o target
-#                 "jail" de .container/Dockerfile (cacheado; JAIL_REBUILD=1 força)
+#                 "jail" de .container/Containerfile (cacheado; JAIL_REBUILD=1 força)
 #   JAIL_NETWORK  vazio/none = sem rede (padrão); qualquer outro valor habilita
 #   JAIL_PUBLISH  porta publicada em 127.0.0.1 (ex.: 4321); implica rede
 #   ALLOW_RUN_COMMANDS_IN_HOST  não vazio = atalho para JAIL_MODE=bare
@@ -27,12 +29,19 @@
 # host — sem daemon, sem sudo e sem imagem. O comando precisa existir no host
 # e a versão não é fixada; com JAIL_PUBLISH a rede do host é compartilhada e a
 # porta já fica acessível localmente sem publicação.
+#
+# Modo compose: sobe (se preciso) o serviço "app" de .container/compose.yml em
+# segundo plano e roda o comando com `compose exec` — útil para o fluxo de dev
+# persistente (mesmo contêiner entre comandos; porta 4321 já publicada em
+# 127.0.0.1). JAIL_NETWORK/JAIL_PUBLISH não se aplicam: valem as opções do
+# compose.yml. Dentro de um contêiner, roda o comando diretamente.
 
 set -euo pipefail
 
 IMAGE="${JAIL_IMAGE:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONTAINERFILE="${SCRIPT_DIR}/.container/Dockerfile"
+CONTAINERFILE="${SCRIPT_DIR}/.container/Containerfile"
+COMPOSE_FILE="${SCRIPT_DIR}/.container/compose.yml"
 LOCAL_IMAGE_TAG="localhost/cluster-management-notes-jail:latest"
 
 # Garante a imagem padrão (target "jail" do Dockerfile único do projeto),
@@ -92,11 +101,39 @@ case "$mode" in
       exit 1
     fi
     ;;
+  compose) ;;
   *)
-    printf 'Erro: JAIL_MODE inválido: "%s" (use auto, bare, podman, docker ou bwrap).\n' "$mode" >&2
+    printf 'Erro: JAIL_MODE inválido: "%s" (use auto, bare, podman, docker, bwrap ou compose).\n' "$mode" >&2
     exit 2
     ;;
 esac
+
+if [[ "$mode" == "compose" ]]; then
+  if in_container; then
+    exec "$@"
+  fi
+  if command -v podman >/dev/null 2>&1; then
+    compose_cmd=(podman compose)
+  elif command -v docker >/dev/null 2>&1; then
+    compose_cmd=(docker compose)
+    if ! docker info >/dev/null 2>&1; then
+      printf 'Aviso: sem acesso ao socket do Docker; tentando com sudo.\n' >&2
+      compose_cmd=(sudo docker compose)
+    fi
+  else
+    printf 'Erro: JAIL_MODE=compose exige podman ou docker.\n' >&2
+    exit 1
+  fi
+  compose_cmd+=(--file "$COMPOSE_FILE")
+  if [[ -z "$("${compose_cmd[@]}" ps --quiet --status running app 2>/dev/null)" ]]; then
+    "${compose_cmd[@]}" up --detach app >&2
+  fi
+  exec_args=()
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    exec_args+=(-T)
+  fi
+  exec "${compose_cmd[@]}" exec "${exec_args[@]}" app "$@"
+fi
 
 network="${JAIL_NETWORK:-none}"
 if [[ -n "${JAIL_PUBLISH:-}" ]]; then

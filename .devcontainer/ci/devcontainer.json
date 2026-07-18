@@ -1,9 +1,7 @@
 {
 	"name": "infrastructure-and-cluster-notebook-ci",
-	"build": {
-		"dockerfile": "../../.container/Dockerfile",
-		"context": "../../.container",
-		"target": "ci"
-	},
+	"dockerComposeFile": ["../../.container/compose.yml", "../../.container/compose.ci.yml"],
+	"service": "app",
+	"workspaceFolder": "/workspace",
 	"postCreateCommand": "bun install --frozen-lockfile"
 }

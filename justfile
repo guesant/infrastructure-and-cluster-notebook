@@ -1,51 +1,43 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
-docs_node_image := "node:lts-alpine"
+compose_file := ".container/compose.yml"
 
 default:
     @just --list
 
-# Instala as dependências do site de documentação (Astro Starlight)
-docs-install:
-    docker run --rm \
-        --user "$(id -u):$(id -g)" \
-        --env HOME=/tmp \
-        --volume "${PWD}:/workspace" \
-        --workdir /workspace \
-        {{docs_node_image}} \
-        npm ci
+# Roda o compose com detecção de runtime: podman, docker ou sudo docker
+# (mesma ordem de preferência do ./jail-exec.sh).
+_compose *args:
+    if command -v podman >/dev/null 2>&1; then \
+        podman compose --file {{compose_file}} {{args}}; \
+    elif docker info >/dev/null 2>&1; then \
+        docker compose --file {{compose_file}} {{args}}; \
+    else \
+        echo "Aviso: sem acesso ao socket do Docker; tentando com sudo." >&2; \
+        sudo docker compose --file {{compose_file}} {{args}}; \
+    fi
 
-# Sobe o servidor de desenvolvimento em http://localhost:4321
-docs-dev:
-    test -d node_modules || just docs-install
-    docker run --rm \
-        --user "$(id -u):$(id -g)" \
-        --env HOME=/tmp \
-        --publish 4321:4321 \
-        --volume "${PWD}:/workspace" \
-        --workdir /workspace \
-        {{docs_node_image}} \
-        npm run dev -- --host 0.0.0.0
+# Sobe o serviço de desenvolvimento do compose em segundo plano
+# (porta 4321 publicada em 127.0.0.1).
+up:
+    just _compose up --detach app
 
-# Gera o build de produção em dist/, falhando em links quebrados ou frontmatter ausente
-docs-build:
-    test -d node_modules || just docs-install
-    docker run --rm \
-        --user "$(id -u):$(id -g)" \
-        --env HOME=/tmp \
-        --volume "${PWD}:/workspace" \
-        --workdir /workspace \
-        {{docs_node_image}} \
-        npm run build
+# Para e remove o contêiner do compose.
+down:
+    just _compose down
 
-# Serve o build de produção gerado por docs-build em http://localhost:4321
-docs-preview:
-    test -d node_modules || just docs-install
-    docker run --rm \
-        --user "$(id -u):$(id -g)" \
-        --env HOME=/tmp \
-        --publish 4321:4321 \
-        --volume "${PWD}:/workspace" \
-        --workdir /workspace \
-        {{docs_node_image}} \
-        npm run preview -- --host 0.0.0.0
+# Abre um shell interativo no serviço de desenvolvimento (sobe antes, se preciso).
+shell: up
+    just _compose exec app bash
+
+# Sobe o servidor de dev do Astro: roda direto (bare) se já estivermos dentro
+# de um contêiner (ex.: devcontainer, CI); caso contrário, via `compose exec`
+# no serviço persistente (subindo-o primeiro, se preciso).
+start:
+    if [[ -n "${container:-}" || -f /.dockerenv || -f /run/.containerenv ]]; then \
+        test -d node_modules || bun install; \
+        bun run dev -- --host 0.0.0.0; \
+    else \
+        just up; \
+        just _compose exec app bash -lc 'test -d node_modules || bun install; bun run dev -- --host 0.0.0.0'; \
+    fi

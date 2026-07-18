@@ -70,17 +70,25 @@ jobs:
             bun run lint
             bun run build
 
-      # TODO: Reabilitar lychee-action após corrigir links
-      # root-relative e falsos positivos.
-      #
-      # - name: Verificar links do site gerado
-      #   uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
-      #   with:
-      #     args: >-
-      #       --no-progress
-      #       --max-concurrency 8
-      #       dist
-      #     fail: true
+      # O site é servido sob a base /infrastructure-and-cluster-notebook; o
+      # symlink reproduz esse prefixo para os links root-relative resolverem
+      # contra dist/. Modo offline: verifica só os links internos do site,
+      # sem depender de hosts externos (fonte dos falsos positivos antigos).
+      - name: Preparar raiz com a base do site para verificação de links
+        run: |
+          mkdir -p .lychee-root
+          ln -sfn ../dist .lychee-root/infrastructure-and-cluster-notebook
+
+      - name: Verificar links do site gerado
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --offline
+            --root-dir ${{ github.workspace }}/.lychee-root
+            --fallback-extensions html
+            'dist/**/*.html'
+          fail: true
 
       - name: Enviar artefato do GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

@@ -1,0 +1,23 @@
+name: cluster-management-notes
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: code
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: sleep infinity
+    init: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 1024
+    mem_limit: 4g
+    tmpfs:
+      - /tmp:size=1024m
+    ports:
+      - "127.0.0.1:4321:4321"

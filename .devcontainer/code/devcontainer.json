@@ -1,10 +1,8 @@
 {
 	"name": "infrastructure-and-cluster-notebook",
-	"build": {
-		"dockerfile": "../../.container/Dockerfile",
-		"context": "../../.container",
-		"target": "code"
-	},
+	"dockerComposeFile": ["../../.container/compose.yml"],
+	"service": "app",
+	"workspaceFolder": "/workspace",
 	"postCreateCommand": "bun install --frozen-lockfile",
 	"forwardPorts": [4321],
 	"portsAttributes": {
