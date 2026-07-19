@@ -13,6 +13,7 @@ Ferramentas para monitorar, debugar e gerenciar Kubernetes clusters.
 Terminal UI interativo para Kubernetes.
 
 **Instalação:**
+
 ```bash
 # Via brew
 brew install k9s
@@ -22,6 +23,7 @@ sudo apt install k9s
 ```
 
 **Uso:**
+
 ```bash
 k9s
 # :pod        → listar pods
@@ -32,6 +34,7 @@ k9s
 ```
 
 **Vantagens:**
+
 - Sem UI externa (rode no terminal)
 - Navegação rápida
 - Acesso a logs e shell
@@ -46,6 +49,7 @@ IDE para Kubernetes (desktop app).
 **Download:** https://k8slens.dev/
 
 **Funcionalidade:**
+
 - Dashboard visual do cluster
 - Navegar resources
 - Ver logs/eventos
@@ -54,6 +58,7 @@ IDE para Kubernetes (desktop app).
 - Sync com kubeconfig automático
 
 **Versões:**
+
 - Open Source (free)
 - Lens Pro (pago, mais recursos)
 
@@ -64,6 +69,7 @@ IDE para Kubernetes (desktop app).
 Plataforma web para gerenciar múltiplos clusters.
 
 **Setup:**
+
 ```bash
 helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
 helm install rancher rancher-latest/rancher \
@@ -72,6 +78,7 @@ helm install rancher rancher-latest/rancher \
 ```
 
 **Funcionalidade:**
+
 - Gerenciar múltiplos clusters
 - RBAC centralizado
 - Monitoring integrado (Prometheus)
@@ -85,6 +92,7 @@ helm install rancher rancher-latest/rancher \
 Web UI para gerenciar Docker hosts e Swarm.
 
 **Setup:**
+
 ```bash
 docker run -d -p 9000:9000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -93,6 +101,7 @@ docker run -d -p 9000:9000 \
 ```
 
 **Funcionalidade:**
+
 - Listar containers/images
 - Logs em tempo real
 - Shell em containers
@@ -108,12 +117,14 @@ docker run -d -p 9000:9000 \
 Dashboard web nativo para gerenciar Linux host.
 
 **Instalação:**
+
 ```bash
 sudo apt install cockpit
 # Acessa em https://localhost:9090
 ```
 
 **Funcionalidade:**
+
 - Terminal web
 - Gerenciar services
 - Firewall (UFW)
@@ -130,6 +141,7 @@ sudo apt install cockpit
 Dashboard Kubernetes leve (Electron + web).
 
 **Instalação:**
+
 ```bash
 # Download: https://headlamp.dev/
 # Ou via container:
@@ -137,6 +149,7 @@ docker run -d -p 8080:80 ghcr.io/kinvolk/headlamp:latest
 ```
 
 **Funcionalidade:**
+
 - Dashboard clean
 - Editing de resources
 - Logs/events
@@ -146,14 +159,14 @@ docker run -d -p 8080:80 ghcr.io/kinvolk/headlamp:latest
 
 ## Escolher a ferramenta
 
-| Caso | Ferramenta |
-|------|-----------|
-| CLI rápido, sem UI | k9s |
-| Desktop visual | Lens |
-| Múltiplos clusters | Rancher |
-| Docker/Swarm | Portainer |
-| Linux host individual | Cockpit |
-| Kubernetes web leve | Headlamp |
+| Caso               | Ferramenta                |
+| ------------------ | ------------------------- |
+| CLI rápido, sem UI | k9s                       |
+| Desktop visual     | Lens                      |
+| Múltiplos clusters | Rancher                   |
+| Docker/Swarm       | Portainer                 |
+| Linux host indiv.  | Cockpit                   |
+| Kubernetes web leve| Headlamp                  |
 
 ---
 

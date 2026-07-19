@@ -13,6 +13,7 @@ Alternativas para copiar entre máquinas: integrado no SSH, sincronização bidi
 Copiar arquivos via SSH (mesmo protocolo, sem servidor adicional).
 
 **Uso:**
+
 ```bash
 # Host remoto → local
 scp user@host:/remote/file.txt ./local/
@@ -25,10 +26,12 @@ scp -r user@host:/remote/dir ./local/
 ```
 
 **Vantagens:**
+
 - Integrado em SSH (sem setup adicional)
 - Seguro (criptografado)
 
 **Desvantagens:**
+
 - Sem progresso visual de transfer
 - Sem retry automático
 
@@ -39,6 +42,7 @@ scp -r user@host:/remote/dir ./local/
 Protocolo FTP sobre SSH (mais seguro, interativo).
 
 **Uso:**
+
 ```bash
 sftp user@host
 # Dentro do SFTP:
@@ -49,6 +53,7 @@ sftp user@host
 ```
 
 **Clientes:**
+
 - `sftp` (CLI, integrado)
 - FileZilla (GUI, multiplataforma)
 - Commander (Norton Commander-style)
@@ -60,6 +65,7 @@ sftp user@host
 Sincronização bidirecional com detecção de mudanças.
 
 **Uso:**
+
 ```bash
 # Backup unidirecional
 rsync -avz /local/path/ user@host:/remote/path/
@@ -72,11 +78,13 @@ rsync -avz --exclude='*.tmp' /local/ user@host:/remote/
 ```
 
 **Vantagens:**
+
 - Sincroniza apenas mudanças (eficiente)
 - Mostra progresso
 - Pode excluir padrões
 
 **Desvantagens:**
+
 - Mais lento na primeira vez (scan completo)
 - Rsync deve estar instalado em ambos os hosts
 
@@ -89,6 +97,7 @@ rsync -avz --exclude='*.tmp' /local/ user@host:/remote/
 Cliente FTP/SFTP com interface gráfica.
 
 **Setup:**
+
 ```
 Protocolo: SFTP
 Host: example.com
@@ -97,6 +106,7 @@ Port: 22
 ```
 
 **Funcionalidade:**
+
 - Upload/download por drag-drop
 - Queue de transferências
 - Sincronização de pastas
@@ -110,6 +120,7 @@ Port: 22
 Cliente S3-compatível para backup em object storage.
 
 **Uso:**
+
 ```bash
 mc alias set minio http://localhost:9000 minioadmin minioadmin
 mc mirror /local/path/ minio/backup/

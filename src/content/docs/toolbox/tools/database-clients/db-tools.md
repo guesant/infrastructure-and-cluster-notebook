@@ -15,11 +15,13 @@ Ferramentas para conectar, executar queries, e gerenciar schemas.
 Cliente nativo de linha de comando.
 
 **Instalação:**
+
 ```bash
 sudo apt install postgresql-client
 ```
 
 **Uso:**
+
 ```bash
 psql -h localhost -U postgres -d mydb
 # Dentro do psql:
@@ -30,6 +32,7 @@ psql -h localhost -U postgres -d mydb
 ```
 
 **Vantagens:**
+
 - Direto, sem UI
 - Perfeito para scripts
 - Leve
@@ -41,12 +44,14 @@ psql -h localhost -U postgres -d mydb
 Cliente universal para múltiplos bancos (PostgreSQL, MySQL, Oracle, etc).
 
 **Instalação:**
+
 ```bash
 # Download: https://dbeaver.io/download/
 # Ou via package manager
 ```
 
 **Funcionalidade:**
+
 - Navegação de schema visual
 - Query builder
 - Import/export
@@ -54,6 +59,7 @@ Cliente universal para múltiplos bancos (PostgreSQL, MySQL, Oracle, etc).
 - Sync entre bancos
 
 **Versões:**
+
 - Community (free)
 - Enterprise (pago, mais recursos)
 
@@ -64,6 +70,7 @@ Cliente universal para múltiplos bancos (PostgreSQL, MySQL, Oracle, etc).
 Web-based admin para PostgreSQL.
 
 **Setup:**
+
 ```bash
 docker run -p 80:80 dpage/pgadmin4
 # Acessa em http://localhost
@@ -71,6 +78,7 @@ docker run -p 80:80 dpage/pgadmin4
 ```
 
 **Funcionalidade:**
+
 - Criar/deletar databases, roles
 - Query executor
 - Backup/restore
@@ -83,11 +91,13 @@ docker run -p 80:80 dpage/pgadmin4
 Cliente nativo de MySQL.
 
 **Uso:**
+
 ```bash
 mysql -h localhost -u root -p -D mydb
 ```
 
-**Alternativa: mycli**
+### Alternativa: mycli
+
 ```bash
 mycli -h localhost -u root -p
 # Syntax highlighting, auto-complete
@@ -100,6 +110,7 @@ mycli -h localhost -u root -p
 IDE profissional para bancos (pago, mas poderoso).
 
 **Funcionalidade:**
+
 - Autocomplete inteligente
 - Profiling de queries
 - Refactoring de schemas

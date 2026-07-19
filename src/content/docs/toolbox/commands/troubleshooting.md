@@ -208,6 +208,3 @@ seq 1 100 | xargs -P 4 -I {} curl https://api.example.com?id={}
 - `parallel`: mais simples, precisa instalação.
 - `xargs -P N`: máximo N processos em paralelo.
 - Cuidado com rate limiting do servidor.
-
-**Relacionado:**
-- [Background e foreground](#background-e-foreground)
