@@ -41,7 +41,7 @@ kubectl get persistentvolumeclaim --all-namespaces
 kubectl get statefulset,deployment --all-namespaces
 kubectl get cronjob --all-namespaces
 kubectl get customresourcedefinition
-```
+```yaml
 
 Não exporte Secrets em claro para “completar” o inventário. Registre a origem, o responsável e o procedimento de recuperação da credencial.
 
@@ -149,7 +149,7 @@ kubectl get cronjob,job --all-namespaces
 kubectl get events --all-namespaces --sort-by=.lastTimestamp
 kubectl get etcdsnapshotfile
 kubectl get volumesnapshot --all-namespaces
-```
+```yaml
 
 `ETCDSnapshotFile` e `VolumeSnapshot` podem não existir em todas as versões ou instalações. Mesmo quando existem, o objeto na API não substitui a verificação do artefato no destino externo.
 

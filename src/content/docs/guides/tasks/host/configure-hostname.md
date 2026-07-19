@@ -17,7 +17,7 @@ O K3s usa o hostname como valor padrão de `node-name` quando esse campo não é
 read -r -p "Novo hostname (ex.: k3s-manager-01): " NEW_HOSTNAME
 
 hostnamectl set-hostname "${NEW_HOSTNAME}"
-```
+```yaml
 
 `hostnamectl` grava o valor em `/etc/hostname` e atualiza o hostname do kernel imediatamente, sem exigir reinicialização.
 
@@ -32,7 +32,7 @@ read -r -p "IP deste nó: " NODE_IP
 read -r -p "Hostname definido acima: " NODE_HOSTNAME
 
 printf '%s %s\n' "${NODE_IP}" "${NODE_HOSTNAME}" >>/etc/hosts
-```
+```yaml
 
 Revise `/etc/hosts` manualmente se o arquivo já tiver uma entrada `127.0.1.1` apontando para um hostname antigo — deixar as duas entradas causa resolução inconsistente entre processos que leem o arquivo em ordens diferentes.
 
@@ -43,7 +43,7 @@ Revise `/etc/hosts` manualmente se o arquivo já tiver uma entrada `127.0.1.1` a
 ```bash
 hostnamectl status
 getent hosts "$(hostname)"
-```
+```yaml
 
 `hostnamectl status` deve mostrar o novo `Static hostname`. `getent hosts` deve resolver o hostname para o IP configurado.
 

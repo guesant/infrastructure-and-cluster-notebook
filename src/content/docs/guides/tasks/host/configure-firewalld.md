@@ -18,7 +18,7 @@ Não rode UFW e firewalld no mesmo host — os dois manipulam as mesmas regras n
 ```bash
 firewall-cmd --get-active-zones
 firewall-cmd --get-default-zone
-```
+```yaml
 
 Confirme qual zona está associada à interface usada pelo cluster antes de adicionar regras — uma regra aplicada à zona errada não tem efeito na interface real.
 
@@ -39,7 +39,7 @@ fi
 
 firewall-cmd "${ZONE_ARGS[@]}" --add-port="${SSH_PORT}/tcp" --permanent
 firewall-cmd --reload
-```
+```yaml
 
 `--permanent` grava a regra na configuração persistente, mas não a aplica ao runtime até o `--reload` (ou até uma reinicialização). Sem `--permanent`, a regra vale apenas para a sessão atual do runtime e desaparece no próximo reload ou reinício.
 
@@ -49,7 +49,7 @@ firewall-cmd --reload
 
 ```bash
 firewall-cmd --zone="${FIREWALLD_ZONE:-$(firewall-cmd --get-default-zone)}" --list-all
-```
+```yaml
 
 A saída mostra serviços, portas, interfaces e regras ricas (`rich rules`) associadas à zona — confirme que apenas o necessário está liberado antes de considerar o host pronto.
 
@@ -60,7 +60,7 @@ A saída mostra serviços, portas, interfaces e regras ricas (`rich rules`) asso
 ```bash
 firewall-cmd --state
 firewall-cmd --zone="${FIREWALLD_ZONE:-$(firewall-cmd --get-default-zone)}" --list-ports
-```
+```yaml
 
 `--state` deve retornar `running`. Teste uma nova conexão SSH antes de encerrar a sessão original — o mesmo cuidado vale aqui como em qualquer mudança de firewall remota.
 
@@ -73,7 +73,7 @@ Uma regra que funciona no runtime mas some após `--reload` foi aplicada sem `--
 ```bash
 firewall-cmd --zone="${FIREWALLD_ZONE}" --remove-port="${SSH_PORT}/tcp" --permanent
 firewall-cmd --reload
-```
+```yaml
 
 Remova regras específicas em vez de parar o serviço inteiro (`systemctl stop firewalld`), que deixaria o host sem filtragem de entrada.
 

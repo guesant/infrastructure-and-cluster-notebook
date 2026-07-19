@@ -29,7 +29,7 @@ Diferentes de um task guide (que tem múltiplos passos e decisões), recipes sã
 
 ## Formato de uma recipe
 
-```
+```yaml
 ### Tarefa
 
 Descrição breve de quando usar (1-2 linhas).
@@ -50,4 +50,4 @@ command here
 
 **Relacionado:**
 - [outra recipe](/path)
-```
+```yaml

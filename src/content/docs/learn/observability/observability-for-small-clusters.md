@@ -24,7 +24,7 @@ flowchart TB
     end
 
     Externo["Verificação externa ao host"] -.->|"único sinal que sobrevive à perda do host"| Host
-```
+```yaml
 
 Isso não invalida a pilha interna — ela continua sendo o principal meio de diagnóstico no dia a dia. Mas reforça que o [monitoramento externo](../../../guides/tasks/observability/configure-external-availability-monitoring/) não é opcional em nó único: é o único sinal que aparece quando o host inteiro desaparece.
 

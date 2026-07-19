@@ -25,7 +25,7 @@ flowchart LR
     Metricas["Métricas"] -->|"responde"| Quanto["Quanto? Com que frequência?"]
     Logs["Logs"] -->|"responde"| OQue["O que aconteceu especificamente?"]
     Traces["Traces"] -->|"responde"| Onde["Onde o tempo foi gasto?"]
-```
+```yaml
 
 Os três se correlacionam por tempo, cluster, namespace, workload e, quando adotado, um `trace_id` comum — mas um identificador de requisição nunca deve virar label de métrica, porque criaria uma série nova por requisição (veja [retenção e cardinalidade](../retention/)).
 

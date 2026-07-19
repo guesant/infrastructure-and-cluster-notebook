@@ -17,13 +17,13 @@ Debian habilita `systemd-timesyncd` por padrão, suficiente para a maioria dos c
 
 ```bash
 timedatectl status
-```
+```yaml
 
 Confirme `System clock synchronized: yes` e `NTP service: active`. Se `NTP service` estiver `inactive`, habilite-o:
 
 ```bash
 timedatectl set-ntp true
-```
+```yaml
 
 ## Definir fuso horário e servidores NTP
 
@@ -32,7 +32,7 @@ timedatectl set-ntp true
 ```bash
 read -r -p "Fuso horário (ex.: America/Sao_Paulo): " NODE_TIMEZONE
 timedatectl set-timezone "${NODE_TIMEZONE}"
-```
+```yaml
 
 Para usar servidores NTP específicos em vez dos padrões do Debian, edite `/etc/systemd/timesyncd.conf`:
 
@@ -41,7 +41,7 @@ read -r -p "Servidores NTP, separados por espaço: " NTP_SERVERS
 
 sed -i "s/^#\?NTP=.*/NTP=${NTP_SERVERS}/" /etc/systemd/timesyncd.conf
 systemctl restart systemd-timesyncd
-```
+```yaml
 
 ## Validação
 
@@ -50,7 +50,7 @@ systemctl restart systemd-timesyncd
 ```bash
 timedatectl status
 timedatectl timesync-status
-```
+```yaml
 
 `System clock synchronized` deve ser `yes` e `timesync-status` deve mostrar um servidor NTP alcançado recentemente (`Poll interval` ativo, sem erro de conexão).
 

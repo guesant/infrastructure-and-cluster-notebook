@@ -17,14 +17,14 @@ docker service create \
   --publish 80:8080 \
   --network mynet \
   nginx:latest
-```
+```yaml
 
 Verifica:
 
 ```bash
 docker service ls
 docker service ps web  # listar tasks (instâncias) do service
-```
+```yaml
 
 ## Health checks
 
@@ -38,7 +38,7 @@ docker service create \
   --health-timeout=10s \
   --health-retries=3 \
   myapi:latest
-```
+```yaml
 
 Swarm mata a task se 3 health checks falharem.
 
@@ -51,13 +51,13 @@ docker service create \
   --constraint node.labels.disktype==ssd \
   --name cache \
   redis:latest
-```
+```yaml
 
 Etiquetar um node:
 
 ```bash
 docker node update --label-add disktype=ssd <node_id>
-```
+```yaml
 
 ## Update strategy
 
@@ -70,7 +70,7 @@ docker service create \
   --update-failure-action pause \
   --name web \
   nginx:v2
-```
+```yaml
 
 - `update-parallelism`: quantos containers atualizar em paralelo (padrão: 1).
 - `update-delay`: esperar entre atualizações.
@@ -80,7 +80,7 @@ docker service create \
 
 ```bash
 docker service update --image nginx:v2 web
-```
+```yaml
 
 Swarm atualiza as réplicas uma por uma (ou conforme `update-parallelism`).
 
@@ -90,7 +90,7 @@ Se a atualização falhar:
 
 ```bash
 docker service rollback web
-```
+```yaml
 
 Ou configure rollback automático:
 
@@ -100,14 +100,14 @@ docker service create \
   --rollback-delay 5s \
   --name web \
   nginx:latest
-```
+```yaml
 
 ## Escala manual
 
 ```bash
 docker service scale web=5
 # Aumentar para 5 réplicas
-```
+```yaml
 
 Não há autoscaling nativo em Swarm.
 
@@ -115,7 +115,7 @@ Não há autoscaling nativo em Swarm.
 
 ```bash
 docker service remove web
-```
+```yaml
 
 Mata todas as tasks do serviço.
 

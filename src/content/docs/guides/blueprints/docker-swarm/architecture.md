@@ -13,6 +13,7 @@ Docker Swarm usa um modelo de consenso distribuído (Raft) para manter consistê
 ### Manager
 
 Um manager:
+
 - Participa do consensus Raft.
 - Mantém o estado do cluster (serviços, tarefas, configs, secrets).
 - Agenda tarefas para workers.
@@ -23,6 +24,7 @@ Um cluster Swarm requer **quorum de managers**. Com 3 managers, tolera falha de 
 ### Worker
 
 Um worker:
+
 - Recebe tarefas do manager (diretos).
 - Executa e monitora containers.
 - Reporta status das tarefas.
@@ -31,6 +33,7 @@ Um worker:
 ### Rede Overlay
 
 Conecta todos os containers de um service entre múltiplos hosts:
+
 - Encapsulamento VXLAN (UDP porta 4789).
 - Cada container vê os demais em uma rede Ethernet virtual.
 - Balanceamento de carga interno (IPVS).
@@ -38,6 +41,7 @@ Conecta todos os containers de um service entre múltiplos hosts:
 ### Ingress Routing Mesh
 
 Publica ports direto na porta do host:
+
 - Qualquer manager ou worker pode receber requisições na porta publicada.
 - Tráfego é roteado automaticamente para o container certo.
 - Oferece balanceamento básico.
@@ -45,6 +49,7 @@ Publica ports direto na porta do host:
 ## Limite de Swarm
 
 Swarm é simples, mas tem limites:
+
 - **Sem persistência nativa**: volumes são locais ao host; replicação é responsabilidade da aplicação.
 - **Sem autoscaling**: não há HPA automático; escala manual com `docker service scale`.
 - **Sem RBAC fino**: todos os managers têm acesso total.

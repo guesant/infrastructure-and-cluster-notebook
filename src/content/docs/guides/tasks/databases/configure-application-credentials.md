@@ -33,7 +33,7 @@ spec:
   name: ${APP_DATABASE_NAME}
   owner: ${APP_DATABASE_USER}
 EOF
-```
+```yaml
 
 ## Criar a credencial do usuário da aplicação
 
@@ -50,7 +50,7 @@ spec:
         passwordSecret:
           name: ${APP_DATABASE_USER}-credentials
 "
-```
+```yaml
 
 ## Validação
 
@@ -59,7 +59,7 @@ spec:
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" get database "${APP_DATABASE_NAME}"
 kubectl --namespace "${PG_NAMESPACE}" get secret "${APP_DATABASE_USER}-credentials"
-```
+```yaml
 
 O banco e o Secret devem existir. Não imprima o conteúdo do Secret no terminal para validação — referencie-o diretamente no manifesto da aplicação via `envFrom` ou `secretKeyRef`.
 
@@ -71,7 +71,7 @@ Se o `Database` ficar sem sincronizar, confirme que o `owner` referenciado já e
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" delete database "${APP_DATABASE_NAME}"
-```
+```yaml
 
 Remover o `Database` não reverte a criação do role automaticamente; remova-o separadamente do `spec.managed.roles` do `Cluster` se necessário.
 

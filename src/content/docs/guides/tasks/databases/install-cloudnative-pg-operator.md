@@ -18,7 +18,7 @@ read -r -p "Versão do operator CloudNativePG: " CNPG_VERSION
 
 kubectl apply --server-side=true \
   --filename "https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-${CNPG_VERSION}/releases/cnpg-${CNPG_VERSION}.yaml"
-```
+```yaml
 
 Fixe a versão exata em vez de usar `main` ou `latest` — o manifesto de release muda de URL a cada versão.
 
@@ -30,7 +30,7 @@ Fixe a versão exata em vez de usar `main` ou `latest` — o manifesto de releas
 kubectl --namespace cnpg-system rollout status deployment/cnpg-controller-manager --timeout=180s
 kubectl --namespace cnpg-system get pods
 kubectl get crd clusters.postgresql.cnpg.io
-```
+```yaml
 
 O Deployment deve estar `Running` e o CRD `Cluster` deve existir antes de prosseguir.
 
@@ -42,7 +42,7 @@ Se o `rollout status` expirar, verifique `kubectl --namespace cnpg-system descri
 
 ```bash
 kubectl delete --filename "https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-${CNPG_VERSION}/releases/cnpg-${CNPG_VERSION}.yaml"
-```
+```yaml
 
 Não remova o operator enquanto houver um `Cluster` PostgreSQL ativo gerenciado por ele — os Pods do banco continuariam existindo, mas sem reconciliação, failover ou backup automatizados.
 

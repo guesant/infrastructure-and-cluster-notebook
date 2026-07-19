@@ -15,7 +15,7 @@ Restaurar um backup cria um novo volume a partir de um ponto salvo — não subs
 
 ```bash
 kubectl --namespace longhorn-system get backups.longhorn.io
-```
+```yaml
 
 ## Restaurar como um novo volume
 
@@ -34,7 +34,7 @@ spec:
   numberOfReplicas: 3
   size: "$(kubectl --namespace longhorn-system get backups.longhorn.io "${BACKUP_NAME}" -o jsonpath='{.status.size}')"
 EOF
-```
+```yaml
 
 ## Criar um PVC apontando para o volume restaurado
 
@@ -58,7 +58,7 @@ spec:
     volumeHandle: ${RESTORED_VOLUME_NAME}
     fsType: ext4
 EOF
-```
+```yaml
 
 ## Validação
 
@@ -66,7 +66,7 @@ EOF
 
 ```bash
 kubectl --namespace longhorn-system get volumes.longhorn.io "${RESTORED_VOLUME_NAME}"
-```
+```yaml
 
 Confirme `state: attached` ou `detached` conforme esperado, e monte o volume em um Pod de teste para validar a integridade dos dados (não apenas a existência do volume) — a mesma lógica do [roteiro de restore drill](../../../../operations/backups/backup-and-recovery/#roteiro-de-restore-drill).
 
@@ -79,7 +79,7 @@ Se o volume restaurado ficar preso em `attaching`, confirme que nenhum outro Pod
 ```bash
 kubectl delete pv "${RESTORED_VOLUME_NAME}-pv"
 kubectl --namespace longhorn-system delete volumes.longhorn.io "${RESTORED_VOLUME_NAME}"
-```
+```yaml
 
 ## Próximo passo
 

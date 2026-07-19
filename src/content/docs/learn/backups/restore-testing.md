@@ -20,7 +20,7 @@ flowchart TB
 
     Processo["O processo de restauração completa sem erro"] --> Existencia["Os dados restaurados existem e têm tamanho plausível"]
     Existencia --> Funcional["A aplicação funciona corretamente com os dados restaurados"]
-```
+```yaml
 
 A camada final — validação funcional — é a mais frequentemente pulada e a mais importante: um banco de dados restaurado que inicia sem erro pode ainda assim ter perdido índices, ter dados inconsistentes, ou não passar em uma consulta simples de verificação.
 

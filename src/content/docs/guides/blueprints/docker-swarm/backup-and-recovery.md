@@ -11,10 +11,12 @@ Swarm armazena estado (services, secrets, configs, redes) em um banco de dados R
 ## O que é backed up
 
 Diretório `/var/lib/docker/swarm/` do manager contém:
+
 - Banco de dados Raft (todos os services, tasks, configs, secrets).
 - Certificados TLS do manager.
 
 **Não** inclui:
+
 - Dados de volumes (sua responsabilidade).
 - Imagens Docker (redownload happens automaticamente).
 - Logs de containers (ephemeral).
@@ -27,7 +29,7 @@ Parar o Docker, fazer cópia atômica, reiniciar:
 sudo systemctl stop docker
 sudo tar -czf /backup/swarm-$(date +%s).tar.gz /var/lib/docker/swarm/
 sudo systemctl start docker
-```
+```yaml
 
 Ou, sem downtime (menos seguro, snapshot pode estar inconsistente):
 
@@ -37,7 +39,7 @@ sudo tar -czf /backup/swarm-snapshot.tar.gz /var/lib/docker/swarm/
 
 # Testar backup
 tar -tzf /backup/swarm-snapshot.tar.gz | head
-```
+```yaml
 
 ## Automatizar backup
 
@@ -56,7 +58,7 @@ systemctl start docker
 
 # Manter apenas últimos 7 dias
 find $BACKUP_DIR -name "swarm-*.tar.gz" -mtime +7 -delete
-```
+```yaml
 
 ## Recuperação: perda de um manager (ainda há quorum)
 
@@ -72,7 +74,7 @@ systemctl restart docker
 
 # Rejuntar ao cluster
 docker swarm join --token <MANAGER_TOKEN> <IP>:<PORT>
-```
+```yaml
 
 ## Recuperação: perda de quorum (CRÍTICO)
 
@@ -85,6 +87,7 @@ Ter backup do `/var/lib/docker/swarm/` de um manager que era funcional.
 ### Procedimento
 
 1. **No manager a ser restaurado** (ou em qualquer máquina):
+
    ```bash
    # Parar Docker
    sudo systemctl stop docker
@@ -99,18 +102,22 @@ Ter backup do `/var/lib/docker/swarm/` de um manager que era funcional.
    sudo systemctl start docker
    ```
 
-2. **Force o servidor em modo standalone** (se precisa recrear o Swarm):
+1. **Force o servidor em modo standalone** (se precisa recrear o Swarm):
+
    ```bash
    sudo docker swarm init --force-new-cluster
    ```
+
    Isso reinitializa o cluster com um novo Raft, usando o backup como base.
 
-3. **Trazer de volta outros managers**:
+2. **Trazer de volta outros managers**:
+
    ```bash
    docker swarm join --token <MANAGER_TOKEN> <IP>:<PORT>
    ```
 
-4. **Verificar**:
+3. **Verificar**:
+
    ```bash
    docker node ls
    docker service ls  # services foram restaurados?
@@ -127,7 +134,7 @@ Antes de colocar em produção, testar o procedimento:
 3. docker swarm init --force-new-cluster
 4. Verificar que services e configs estão lá
 5. Tentar deslocar um service
-```
+```yaml
 
 ## Limitações
 

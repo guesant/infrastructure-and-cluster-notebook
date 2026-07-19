@@ -44,7 +44,7 @@ docker run --rm \
   npx --yes degit@latest \
   guesant/infrastructure-and-cluster-notebook/templates/gitops#main \
   "${TEMPLATE_DESTINATION}"
-```
+```yaml
 
 O `degit` baixa um snapshot do subdiretório solicitado sem o histórico `.git` deste projeto. O `--user` evita que os arquivos sejam criados como `root`, enquanto `HOME=/tmp` fornece ao npm um diretório temporário gravável. Por segurança, não foi usado `--force`: se o destino já contiver arquivos, revise ou mova o diretório antes de repetir o comando. Os manifests do template usam caminhos relativos iniciados por `gitops/`; se escolher outro destino, atualize esses campos `spec.source.path`. As referências `node:lts-alpine` e `degit@latest` acompanham novas versões; em automações reproduzíveis, fixe versões ou digests após validá-los.
 

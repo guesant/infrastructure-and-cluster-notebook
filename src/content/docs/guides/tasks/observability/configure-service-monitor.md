@@ -18,7 +18,7 @@ read -r -p "Namespace da aplicação: " APP_NAMESPACE
 read -r -p "Nome do Service: " APP_SERVICE_NAME
 
 kubectl --namespace "${APP_NAMESPACE}" get service "${APP_SERVICE_NAME}" -o yaml | grep -A3 ports
-```
+```yaml
 
 A porta usada para métricas precisa ter um `name` (ex.: `metrics`) — o `ServiceMonitor` referencia a porta pelo nome, não pelo número.
 
@@ -55,7 +55,7 @@ spec:
       interval: 30s
       scrapeTimeout: 10s
 EOF
-```
+```yaml
 
 O label `release: kube-prometheus-stack` precisa corresponder ao `serviceMonitorSelector` configurado na instância do Prometheus — confirme o valor real se a instalação usou um nome de release diferente.
 
@@ -65,7 +65,7 @@ O label `release: kube-prometheus-stack` precisa corresponder ao `serviceMonitor
 
 ```bash
 kubectl --namespace monitoring get servicemonitor "${SERVICE_MONITOR_NAME}"
-```
+```yaml
 
 Confirme também nos targets do Prometheus (via port-forward para a interface web, ou `kubectl --namespace monitoring port-forward service/kube-prometheus-stack-prometheus 9090:9090` e acessar `/targets`) que o target aparece com estado `UP`.
 
@@ -77,7 +77,7 @@ Um manifesto aceito pela API não prova que o target foi descoberto — veja a t
 
 ```bash
 kubectl --namespace monitoring delete servicemonitor "${SERVICE_MONITOR_NAME}"
-```
+```yaml
 
 ## Próximo passo
 

@@ -18,7 +18,7 @@ Cliente nativo de linha de comando.
 
 ```bash
 sudo apt install postgresql-client
-```
+```yaml
 
 **Uso:**
 
@@ -29,7 +29,7 @@ psql -h localhost -U postgres -d mydb
 # \du              → listar usuários
 # SELECT * FROM users;  → query
 # \q               → sair
-```
+```yaml
 
 **Vantagens:**
 
@@ -48,7 +48,7 @@ Cliente universal para múltiplos bancos (PostgreSQL, MySQL, Oracle, etc).
 ```bash
 # Download: https://dbeaver.io/download/
 # Ou via package manager
-```
+```yaml
 
 **Funcionalidade:**
 
@@ -75,7 +75,7 @@ Web-based admin para PostgreSQL.
 docker run -p 80:80 dpage/pgadmin4
 # Acessa em http://localhost
 # User: admin@pgadmin.org, password: admin
-```
+```yaml
 
 **Funcionalidade:**
 
@@ -94,14 +94,14 @@ Cliente nativo de MySQL.
 
 ```bash
 mysql -h localhost -u root -p -D mydb
-```
+```yaml
 
 ### Alternativa: mycli
 
 ```bash
 mycli -h localhost -u root -p
 # Syntax highlighting, auto-complete
-```
+```yaml
 
 ---
 
@@ -132,7 +132,7 @@ ssh -L 5432:db-server:5432 bastion-host
 
 # Depois, no DBeaver/psql:
 psql -h localhost -p 5432 -U postgres
-```
+```yaml
 
 ### Backup/Restore
 
@@ -145,7 +145,7 @@ psql -h localhost -U postgres mydb < backup.sql
 
 # MySQL backup
 mysqldump -h localhost -u root -p mydb > backup.sql
-```
+```yaml
 
 ---
 

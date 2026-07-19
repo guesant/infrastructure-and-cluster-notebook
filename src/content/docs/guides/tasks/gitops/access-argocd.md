@@ -19,7 +19,7 @@ LOCAL_PORT="${LOCAL_PORT:-8080}"
 
 kubectl --namespace argocd \
   port-forward service/argocd-server "${LOCAL_PORT}:443"
-```
+```yaml
 
 Acesse `https://127.0.0.1:PORTA_LOCAL`, substituindo `PORTA_LOCAL` pelo valor informado. O certificado inicial é autoassinado; o aviso do navegador é esperado nesta etapa.
 
@@ -33,7 +33,7 @@ kubectl --namespace argocd \
   --output jsonpath='{.data.password}' \
   | base64 --decode
 printf '\n'
-```
+```yaml
 
 ## Trocar a senha inicial
 
@@ -47,7 +47,7 @@ LOCAL_PORT="${LOCAL_PORT:-8080}"
 
 argocd login "127.0.0.1:${LOCAL_PORT}" --username admin --insecure
 argocd account update-password
-```
+```yaml
 
 Depois de trocar a senha, remova o secret inicial:
 
@@ -55,7 +55,7 @@ Depois de trocar a senha, remova o secret inicial:
 
 ```bash
 kubectl --namespace argocd delete secret argocd-initial-admin-secret
-```
+```yaml
 
 ## Validação
 
@@ -63,7 +63,7 @@ kubectl --namespace argocd delete secret argocd-initial-admin-secret
 
 ```bash
 argocd account get-user-info
-```
+```yaml
 
 Deve retornar o usuário `admin` autenticado com a nova senha. Se o login com a senha antiga ainda funcionar depois da troca, confirme que o secret inicial foi realmente removido e que não há uma segunda sessão de CLI usando um token antigo.
 

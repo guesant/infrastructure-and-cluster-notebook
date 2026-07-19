@@ -20,7 +20,7 @@ helm upgrade --install alloy alloy \
   --repo https://grafana.github.io/helm-charts \
   --version "${ALLOY_VERSION}" \
   --namespace monitoring
-```
+```yaml
 
 ## Configurar a coleta de logs de Pods para o Loki
 
@@ -28,7 +28,7 @@ O chart padrão do Alloy já inclui uma configuração de exemplo para coleta de
 
 ```bash
 kubectl --namespace monitoring get configmap alloy -o yaml | grep -A5 "loki.write"
-```
+```yaml
 
 Se o destino não estiver configurado, edite os values do chart (`--set-string` ou um arquivo `values.yaml`) para apontar `loki.write` ao Service do Loki (`http://loki:3100/loki/api/v1/push`) e reaplique o `helm upgrade`.
 
@@ -39,7 +39,7 @@ Se o destino não estiver configurado, edite os values do chart (`--set-string` 
 ```bash
 kubectl --namespace monitoring get daemonset alloy
 kubectl --namespace monitoring logs daemonset/alloy --tail=50
-```
+```yaml
 
 O DaemonSet deve ter um Pod por nó, todos `Running`. No Grafana (`Explore` → Loki), confirme que logs de um namespace conhecido aparecem em uma consulta como `{namespace="kube-system"}`.
 
@@ -55,7 +55,7 @@ Se os logs não chegarem ao Loki, confirme conectividade de rede entre o namespa
 
 ```bash
 helm --namespace monitoring uninstall alloy
-```
+```yaml
 
 ## Próximo passo
 

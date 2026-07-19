@@ -23,7 +23,7 @@ printf '\n'
 
 kubectl --namespace cert-manager create secret generic dns-provider-credentials \
   --from-literal=api-token="${DNS_PROVIDER_TOKEN}"
-```
+```yaml
 
 ## Criar o ClusterIssuer
 
@@ -50,7 +50,7 @@ spec:
               name: dns-provider-credentials
               key: api-token
 EOF
-```
+```yaml
 
 Use o servidor de staging (`https://acme-staging-v02.api.letsencrypt.org/directory`) enquanto valida a configuração — o ambiente de produção do Let's Encrypt aplica limites de taxa por domínio que uma tentativa malsucedida repetida pode esgotar.
 
@@ -61,7 +61,7 @@ Use o servidor de staging (`https://acme-staging-v02.api.letsencrypt.org/directo
 ```bash
 kubectl get clusterissuer letsencrypt-dns01
 kubectl describe clusterissuer letsencrypt-dns01
-```
+```yaml
 
 `READY` deve ser `True`. Se não estiver, o `describe` mostra a condição e a mensagem de erro reportada pelo cert-manager, geralmente relacionada a credencial inválida ou zona DNS incorreta.
 
@@ -76,7 +76,7 @@ Se o `Challenge` ficar preso em `pending`, confirme a propagação do registro T
 ```bash
 kubectl delete clusterissuer letsencrypt-dns01
 kubectl --namespace cert-manager delete secret dns-provider-credentials
-```
+```yaml
 
 Remover o `ClusterIssuer` não revoga certificados já emitidos por ele; eles continuam válidos até o vencimento, mas deixam de ser renovados automaticamente.
 

@@ -22,7 +22,7 @@ de lá tem a tabela completa de qual template usar para cada tipo.
 
 ```bash
 cp templates/page-types/guide-task.mdx src/content/docs/guides/tasks/<domínio>/<nome-do-arquivo>.mdx
-```
+```yaml
 
 Preencha os campos entre `<...>` e apague as seções que não se aplicarem.
 

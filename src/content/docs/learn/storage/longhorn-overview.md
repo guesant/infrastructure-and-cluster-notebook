@@ -22,7 +22,7 @@ flowchart LR
     Engine -->|"escrita síncrona"| ReplicaA["Réplica — nó A"]
     Engine -->|"escrita síncrona"| ReplicaB["Réplica — nó B"]
     Engine -->|"escrita síncrona"| ReplicaC["Réplica — nó C"]
-```
+```yaml
 
 O **armazenamento secundário** (backupstore) é um destino externo — normalmente compatível com S3 ou NFS — para onde o Longhorn pode copiar backups de volumes, distinto das réplicas primárias. Um backup no backupstore sobrevive à perda de todos os nós do cluster; réplicas não.
 

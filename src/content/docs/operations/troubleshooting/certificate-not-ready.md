@@ -16,7 +16,7 @@ Um `Certificate` que não fica `Ready` significa que o cert-manager ainda não c
 ```bash
 kubectl get certificate <nome> --namespace <namespace>
 kubectl describe certificate <nome> --namespace <namespace>
-```
+```yaml
 
 A seção `Status.Conditions` explica o estado atual. Se o cert-manager já tentou e falhou, o `describe` costuma apontar diretamente para o `CertificateRequest`, `Order` ou `Challenge` relacionado.
 
@@ -27,7 +27,7 @@ Em uma emissão ACME, a cadeia é `Certificate` → `CertificateRequest` → `Or
 ```bash
 kubectl --namespace <namespace> \
   get certificates,certificaterequests,orders.acme.cert-manager.io,challenges.acme.cert-manager.io
-```
+```yaml
 
 Um `Challenge` preso em `pending` é a causa mais comum — normalmente indica que o registro DNS TXT do desafio DNS-01 não propagou ainda, ou que a credencial do provedor DNS não tem permissão de escrita na zona.
 
@@ -45,7 +45,7 @@ Um `Challenge` preso em `pending` é a causa mais comum — normalmente indica q
 ```bash
 kubectl get clusterissuer
 kubectl describe clusterissuer <nome>
-```
+```yaml
 
 Se o próprio `ClusterIssuer` não estiver `Ready`, nenhum `Certificate` que o referencia vai emitir com sucesso — corrija o Issuer primeiro.
 
@@ -55,7 +55,7 @@ Depois de corrigir a causa raiz (credencial, DNS, Issuer), o cert-manager tenta 
 
 ```bash
 kubectl delete certificaterequest --namespace <namespace> --selector cert-manager.io/certificate-name=<nome>
-```
+```yaml
 
 Isso remove a tentativa travada; o cert-manager recria um `CertificateRequest` novo a partir do `Certificate` existente.
 

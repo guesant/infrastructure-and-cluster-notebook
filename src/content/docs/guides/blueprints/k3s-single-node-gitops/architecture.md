@@ -31,7 +31,7 @@ flowchart LR
     CertManager -->|"Secret TLS"| Traefik
     ArgoCD -->|"reconcilia"| Apps
     ArgoCD -->|"reconcilia"| CertManager
-```
+```yaml
 
 A camada de rede decide o que chega ao host e como o tráfego é roteado até um Service. A camada de plataforma fornece certificados e reconciliação declarativa para as duas camadas vizinhas. A camada de aplicação é o conjunto de workloads que o cluster existe para executar — este blueprint não prescreve quais.
 
@@ -56,7 +56,7 @@ sequenceDiagram
     Traefik->>Service: encaminha requisição
     Service->>Pod: distribui para um Pod saudável
     Pod-->>Cliente: resposta
-```
+```yaml
 
 O certificado usado no handshake TLS foi emitido antecipadamente pelo cert-manager e gravado como Secret referenciado pelo `Gateway` — a emissão não acontece no momento da requisição.
 
@@ -82,7 +82,7 @@ sequenceDiagram
         Operador->>ArgoCD: aciona sync manualmente
         ArgoCD->>API: aplica a diferença
     end
-```
+```yaml
 
 O Argo CD roda dentro do mesmo cluster que gerencia — se a API ficar indisponível, a reconciliação para junto com o restante do cluster, e a recuperação segue o procedimento em [operação](../k3s-single-node-gitops/operations/), não um fluxo de auto-recuperação do próprio Argo CD.
 

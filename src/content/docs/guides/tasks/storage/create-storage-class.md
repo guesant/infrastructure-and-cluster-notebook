@@ -29,7 +29,7 @@ parameters:
   numberOfReplicas: "${REPLICA_COUNT}"
   staleReplicaTimeout: "30"
 EOF
-```
+```yaml
 
 `reclaimPolicy: Retain` evita exclusão automática de dados quando o PVC é removido — veja [PersistentVolumes na prática](../../../../learn/storage/persistent-volumes/) para os trade-offs entre `Retain` e `Delete`.
 
@@ -41,7 +41,7 @@ Adicione o parâmetro `diskSelector` para direcionar volumes desta classe apenas
 parameters:
   numberOfReplicas: "3"
   diskSelector: "ssd"
-```
+```yaml
 
 ## Definir uma classe como padrão do cluster
 
@@ -50,7 +50,7 @@ No máximo uma `StorageClass` deve ser padrão por vez:
 ```bash
 kubectl patch storageclass "${STORAGE_CLASS_NAME}" \
   --patch '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-```
+```yaml
 
 ## Validação
 
@@ -58,7 +58,7 @@ kubectl patch storageclass "${STORAGE_CLASS_NAME}" \
 
 ```bash
 kubectl get storageclass
-```
+```yaml
 
 Confirme que apenas uma classe aparece marcada `(default)` e que os parâmetros da nova classe correspondem ao esperado (`kubectl describe storageclass "${STORAGE_CLASS_NAME}"`).
 
@@ -70,7 +70,7 @@ Se um PVC criado com a nova classe ficar `Pending`, confirme que existe capacida
 
 ```bash
 kubectl delete storageclass "${STORAGE_CLASS_NAME}"
-```
+```yaml
 
 Não remova uma `StorageClass` ainda referenciada por PVCs existentes.
 

@@ -20,7 +20,7 @@ read -r -p \
 
 ROOT_APPLICATION="${ROOT_APPLICATION:-gitops/root/application.yaml}"
 kubectl apply -f "${ROOT_APPLICATION}"
-```
+```yaml
 
 ## Validação
 
@@ -29,7 +29,7 @@ kubectl apply -f "${ROOT_APPLICATION}"
 ```bash
 kubectl --namespace argocd get applications.argoproj.io
 kubectl --namespace argocd describe application root
-```
+```yaml
 
 A Application `root` deve aparecer com `SYNC STATUS` `Synced` e `HEALTH STATUS` `Healthy`; as Applications descobertas a partir dela devem aparecer na mesma lista pouco depois, conforme o Argo CD as reconcilia.
 
@@ -43,7 +43,7 @@ Se a Application `root` ficar `Unknown` ou `OutOfSync` sem nunca sincronizar, co
 
 ```bash
 kubectl --namespace argocd delete application root
-```
+```yaml
 
 Remover a Application `root` não desfaz automaticamente o que as Applications descobertas por ela já sincronizaram no cluster; remova-as individualmente se for necessário desfazer também os recursos aplicados.
 

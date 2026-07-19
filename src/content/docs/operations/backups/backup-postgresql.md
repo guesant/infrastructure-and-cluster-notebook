@@ -20,7 +20,7 @@ read -r -p "Nome do cluster: " PG_CLUSTER_NAME
 kubectl --namespace "${PG_NAMESPACE}" get backups
 kubectl --namespace "${PG_NAMESPACE}" get scheduledbackups
 kubectl --namespace "${PG_NAMESPACE}" describe cluster "${PG_CLUSTER_NAME}" | grep -A5 "Continuous Backup status"
-```
+```yaml
 
 Confirme que:
 
@@ -32,7 +32,7 @@ Confirme que:
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" get backups -o jsonpath='{.items[-1:].status.stoppedAt}'
-```
+```yaml
 
 Compare com o RPO definido para este banco — se o intervalo entre o valor retornado e agora exceder o RPO, investigue antes de considerar a proteção adequada.
 

@@ -22,7 +22,7 @@ mkdir -p "backup-${BACKUP_NAMESPACE}-$(date +%Y%m%d)"
 kubectl get all,configmap,secret,ingress,pvc \
   --namespace "${BACKUP_NAMESPACE}" \
   -o yaml > "backup-${BACKUP_NAMESPACE}-$(date +%Y%m%d)/resources.yaml"
-```
+```yaml
 
 O export inclui campos gerenciados pelo cluster (`resourceVersion`, `uid`, status) que não devem ser reaplicados diretamente — trate o arquivo como referência para reconstrução manual ou para comparação, não como um manifesto pronto para `kubectl apply`.
 
@@ -38,7 +38,7 @@ Para recursos de operators (cert-manager, Argo CD, Longhorn), inclua os CRDs rel
 kubectl get crd -o name | grep -E 'cert-manager|argoproj|longhorn'
 kubectl get certificates,clusterissuers --all-namespaces -o yaml > backup-cert-manager.yaml
 kubectl get applications.argoproj.io --namespace argocd -o yaml > backup-argocd-applications.yaml
-```
+```yaml
 
 ## Copiar para fora do cluster
 
@@ -50,7 +50,7 @@ Confirme que o arquivo exportado contém os recursos esperados e pode ser lido:
 
 ```bash
 kubectl apply --dry-run=client --filename resources.yaml
-```
+```yaml
 
 Um erro de parsing nesta etapa indica um export corrompido ou incompleto — detecte isso no momento do backup, não durante uma restauração real.
 

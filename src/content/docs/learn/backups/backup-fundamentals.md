@@ -24,7 +24,7 @@ flowchart LR
 
     Replica["Réplica<br/>(isolamento mínimo)"] --> Snapshot["Snapshot<br/>(ponto no tempo, mesmo domínio)"]
     Snapshot --> Backup["Backup<br/>(isolado, outro destino)"]
-```
+```yaml
 
 Cada camada adiciona proteção contra um tipo diferente de falha — nenhuma substitui as demais. Veja [replicação não é backup](../../storage/replication-is-not-backup/) para o detalhamento com exemplos práticos.
 

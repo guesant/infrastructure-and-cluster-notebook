@@ -49,7 +49,7 @@ kubectl --namespace <namespace> get pod <pod> \
   --output jsonpath='{.status.qosClass}{"\n"}'
 kubectl --namespace <namespace> top pod <pod> --containers
 kubectl get events --all-namespaces --sort-by=.lastTimestamp
-```
+```yaml
 
 `kubectl top` depende de um pipeline de métricas, como metrics-server, e mostra uma amostra recente; combine-o com séries históricas e testes de carga.
 
@@ -295,7 +295,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: catalog-api
-```
+```yaml
 
 O `preStop` do exemplo pressupõe que a imagem contém `/bin/sh`. Prefira um hook entendido pela própria aplicação ou remova-o se o tratamento de `SIGTERM` já for suficiente. O registry e a imagem são ilustrativos e devem ser substituídos antes da validação.
 
@@ -309,7 +309,7 @@ kubectl diff --filename workload.yaml
 kubectl auth can-i --list \
   --namespace apps \
   --as system:serviceaccount:apps:catalog-api
-```
+```yaml
 
 Depois da implantação:
 
@@ -324,7 +324,7 @@ kubectl --namespace apps describe pod <pod>
 kubectl --namespace apps get poddisruptionbudget catalog-api
 kubectl --namespace apps get endpointslice \
   --selector kubernetes.io/service-name=catalog-api
-```
+```yaml
 
 Confirme que:
 

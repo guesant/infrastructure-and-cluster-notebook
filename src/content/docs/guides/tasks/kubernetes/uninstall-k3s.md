@@ -19,13 +19,13 @@ A desinstalação apaga o datastore local (incluindo etcd embarcado, se este for
 
 ```bash
 ls /usr/local/bin/k3s-uninstall.sh /usr/local/bin/k3s-agent-uninstall.sh 2>/dev/null
-```
+```yaml
 
 Managers (server) usam `k3s-uninstall.sh`; agents usam `k3s-agent-uninstall.sh`. Execute apenas o que existir no host:
 
 ```bash
 /usr/local/bin/k3s-uninstall.sh 2>/dev/null || /usr/local/bin/k3s-agent-uninstall.sh
-```
+```yaml
 
 ## Validação
 
@@ -35,7 +35,7 @@ Managers (server) usam `k3s-uninstall.sh`; agents usam `k3s-agent-uninstall.sh`.
 systemctl status k3s 2>&1 | head -n1
 ls /etc/rancher/k3s 2>&1
 ip link show | grep -E 'cni|flannel' || true
-```
+```yaml
 
 O serviço não deve mais existir (`Unit k3s.service could not be found`), `/etc/rancher/k3s` não deve existir e não deve sobrar nenhuma interface de rede criada pelo CNI.
 

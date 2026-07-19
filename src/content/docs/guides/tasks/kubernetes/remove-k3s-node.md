@@ -49,7 +49,7 @@ Depois que o `drain` terminar sem Pods restantes:
 
 ```bash
 kubectl get nodes
-```
+```yaml
 
 O nó removido não deve mais aparecer na lista. Confirme também que os Pods que rodavam nele foram reagendados nos nós restantes (`kubectl get pods --all-namespaces -o wide`).
 

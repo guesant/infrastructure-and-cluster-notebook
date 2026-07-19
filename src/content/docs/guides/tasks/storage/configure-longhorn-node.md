@@ -19,7 +19,7 @@ read -r -p "Caminho do disco montado (ex.: /mnt/longhorn-disk1): " DISK_PATH
 
 kubectl --namespace longhorn-system patch nodes.longhorn.io "${NODE_NAME}" --type=merge \
   --patch "{\"spec\":{\"disks\":{\"disk1\":{\"path\":\"${DISK_PATH}\",\"allowScheduling\":true}}}}"
-```
+```yaml
 
 Repita com um nome de disco diferente (`disk2`, `disk3`) para cada disco adicional no mesmo nó.
 
@@ -32,7 +32,7 @@ read -r -p "Tag a aplicar (ex.: ssd): " DISK_TAG
 
 kubectl --namespace longhorn-system patch nodes.longhorn.io "${NODE_NAME}" --type=merge \
   --patch "{\"spec\":{\"disks\":{\"disk1\":{\"tags\":[\"${DISK_TAG}\"]}}}}"
-```
+```yaml
 
 ## Validação
 
@@ -40,7 +40,7 @@ kubectl --namespace longhorn-system patch nodes.longhorn.io "${NODE_NAME}" --typ
 
 ```bash
 kubectl --namespace longhorn-system get nodes.longhorn.io "${NODE_NAME}" -o yaml
-```
+```yaml
 
 Confirme em `status.diskStatus` que o disco aparece com `schedulable: true` e a capacidade esperada.
 
@@ -53,7 +53,7 @@ Se o disco não aparecer como agendável, confirme que o caminho montado tem per
 ```bash
 kubectl --namespace longhorn-system patch nodes.longhorn.io "${NODE_NAME}" --type=merge \
   --patch "{\"spec\":{\"disks\":{\"disk1\":{\"allowScheduling\":false}}}}"
-```
+```yaml
 
 Desabilitar o agendamento não remove réplicas já existentes no disco — planeje a migração delas antes de remover o disco fisicamente.
 

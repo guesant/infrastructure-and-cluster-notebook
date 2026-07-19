@@ -36,7 +36,7 @@ Depois que a manutenção terminar e o nó estiver saudável novamente:
 
 ```bash
 kubectl uncordon "${K3S_NODE_NAME}"
-```
+```yaml
 
 ## Validação
 
@@ -45,7 +45,7 @@ kubectl uncordon "${K3S_NODE_NAME}"
 ```bash
 kubectl get node "${K3S_NODE_NAME}"
 kubectl get pods --all-namespaces -o wide | grep "${K3S_NODE_NAME}"
-```
+```yaml
 
 O nó deve voltar a `Ready` sem `SchedulingDisabled`, e os workloads que estavam pendentes devem ser reagendados nele em pouco tempo.
 
@@ -57,7 +57,7 @@ Se `uncordon` não fizer os Pods pendentes serem agendados, verifique se há tai
 
 ```bash
 kubectl cordon "${K3S_NODE_NAME}"
-```
+```yaml
 
 ## Próximo passo
 

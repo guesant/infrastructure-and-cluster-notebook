@@ -31,17 +31,19 @@ services:
     image: postgres
     environment:
       POSTGRES_PASSWORD: example
-```
+```yaml
 
 Tudo roda na **mesma máquina**, via `docker-compose up`.
 
 **Quando usar:**
+
 - Seu laptop.
 - CI/CD local.
 - Testing rápido.
 - Pequenos ambientes (< 1GB RAM).
 
 **Limitações:**
+
 - Sem escalabilidade.
 - Sem alta disponibilidade.
 - Sem orquestração entre hosts.
@@ -55,17 +57,19 @@ Sintaxe: Docker Compose YAML + `docker service` em vez de `docker-compose`:
 
 ```bash
 docker service create --replicas 3 -p 80:8080 nginx
-```
+```yaml
 
 Tudo roda em **múltiplos hosts** coordenados via quorum de managers.
 
 **Quando usar:**
+
 - 2-50 nós.
 - Sua equipe conhece Docker (Compose).
 - Setup e operação simples.
 - Staging/QA.
 
 **Limitações (vs. Kubernetes):**
+
 - Sem HPA automático.
 - Sem RBAC fino.
 - Sem namespaces.
@@ -95,11 +99,12 @@ spec:
       containers:
       - name: nginx
         image: nginx
-```
+```yaml
 
 Tudo roda em **múltiplos hosts** com conceitos avançados (namespaces, RBAC, ingress, CSI).
 
 **Quando usar:**
+
 - Qualquer cluster que precisa crescer.
 - Automação (HPA, rollouts automáticos).
 - Multi-tenancy (namespaces).
@@ -108,7 +113,7 @@ Tudo roda em **múltiplos hosts** com conceitos avançados (namespaces, RBAC, in
 
 ## Trajetória típica
 
-```
+```yaml
 Laptop
   ↓ (desenvolvimento)
 Docker Compose
@@ -118,13 +123,13 @@ Docker Swarm
 Kubernetes (K3s ou EKS)
   ↓ (escala, multi-region, SaaS)
 EKS / GKE / AKS
-```
+```yaml
 
 Ou direto:
 
-```
+```yaml
 Laptop (Compose) → Kubernetes (K3s)
-```
+```yaml
 
 (muitas equipes pulam Swarm por causa do mercado — Kubernetes é onipresente.)
 

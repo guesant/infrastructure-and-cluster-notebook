@@ -42,7 +42,7 @@ flowchart TB
     Traefik -->|"encaminha HTTP/HTTPS"| Workloads
     CertManager -->|"grava Secret TLS"| Traefik
     Cliente["Cliente externo"] -->|"HTTPS"| Traefik
-```
+```yaml
 
 O K3s roda com `cluster-init: true` mesmo em nó único, o que já deixa o control plane pronto para receber servidores adicionais no futuro sem reinstalação (veja [Fase 5 — multinó](../../../../../.todo/phase-5-multinode.md), fora do escopo deste blueprint). O mesmo host executa control plane, workloads, ingress e o próprio Argo CD — não há isolamento de papéis entre essas funções.
 

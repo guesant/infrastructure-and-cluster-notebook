@@ -21,7 +21,7 @@ printf '\n'
 
 kubectl --namespace monitoring create secret generic alertmanager-slack-webhook \
   --from-literal=url="${SLACK_WEBHOOK_URL}"
-```
+```yaml
 
 ```bash
 kubectl apply -f - <<EOF
@@ -54,7 +54,7 @@ spec:
           channel: "#alerts"
           sendResolved: true
 EOF
-```
+```yaml
 
 ## Validação
 
@@ -83,13 +83,13 @@ spec:
           annotations:
             summary: "Teste de entrega do Alertmanager"
 EOF
-```
+```yaml
 
 Confirme o recebimento no canal configurado e depois **remova a regra de teste**:
 
 ```bash
 kubectl --namespace monitoring delete prometheusrule teste-alertmanager
-```
+```yaml
 
 ## Troubleshooting
 
@@ -100,7 +100,7 @@ Se o alerta não chegar ao Slack, confirme o Secret referenciado em `apiURL.name
 ```bash
 kubectl --namespace monitoring delete alertmanagerconfig default-routing
 kubectl --namespace monitoring delete secret alertmanager-slack-webhook
-```
+```yaml
 
 ## Próximo passo
 

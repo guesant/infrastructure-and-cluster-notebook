@@ -17,7 +17,7 @@ O cert-manager renova certificados automaticamente antes do vencimento, mas uma 
 kubectl get certificates --all-namespaces
 kubectl get certificates --all-namespaces -o json | \
   python3 -c 'import json,sys; [print(c["metadata"]["namespace"], c["metadata"]["name"], c["status"].get("notAfter", "sem data")) for c in json.load(sys.stdin)["items"]]'
-```
+```yaml
 
 A coluna `READY` de `kubectl get certificates` deve estar `True` para todos. Um `False` persistente indica um problema de renovação que precisa de investigação imediata, não apenas registro para revisão futura.
 
@@ -31,7 +31,7 @@ Compare `notAfter` com a data atual; certificados do Let's Encrypt normalmente t
 
 ```bash
 kubectl describe certificate <nome> --namespace <namespace>
-```
+```yaml
 
 Revise a seção `Status.Conditions` e os eventos — veja [diagnosticar uma emissão](../../../guides/tasks/certificates/install-cert-manager/#diagnosticar-uma-emissão) para o procedimento completo com `cmctl`.
 

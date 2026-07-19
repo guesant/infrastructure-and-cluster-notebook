@@ -83,7 +83,7 @@ spec:
             httpGet:
               path: /ready
               port: http
-```
+```yaml
 
 Substitua a referência ilustrativa pelo registro, versão e digest verificados. A probe também precisa representar a prontidão real da aplicação; não copie o endpoint sem validar sua semântica.
 
@@ -220,7 +220,7 @@ kubectl --namespace "${NAMESPACE}" get replicasets \
 kubectl --namespace "${NAMESPACE}" describe deployment "${DEPLOYMENT}"
 kubectl --namespace "${NAMESPACE}" get events \
   --sort-by=.metadata.creationTimestamp
-```
+```yaml
 
 O formato de `imageID` depende do runtime. Em imagens multi-arquitetura, o digest fixado pode identificar um índice OCI, enquanto o runtime registra o manifesto específico da plataforma. Nesse caso, valide a relação entre ambos em vez de exigir igualdade textual sem contexto.
 
@@ -279,7 +279,7 @@ Resultado:
 - digest / imageID observado:
 - réplicas, probes, métricas, alertas e testes funcionais:
 - decisão final e ações pendentes:
-```
+```yaml
 
 Não inclua tokens, conteúdo de Secrets, credenciais do registro ou outros dados sensíveis na evidência.
 

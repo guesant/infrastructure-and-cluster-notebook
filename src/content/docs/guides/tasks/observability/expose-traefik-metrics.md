@@ -28,13 +28,13 @@ spec:
         expose:
           default: false
 '
-```
+```yaml
 
 Combine este patch com os valores já existentes de `providers.kubernetesGateway` e `ports.web`/`ports.websecure` — não sobrescreva a configuração inteira, apenas adicione a seção `metrics`.
 
 ```bash
 kubectl --namespace kube-system rollout status deployment/traefik --timeout=180s
-```
+```yaml
 
 ## Criar o ServiceMonitor
 
@@ -59,7 +59,7 @@ spec:
       path: /metrics
       interval: 30s
 EOF
-```
+```yaml
 
 ## Validação
 
@@ -68,7 +68,7 @@ EOF
 ```bash
 kubectl --namespace monitoring get servicemonitor traefik
 kubectl --namespace kube-system get service traefik -o yaml | grep -A2 "name: metrics"
-```
+```yaml
 
 Confirme nos targets do Prometheus que o target `traefik` aparece `UP`, e que métricas como `traefik_service_requests_total` aparecem em uma consulta de teste.
 
@@ -80,7 +80,7 @@ Se a porta `metrics` não aparecer no Service do Traefik, confirme que o `HelmCh
 
 ```bash
 kubectl --namespace monitoring delete servicemonitor traefik
-```
+```yaml
 
 ## Próximo passo
 

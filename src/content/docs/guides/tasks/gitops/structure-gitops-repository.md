@@ -37,7 +37,7 @@ flowchart TD
     RancherChart --> Cluster
     CNPGManifests --> Cluster
     InfisicalManifests --> Cluster
-```
+```yaml
 
 O termo `root` não indica um tipo especial de repositório no Argo CD — é apenas o nome da Application de bootstrap. Seu manifesto aponta para `gitops/applications/`; as Applications encontradas nesse diretório passam a observar seus próprios caminhos em `gitops/apps/`. Como os manifests são independentes, mantenha somente os arquivos das aplicações que deseja usar.
 
@@ -55,7 +55,7 @@ O termo `root` não indica um tipo especial de repositório no Argo CD — é ap
 
 ```bash
 grep -r "example/cluster-config" gitops/ || printf 'Nenhuma URL de exemplo restante.\n'
-```
+```yaml
 
 Nenhuma ocorrência deve sobrar — cada referência ao repositório de exemplo precisa ter sido substituída pela URL real antes do bootstrap.
 

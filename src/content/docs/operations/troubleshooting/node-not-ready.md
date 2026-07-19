@@ -16,7 +16,7 @@ Um nó `NotReady` deixou de reportar heartbeats saudáveis ao control plane. Em 
 ```bash
 kubectl get nodes
 kubectl describe node <nome-do-nó>
-```
+```yaml
 
 A seção `Conditions` do `describe` mostra a causa mais provável: `MemoryPressure`, `DiskPressure`, `PIDPressure` ou `Ready: Unknown` (perda de comunicação com o kubelet).
 
@@ -29,7 +29,7 @@ O control plane não recebe heartbeats do kubelet. Verifique no próprio host:
 ```bash
 systemctl status k3s
 journalctl -u k3s -n 100 --no-pager
-```
+```yaml
 
 Causas comuns: serviço K3s parado, falha de rede entre o kubelet e a API (relevante em multinó; irrelevante quando API e kubelet estão no mesmo host), ou o host inteiro sem resposta (verifique via console/hypervisor, não apenas SSH).
 
@@ -40,7 +40,7 @@ Siga [revisão de capacidade de disco](../../maintenance/disk-capacity-review/) 
 ```bash
 free --human
 kubectl top nodes 2>/dev/null || true
-```
+```yaml
 
 ## Verificar horário
 
@@ -48,7 +48,7 @@ Um relógio desalinhado pode causar falhas de heartbeat e de validação TLS ent
 
 ```bash
 timedatectl status
-```
+```yaml
 
 Veja [configurar sincronização de horário](../../../guides/tasks/host/configure-time-synchronization/) se o relógio estiver dessincronizado.
 
@@ -58,7 +58,7 @@ Na maioria dos casos, reiniciar o serviço resolve um estado travado:
 
 ```bash
 systemctl restart k3s
-```
+```yaml
 
 Se o problema persistir após reinício e a causa não for óbvia pelos logs, considere [drenar e reintegrar o nó](../../maintenance/drain-and-uncordon-node/) — mas em nó único não há para onde drenar; priorize corrigir o host diretamente.
 

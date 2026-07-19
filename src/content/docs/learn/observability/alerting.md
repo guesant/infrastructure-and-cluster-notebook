@@ -23,7 +23,7 @@ flowchart LR
     Alerta -->|"annotations"| Runbook["Link para runbook"]
     Alerta --> Roteamento["Roteamento (Alertmanager)"]
     Roteamento --> Destino["Destino real (Slack, PagerDuty, e-mail)"]
-```
+```yaml
 
 A severidade deveria ser definida pela resposta esperada, não pelo nome técnico do componente: `critical` significa "acionar alguém agora, existe ação possível"; `warning` significa "revisar antes que vire impacto"; `info` não deveria acordar ninguém.
 

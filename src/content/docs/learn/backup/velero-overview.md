@@ -8,6 +8,7 @@ sidebar:
 > **Para quem é:** operadores de clusters Kubernetes que precisam de backup de estado do cluster + workloads (PVCs).
 
 Velero é um backup automático para Kubernetes e volumes persistentes. Diferente de um snapshot de etcd (que cobre o estado da API), Velero também cobre:
+
 - Dados de volumes (PVCs) — replicados ou snapshotados no storage provider.
 - Manifests de resources (Deployments, Services, etc.) — via serialização de objetos API.
 - Namespaces completos.
@@ -15,7 +16,7 @@ Velero é um backup automático para Kubernetes e volumes persistentes. Diferent
 
 ## Como funciona
 
-```
+```yaml
 Velero (CLI + controller no cluster)
   ├─ Lê estado do cluster (via API)
   ├─ Serializa resources em YAML
@@ -26,7 +27,7 @@ Na recuperação:
   ├─ Cria namespace novo (ou sobrescreve)
   ├─ Restaura resources via `kubectl apply`
   └─ Reconecta volumes restaurados
-```
+```yaml
 
 ## Diferença: etcd snapshot vs. Velero
 
@@ -67,12 +68,14 @@ Velero fala com provedores via plugins:
 ## Trade-offs
 
 **Vantagens:**
+
 - Backup granular (não é tudo ou nada).
 - Restore seletivo.
 - Integração com diferentes provedores.
 - Histórico de backups.
 
 **Desvantagens:**
+
 - Mais complexo que etcd snapshot.
 - Depende de storage externo (custo).
 - Restore é mais lento.

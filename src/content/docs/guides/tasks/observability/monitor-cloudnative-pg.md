@@ -36,7 +36,7 @@ spec:
     - port: metrics
       interval: 30s
 EOF
-```
+```yaml
 
 ## Consultas essenciais
 
@@ -55,7 +55,7 @@ Um atraso de replicação crescente costuma preceder um failover ou indicar sobr
 
 ```bash
 kubectl --namespace monitoring get podmonitor "${PG_CLUSTER_NAME}"
-```
+```yaml
 
 Confirme nos targets do Prometheus que os Pods do cluster aparecem `UP` na porta `metrics`.
 

@@ -44,7 +44,7 @@ spec:
       path: ${METRICS_PATH}
       interval: 30s
 EOF
-```
+```yaml
 
 ## Validação
 
@@ -52,7 +52,7 @@ EOF
 
 ```bash
 kubectl --namespace monitoring get podmonitor "${POD_MONITOR_NAME}"
-```
+```yaml
 
 Confirme nos targets do Prometheus que os Pods selecionados aparecem com estado `UP`.
 
@@ -64,7 +64,7 @@ Se nenhum target aparecer, confirme que `podMonitorSelector` da instância do Pr
 
 ```bash
 kubectl --namespace monitoring delete podmonitor "${POD_MONITOR_NAME}"
-```
+```yaml
 
 ## Próximo passo
 

@@ -46,6 +46,7 @@ Exemplo: 5-50 nós com múltiplos times, requisitos de autoscaling, diferentes e
 ## Casos híbridos
 
 Não é raro ver:
+
 - **Swarm para staging/dev** (simplicidade) + **K3s para prod** (robustez).
 - **Docker Swarm internamente** (operações locais) + **Kubernetes em cloud** (EKS/GKE para escalabilidade pública).
 - **Ambos coexistindo** — Docker Compose para testes rápidos, Swarm para pequenos deploys, K3s para clusters maiores.

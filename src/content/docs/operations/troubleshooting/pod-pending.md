@@ -15,7 +15,7 @@ sidebar:
 
 ```bash
 kubectl --namespace <namespace> describe pod <pod>
-```
+```yaml
 
 A seção `Events` no final da saída normalmente nomeia a causa diretamente: `Insufficient cpu`, `Insufficient memory`, `node(s) had taint`, `didn't find available persistent volumes`, entre outras.
 
@@ -35,7 +35,7 @@ Como há apenas um nó, "nenhum nó disponível" quase sempre significa que o ú
 
 ```bash
 kubectl describe node <nome-do-nó> | grep -A5 "Allocated resources"
-```
+```yaml
 
 Se `requests.cpu`/`requests.memory` já estão perto de 100% alocados, o novo Pod não cabe mesmo que o nó tenha uso real baixo — `requests` reservam capacidade, não medem consumo atual.
 
@@ -44,7 +44,7 @@ Se `requests.cpu`/`requests.memory` já estão perto de 100% alocados, o novo Po
 ```bash
 kubectl get pvc --namespace <namespace>
 kubectl describe pvc <nome> --namespace <namespace>
-```
+```yaml
 
 Um PVC `Pending` por falta de `StorageClass` padrão é esperado neste notebook — a instalação do primeiro servidor desabilita `local-storage` intencionalmente (veja [decisões do blueprint](../../../guides/blueprints/k3s-single-node-gitops/#decisões-adotadas)). Instale o [Longhorn](../../../guides/tasks/storage/install-longhorn/) ou revise a decisão de armazenamento.
 

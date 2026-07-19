@@ -11,11 +11,13 @@ OpenBao standalone (tema anterior) é simples para dev. HA production requer aut
 ## Auto-unseal via AWS KMS
 
 Sem auto-unseal:
+
 - OpenBao inicia locked (sealed)
 - Precisa de operador com unseal keys manualmente
 - Risco: operador não disponível
 
 **Com auto-unseal:**
+
 - Inicia e desbloqueia automaticamente
 - Usa chave KMS (AWS, Google, Azure, HashiCorp Cloud)
 
@@ -26,7 +28,7 @@ Sem auto-unseal:
 aws kms create-key --description "OpenBao unseal key"
 aws kms create-alias --alias-name alias/openbao-unseal \
   --target-key-id <key-id>
-```
+```yaml
 
 ### Helm values (com auto-unseal)
 
@@ -53,7 +55,7 @@ seal:
   config:
     region: us-east-1
     kmsKeyId: arn:aws:kms:...
-```
+```yaml
 
 ### Deploy
 
@@ -62,7 +64,7 @@ helm install openbao openbao/openbao \
   -f values.yaml \
   --namespace secrets \
   --create-namespace
-```
+```yaml
 
 ## HA Replication (3+ replicas)
 
@@ -84,13 +86,14 @@ ha:
                   values:
                   - openbao
               topologyKey: kubernetes.io/hostname
-```
+```yaml
 
 Cada réplica em nó diferente (anti-affinity).
 
 ## Storage backend (integrado)
 
 Opções:
+
 - **Integrated storage** (padrão, Raft): nenhuma config adicional
 - **PostgreSQL:** para máxima flexibilidade
 - **S3:** para cloud-native
@@ -102,7 +105,7 @@ storage:
   config:
     connection_url: "postgresql://user:pass@postgres.default.svc:5432/openbao"
     ha_enabled: true
-```
+```yaml
 
 ## Metrics + Alertas
 
@@ -120,16 +123,17 @@ spec:
   endpoints:
   - port: metrics
     interval: 30s
-```
+```yaml
 
 Alert crítico:
+
 ```yaml
 - alert: OpenBaoSealed
   expr: openbao_core_unsealed == 0
   for: 1m
   annotations:
     summary: "OpenBao is sealed"
-```
+```yaml
 
 ## Backup + Restore
 
@@ -143,14 +147,14 @@ kubectl exec -n secrets openbao-0 -- \
 # Restore
 kubectl exec -n secrets openbao-0 -- \
   openbao operator raft snapshot restore /tmp/raft.snap
-```
+```yaml
 
 ### PostgreSQL backup
 
 ```bash
 # Standard PostgreSQL backup
 pg_dump -h postgres.default.svc openbao > openbao-backup.sql
-```
+```yaml
 
 ## Initialization (primeiro start)
 
@@ -160,7 +164,7 @@ kubectl exec -n secrets openbao-0 -- \
   openbao operator init \
     -key-shares=5 \
     -key-threshold=3
-```
+```yaml
 
 Com auto-unseal, não precisa de unseal keys manualmente após init.
 
@@ -169,16 +173,18 @@ Com auto-unseal, não precisa de unseal keys manualmente após init.
 Se perder quórum (2 de 3 réplicas down):
 
 1. **Scale down** perdidas:
+
    ```bash
    kubectl delete pod openbao-1 -n secrets
    ```
 
-2. **Scale up** nova réplica:
+1. **Scale up** nova réplica:
+
    ```bash
    kubectl scale statefulset openbao --replicas=3 -n secrets
    ```
 
-3. **Raft autopeer** reconstrói quórum
+1. **Raft autopeer** reconstrói quórum
 
 ## Production checklist
 

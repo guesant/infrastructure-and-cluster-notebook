@@ -16,7 +16,7 @@ sidebar:
 ```bash
 kubectl --namespace argocd get applications.argoproj.io
 kubectl --namespace argocd describe application <nome>
-```
+```yaml
 
 `describe` mostra o diff entre o estado desejado e o observado, além de eventos recentes de sincronização.
 
@@ -26,13 +26,13 @@ Verifique se é uma divergência esperada (mudança manual não versionada, ou u
 
 ```bash
 argocd app diff <nome>
-```
+```yaml
 
 Se a divergência for uma mudança manual indevida no cluster, o Argo CD a corrige automaticamente quando `selfHeal` está habilitado; caso contrário, sincronize manualmente:
 
 ```bash
 argocd app sync <nome>
-```
+```yaml
 
 Se a divergência for esperada (ex.: campo mutável gerenciado por um admission controller), ajuste `ignoreDifferences` na `Application` em vez de deixá-la permanentemente `OutOfSync`.
 
@@ -43,7 +43,7 @@ O problema está nos recursos já sincronizados, não na sincronização em si. 
 ```bash
 kubectl --namespace <namespace-da-app> get pods
 kubectl --namespace <namespace-da-app> describe pod <pod>
-```
+```yaml
 
 Um `Deployment` com `Degraded` geralmente reflete Pods em `CrashLoopBackOff`, `ImagePullBackOff` ou falha de probe — trate como um problema normal de workload, não do Argo CD.
 
@@ -62,7 +62,7 @@ Depois de corrigir a causa raiz, force uma nova sincronização:
 
 ```bash
 argocd app sync <nome> --force
-```
+```yaml
 
 `--force` substitui recursos existentes em vez de aplicar um patch — use com atenção em recursos que outros controllers também gerenciam.
 

@@ -23,7 +23,7 @@ flowchart LR
     ServiceMonitor -->|"traduzido pelo Operator em"| ScrapeConfig["Configuração de scrape"]
     ScrapeConfig --> Prometheus["Prometheus"]
     Prometheus -->|"coleta (pull)"| Pods
-```
+```yaml
 
 Um `ServiceMonitor` seleciona um `Service` (não os Pods diretamente) — o `Service` precisa ter uma porta nomeada e `EndpointSlices` válidos apontando para os Pods certos. Um `PodMonitor` seleciona Pods diretamente, útil quando não existe (ou não faz sentido criar) um `Service` estável — veja [configurar um ServiceMonitor](../../../guides/tasks/observability/configure-service-monitor/) e [configurar um PodMonitor](../../../guides/tasks/observability/configure-pod-monitor/).
 

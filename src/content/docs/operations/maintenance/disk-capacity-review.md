@@ -16,7 +16,7 @@ Um host sem espaço em disco disponível para o K3s começa a evictar Pods (`Dis
 ```bash
 df --human /var/lib/rancher /var/lib/kubelet /var/lib/longhorn 2>/dev/null
 du --human --max-depth=1 /var/lib/rancher/k3s/agent/containerd 2>/dev/null | sort -rh | head -n10
-```
+```yaml
 
 `/var/lib/rancher` contém o datastore do K3s e as imagens de container; `/var/lib/longhorn`, se presente, contém os dados replicados do Longhorn. Cada um merece atenção separada — um cheio pelo outro é um sintoma comum.
 
@@ -27,7 +27,7 @@ du --human --max-depth=1 /var/lib/rancher/k3s/agent/containerd 2>/dev/null | sor
 ```bash
 kubectl get nodes -o json | \
   python3 -c 'import json,sys; [print(n["metadata"]["name"], c) for n in json.load(sys.stdin)["items"] for c in n["status"]["conditions"] if c["type"] == "DiskPressure"]'
-```
+```yaml
 
 Um nó com `DiskPressure: True` já está evictando Pods de baixa prioridade — trate como incidente, não como item de rotina.
 
@@ -39,7 +39,7 @@ O containerd usado pelo K3s remove imagens órfãs automaticamente sob pressão 
 
 ```bash
 k3s crictl rmi --prune
-```
+```yaml
 
 ## Verificar volumes persistentes
 
@@ -49,7 +49,7 @@ Se o Longhorn estiver instalado, revise a capacidade agregada e por nó pela int
 
 ```bash
 kubectl --namespace longhorn-system get nodes.longhorn.io -o wide
-```
+```yaml
 
 ## Checklist
 

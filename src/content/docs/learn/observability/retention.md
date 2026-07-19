@@ -22,7 +22,7 @@ flowchart LR
 
     MetricaBaixa["http_requests_total{method, status}"] -->|"poucas combinações"| SeriesBaixa["Dezenas de séries"]
     MetricaAlta["http_requests_total{method, status, user_id}"] -->|"uma série por usuário"| SeriesAlta["Milhares ou milhões de séries"]
-```
+```yaml
 
 Um identificador de requisição, sessão ou usuário como label de métrica é o erro de cardinalidade mais comum — ele transforma uma métrica agregável em uma série por evento, que é exatamente o que logs e traces já fazem melhor.
 

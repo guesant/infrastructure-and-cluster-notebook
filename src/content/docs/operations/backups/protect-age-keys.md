@@ -25,7 +25,7 @@ Se [SOPS estiver integrado ao Argo CD](../../guides/tasks/secrets/use-sops-with-
 
 ```bash
 kubectl --namespace argocd get secret sops-age-key
-```
+```yaml
 
 Esse Secret é, ele mesmo, um dado de bootstrap fora do GitOps — trate-o com o mesmo cuidado descrito em [backup de dados de bootstrap do GitOps](../backup-gitops-bootstrap-data/).
 
@@ -36,7 +36,7 @@ Periodicamente, confirme que a cópia guardada da chave realmente decifra um arq
 ```bash
 export SOPS_AGE_KEY_FILE=/caminho/para/copia-guardada/age-key.txt
 sops --decrypt algum-arquivo-cifrado-de-teste.yaml
-```
+```yaml
 
 Uma cópia de chave nunca testada pode estar corrompida, incompleta, ou ser a versão errada de uma rotação anterior.
 

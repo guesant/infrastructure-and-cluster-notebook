@@ -16,7 +16,7 @@ O kube-prometheus-stack já inclui `node-exporter` (métricas de host: CPU, mem�
 ```bash
 kubectl --namespace monitoring get daemonset kube-prometheus-stack-prometheus-node-exporter
 kubectl --namespace monitoring get pods -l app.kubernetes.io/name=kube-state-metrics
-```
+```yaml
 
 O `node-exporter` deve rodar como DaemonSet (um Pod por nó); `kube-state-metrics` roda como Deployment único, consultando a API em vez do host diretamente.
 

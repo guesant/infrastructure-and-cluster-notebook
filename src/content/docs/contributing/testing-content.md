@@ -14,7 +14,7 @@ nenhuma substitui a outra.
 ```bash
 ./jail-exec.sh bun run lint
 ./jail-exec.sh bun run build
-```
+```yaml
 
 - `lint` roda `markdownlint-cli2` (Markdown) e `eslint` com `eslint-plugin-mdx` (MDX).
 - `build` falha alto e claro em front matter inválido, import quebrado (`?raw` ou de

@@ -19,20 +19,20 @@ docker service create \
   --update-failure-action pause \
   --name app \
   myapp:v1
-```
+```yaml
 
 Depois, atualizar:
 
 ```bash
 docker service update --image myapp:v2 app
-```
+```yaml
 
 Observar o progresso:
 
 ```bash
 docker service ps app
 # watch docker service ps app  (atualização passo a passo)
-```
+```yaml
 
 ## Rollback automático
 
@@ -42,7 +42,7 @@ Se o health check falhar em uma nova versão, pausar (não atualizar as demais):
 docker service update \
   --update-failure-action pause \
   app
-```
+```yaml
 
 Depois, decidir se continua ou volta:
 
@@ -52,7 +52,7 @@ docker service ps app --no-trunc
 
 # Rollback manualmente
 docker service rollback app
-```
+```yaml
 
 ## Rollback automático com detecção de falha
 
@@ -61,12 +61,15 @@ Infelizmente, Swarm não oferece rollback automático real — um container que 
 Padrão recomendado:
 
 1. Deploy versão nova com `--update-failure-action pause`.
-2. Monitorar logs e health checks por alguns minutos.
-3. Se tudo bem, continuar o deploy (há tarefas pausadas):
+1. Monitorar logs e health checks por alguns minutos.
+1. Se tudo bem, continuar o deploy (há tarefas pausadas):
+
    ```bash
    docker service update app  # continua o deploy
    ```
-4. Se mal, fazer rollback:
+
+1. Se mal, fazer rollback:
+
    ```bash
    docker service rollback app
    ```
@@ -98,7 +101,7 @@ docker service update --publish-add 80:8080 app-green
 
 # Remover versão antiga
 docker service remove app-blue
-```
+```yaml
 
 Vantagem: rollback instantâneo. Desvantagem: precisa de LB externo ou API de rota customizada.
 
@@ -118,7 +121,7 @@ systemctl start docker
 
 # Trazer nó de volta
 docker node update --availability active <node_id>
-```
+```yaml
 
 ## Estratégia de teste
 

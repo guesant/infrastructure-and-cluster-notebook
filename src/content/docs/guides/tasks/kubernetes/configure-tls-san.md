@@ -36,7 +36,7 @@ if sys.argv[1] not in config["tls-san"]:
 with open(path, "w") as f:
     yaml.safe_dump(config, f, default_flow_style=False)
 PYEOF
-```
+```yaml
 
 Esse trecho usa `python3`/`pyyaml` para editar o YAML preservando as demais chaves; se `pyyaml` não estiver disponível no host, edite o arquivo manualmente com o mesmo cuidado descrito em [configurar opções do servidor](../configure-k3s-server-options/).
 
@@ -49,7 +49,7 @@ O novo SAN só passa a valer no certificado depois de uma reemissão. Force-a re
 ```bash
 mv /var/lib/rancher/k3s/server/tls/dynamic-cert.json /var/lib/rancher/k3s/server/tls/dynamic-cert.json.bak
 systemctl restart k3s
-```
+```yaml
 
 Em uma topologia HA, aguarde o nó voltar a `Ready` antes de repetir o procedimento no próximo manager — os certificados são independentes por nó, mas os clientes precisam encontrar pelo menos um manager saudável durante o processo.
 
@@ -60,7 +60,7 @@ Em uma topologia HA, aguarde o nó voltar a `Ready` antes de repetir o procedime
 ```bash
 openssl s_client -connect "${NEW_TLS_SAN}:6443" -showcerts </dev/null 2>/dev/null | openssl x509 -noout -text | grep -A1 "Subject Alternative Name"
 kubectl --server "https://${NEW_TLS_SAN}:6443" cluster-info
-```
+```yaml
 
 O SAN adicionado deve aparecer na lista `Subject Alternative Name` e `kubectl` deve conseguir se conectar pelo novo endereço sem erro de certificado.
 
@@ -73,7 +73,7 @@ Se o certificado continuar sem o novo SAN após o restart, confirme que `dynamic
 ```bash
 cp /etc/rancher/k3s/config.yaml.bak /etc/rancher/k3s/config.yaml
 systemctl restart k3s
-```
+```yaml
 
 Remover um SAN já em uso por clientes ativos quebra o acesso deles; comunique a mudança antes de reverter.
 

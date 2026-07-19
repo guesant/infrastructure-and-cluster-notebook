@@ -16,7 +16,7 @@ Com a partição criada, formate-a e monte-a em um diretório persistente que o 
 ```bash
 read -r -p "Partição a formatar (ex.: /dev/sdb1): " TARGET_PARTITION
 mkfs.ext4 "${TARGET_PARTITION}"
-```
+```yaml
 
 ext4 é adequado para a maioria dos casos; XFS é uma alternativa válida se o ambiente já padroniza nele.
 
@@ -26,7 +26,7 @@ ext4 é adequado para a maioria dos casos; XFS é uma alternativa válida se o a
 read -r -p "Ponto de montagem (ex.: /mnt/longhorn-disk1): " MOUNT_POINT
 mkdir -p "${MOUNT_POINT}"
 mount "${TARGET_PARTITION}" "${MOUNT_POINT}"
-```
+```yaml
 
 ## Persistir o mount em `/etc/fstab`
 
@@ -35,7 +35,7 @@ Sem uma entrada em `/etc/fstab`, o disco não será remontado automaticamente ap
 ```bash
 DISK_UUID="$(blkid --match-tag UUID --output value "${TARGET_PARTITION}")"
 printf 'UUID=%s %s ext4 defaults 0 2\n' "${DISK_UUID}" "${MOUNT_POINT}" >>/etc/fstab
-```
+```yaml
 
 ## Validação
 
@@ -43,7 +43,7 @@ printf 'UUID=%s %s ext4 defaults 0 2\n' "${DISK_UUID}" "${MOUNT_POINT}" >>/etc/f
 mount --target "${MOUNT_POINT}"
 df --human "${MOUNT_POINT}"
 umount "${MOUNT_POINT}" && mount --all && mount --target "${MOUNT_POINT}"
-```
+```yaml
 
 O último comando testa que a entrada em `/etc/fstab` está correta, remontando a partir dela em vez do comando `mount` direto anterior.
 
@@ -56,7 +56,7 @@ Se `mount --all` falhar após editar `/etc/fstab`, revise a sintaxe da linha adi
 ```bash
 umount "${MOUNT_POINT}"
 sed -i "\|${MOUNT_POINT}|d" /etc/fstab
-```
+```yaml
 
 ## Próximo passo
 

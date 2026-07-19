@@ -23,7 +23,7 @@ printf '\n'
 kubectl --namespace "${PG_NAMESPACE}" create secret generic postgresql-backup-credentials \
   --from-literal=ACCESS_KEY_ID="${BACKUP_ACCESS_KEY_ID}" \
   --from-literal=ACCESS_SECRET_KEY="${BACKUP_SECRET_ACCESS_KEY}"
-```
+```yaml
 
 ## Configurar o destino no Cluster
 
@@ -47,7 +47,7 @@ spec:
         compression: gzip
     retentionPolicy: 30d
 "
-```
+```yaml
 
 ## Agendar backups completos recorrentes
 
@@ -66,7 +66,7 @@ spec:
   cluster:
     name: ${PG_CLUSTER_NAME}
 EOF
-```
+```yaml
 
 ## Validação
 
@@ -76,7 +76,7 @@ EOF
 kubectl --namespace "${PG_NAMESPACE}" get scheduledbackups
 kubectl --namespace "${PG_NAMESPACE}" get backups
 kubectl --namespace "${PG_NAMESPACE}" describe cluster "${PG_CLUSTER_NAME}" | grep -A5 "Continuous Backup status"
-```
+```yaml
 
 Confirme que o WAL está sendo arquivado continuamente (`Continuous Backup status`) e que ao menos um `Backup` completou com sucesso.
 
@@ -88,7 +88,7 @@ Se o backup falhar com erro de credencial, confirme que o Secret `postgresql-bac
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" delete scheduledbackup "${PG_CLUSTER_NAME}-daily"
-```
+```yaml
 
 Remover o `ScheduledBackup` não apaga backups já existentes no destino nem interrompe o arquivamento contínuo de WAL, configurado separadamente em `spec.backup`.
 

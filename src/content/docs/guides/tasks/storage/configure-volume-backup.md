@@ -24,7 +24,7 @@ printf '\n'
 kubectl --namespace longhorn-system create secret generic longhorn-backup-secret \
   --from-literal=AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
   --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
-```
+```yaml
 
 Depois, configure o target via `Setting`:
 
@@ -36,7 +36,7 @@ kubectl --namespace longhorn-system patch settings.longhorn.io backup-target --t
 
 kubectl --namespace longhorn-system patch settings.longhorn.io backup-target-credential-secret --type=merge \
   --patch '{"value": "longhorn-backup-secret"}'
-```
+```yaml
 
 ## Criar um backup manual
 
@@ -56,7 +56,7 @@ spec:
   snapshotName: ""
   volumeName: ${VOLUME_NAME}
 EOF
-```
+```yaml
 
 ## Agendar backups recorrentes
 
@@ -77,7 +77,7 @@ spec:
   retain: 7
   concurrency: 2
 EOF
-```
+```yaml
 
 Associe volumes ao grupo `default` (ou outro grupo customizado) via label `recurring-job-group.longhorn.io/default: enabled` no volume.
 
@@ -88,7 +88,7 @@ Associe volumes ao grupo `default` (ou outro grupo customizado) via label `recur
 ```bash
 kubectl --namespace longhorn-system get backups.longhorn.io
 kubectl --namespace longhorn-system get recurringjobs.longhorn.io
-```
+```yaml
 
 Confirme que os backups aparecem com `state: Completed` e que o `RecurringJob` está gerando execuções conforme o cron configurado.
 
@@ -100,7 +100,7 @@ Se um backup falhar com erro de credencial, confirme que o Secret referenciado e
 
 ```bash
 kubectl --namespace longhorn-system delete recurringjob daily-backup
-```
+```yaml
 
 ## Próximo passo
 

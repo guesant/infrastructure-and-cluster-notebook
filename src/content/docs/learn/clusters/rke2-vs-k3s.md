@@ -11,7 +11,7 @@ Ambas são Kubernetes leve da Rancher, mas com trade-offs diferentes. K3s é min
 ## Comparação rápida
 
 | Critério | K3s | RKE2 |
-|----------|-----|------|
+| ---------- | ----- | ------ |
 | **Tamanho** | ~50MB | ~700MB |
 | **Bundled** | Flannel, Traefik | Nada (escolha seus CNI/ingress) |
 | **Armazenamento** | etcd embarcado | Você escolhe |
@@ -24,15 +24,18 @@ Ambas são Kubernetes leve da Rancher, mas com trade-offs diferentes. K3s é min
 ## K3s — Minimalista
 
 **Opinativo:**
+
 - Escolha feita por você: Flannel (rede), Traefik (ingress), etcd (storage)
 - Fast track para começar
 
 **Melhor para:**
+
 - Desenvolvimento e testes
 - Pequenos clusters (<50 nós)
 - Quando você sabe o que quer
 
 **Limitações:**
+
 - Sem FIPS/CIS hardening nativo
 - Não certificado para compliance
 
@@ -41,16 +44,19 @@ Ambas são Kubernetes leve da Rancher, mas com trade-offs diferentes. K3s é min
 ## RKE2 — Conformidade
 
 **Agnóstico:**
+
 - Você instala CNI, ingress, storage
 - Segurança hardened por padrão (CIS benchmark)
 - Suporte para FIPS, DISA K8s Hardening
 
 **Melhor para:**
+
 - Production com requisitos de compliance
 - Segurança crítica
 - Ambientes regulados (federal, healthcare, finance)
 
 **Overhead:**
+
 - Mais recursos (sem Traefik bundled)
 - Configuração manualdesde o início
 
@@ -59,17 +65,20 @@ Ambas são Kubernetes leve da Rancher, mas com trade-offs diferentes. K3s é min
 ## Decisão prática
 
 **Comece com K3s se:**
+
 - Experimentando com Kubernetes
 - Lab/POC com poucos nós
 - Quer setup rápido
 
 **Mude para RKE2 se:**
+
 - Precisa de compliance (CIS, FIPS)
 - Production com requerimentos regulatórios
 - Equipe experiente com Kubernetes
 - Já tem estratégia clara de rede/storage
 
 **Híbrido:**
+
 - Usar K3s em dev, RKE2 em prod
 - Mesma configuração de aplicações (CNI agnóstico)
 
@@ -78,7 +87,7 @@ Ambas são Kubernetes leve da Rancher, mas com trade-offs diferentes. K3s é min
 ## Outras distribuições
 
 | Distribuição | Foco | Caso de uso |
-|---|---|---|
+| --- | --- | --- |
 | **Kubeadm** | Máxima flexibilidade | DIY, aprender Kubernetes |
 | **k0s** | Minimalista modular | Edge, IoT |
 | **MicroK8s** | Snap-based, Ubuntu | Desktop/laptop |
@@ -89,6 +98,7 @@ Ambas são Kubernetes leve da Rancher, mas com trade-offs diferentes. K3s é min
 ## Migração K3s → RKE2
 
 Se começou com K3s e precisa de compliance:
+
 1. Instale RKE2 novo cluster
 2. Migrate workloads (mesma API Kubernetes)
 3. Retire K3s

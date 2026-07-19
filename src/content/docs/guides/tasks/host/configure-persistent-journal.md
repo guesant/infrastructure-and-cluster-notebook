@@ -19,7 +19,7 @@ systemd-tmpfiles --create --prefix /var/log/journal
 
 sed -i 's/^#\?Storage=.*/Storage=persistent/' /etc/systemd/journald.conf
 systemctl restart systemd-journald
-```
+```yaml
 
 `systemd-tmpfiles --create` aplica as permissões corretas (`root:systemd-journal`, `2755`) ao novo diretório sem exigir reinicialização completa do host.
 
@@ -34,7 +34,7 @@ read -r -p "Limite máximo do journal (ex.: 500M, 2G): " JOURNAL_MAX_USE
 
 sed -i "s/^#\?SystemMaxUse=.*/SystemMaxUse=${JOURNAL_MAX_USE}/" /etc/systemd/journald.conf
 systemctl restart systemd-journald
-```
+```yaml
 
 ## Validação
 
@@ -43,7 +43,7 @@ systemctl restart systemd-journald
 ```bash
 journalctl --disk-usage
 find /var/log/journal -maxdepth 1 -type d
-```
+```yaml
 
 `--disk-usage` deve reportar um valor maior que zero em `/var/log/journal` (não em `/run/log/journal`) depois de uma reinicialização de teste ou de `systemctl restart systemd-journald`.
 

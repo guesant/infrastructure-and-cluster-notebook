@@ -17,7 +17,7 @@ Não desabilite serviços às cegas. Liste o que está ativo, decida caso a caso
 
 ```bash
 systemctl list-units --type=service --state=running
-```
+```yaml
 
 Revise a lista contra o papel do host. Candidatos comuns a desabilitar em um servidor sem interface gráfica: `bluetooth.service`, `cups.service`, `avahi-daemon.service`, `ModemManager.service`.
 
@@ -29,7 +29,7 @@ Revise a lista contra o papel do host. Candidatos comuns a desabilitar em um ser
 read -r -p "Nome do serviço a desabilitar (ex.: bluetooth.service): " SERVICE_NAME
 
 systemctl disable --now "${SERVICE_NAME}"
-```
+```yaml
 
 `--now` para o serviço imediatamente além de remover sua ativação no próximo boot, em um único comando.
 
@@ -40,7 +40,7 @@ systemctl disable --now "${SERVICE_NAME}"
 ```bash
 systemctl status "${SERVICE_NAME}"
 systemctl is-enabled "${SERVICE_NAME}"
-```
+```yaml
 
 `is-enabled` deve retornar `disabled` e o serviço não deve aparecer mais em `systemctl list-units --type=service --state=running`.
 
@@ -48,7 +48,7 @@ systemctl is-enabled "${SERVICE_NAME}"
 
 ```bash
 systemctl enable --now "${SERVICE_NAME}"
-```
+```yaml
 
 ## Próximo passo
 

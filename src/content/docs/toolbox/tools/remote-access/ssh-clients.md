@@ -20,7 +20,7 @@ sudo apt install openssh-client
 
 # Executar
 ssh user@host
-```
+```yaml
 
 **Uso:**
 
@@ -60,7 +60,7 @@ Host intermediário para acessar infraestrutura privada.
 
 ```text
 Seu host → Bastion (público) → Host privado
-```
+```yaml
 
 **Implementação:**
 
@@ -71,7 +71,7 @@ Host private-server
   HostName 10.0.1.100
 
 ssh private-server
-```
+```yaml
 
 ---
 
@@ -86,7 +86,7 @@ Interface web nativa em Debian/RHEL para gerenciar hosts.
 ```bash
 sudo apt install cockpit
 # Acessa em https://localhost:9090
-```
+```yaml
 
 **Funcionalidade:**
 

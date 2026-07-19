@@ -33,7 +33,7 @@ A chave precisa ter permissão de leitura no repositório (deploy key, no GitHub
 ```bash
 argocd repo list
 argocd repo get "${GITOPS_REPO_URL}"
-```
+```yaml
 
 O repositório deve aparecer com status de conexão `Successful`. Um status diferente costuma indicar chave sem permissão de leitura no provedor Git ou URL SSH digitada incorretamente (formato `git@host:organização/repositório.git`).
 
@@ -45,7 +45,7 @@ Se `argocd repo get` retornar erro de host desconhecido (`unknown host key`), o 
 
 ```bash
 argocd repo rm "${GITOPS_REPO_URL}"
-```
+```yaml
 
 ## Próximo passo
 

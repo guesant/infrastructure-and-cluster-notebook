@@ -21,7 +21,7 @@ LOCAL_PORT="${LOCAL_PORT:-5432}"
 
 kubectl --namespace "${PG_NAMESPACE}" \
   port-forward "service/${PG_CLUSTER_NAME}-rw" "${LOCAL_PORT}:5432"
-```
+```yaml
 
 Enquanto o comando roda, conecte-se em `127.0.0.1:${LOCAL_PORT}` com qualquer cliente PostgreSQL — veja [acessar o PostgreSQL com um cliente gráfico](../access-postgresql-with-gui-client/).
 
@@ -33,7 +33,7 @@ Enquanto o comando roda, conecte-se em `127.0.0.1:${LOCAL_PORT}` com qualquer cl
 kubectl --namespace "${PG_NAMESPACE}" get secret "${PG_CLUSTER_NAME}-superuser" \
   --output jsonpath='{.data.password}' | base64 --decode
 printf '\n'
-```
+```yaml
 
 Use a credencial de superusuário apenas para administração; aplicações devem usar a credencial dedicada de [configurar credenciais de aplicação](../configure-application-credentials/).
 
@@ -45,7 +45,7 @@ Se um cliente externo precisar de acesso contínuo (não apenas administrativo p
 
 ```bash
 psql "postgresql://postgres@127.0.0.1:${LOCAL_PORT}/postgres" -c 'SELECT 1;'
-```
+```yaml
 
 Deve retornar `1` sem erro de conexão.
 

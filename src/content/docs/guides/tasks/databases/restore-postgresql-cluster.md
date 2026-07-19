@@ -51,7 +51,7 @@ ${RECOVERY_TARGET_YAML}
             name: postgresql-backup-credentials
             key: ACCESS_SECRET_KEY
 EOF
-```
+```yaml
 
 Sem `targetTime`, o CloudNativePG restaura até o ponto mais recente disponível no WAL arquivado.
 
@@ -61,13 +61,13 @@ Sem `targetTime`, o CloudNativePG restaura até o ponto mais recente disponível
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" get cluster "${PG_RESTORED_NAME}"
-```
+```yaml
 
 Depois que o cluster restaurado ficar saudável, valide a integridade dos dados na camada da aplicação — confira schema, contagens conhecidas ou checksums, não apenas a existência do Pod:
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" exec -it "${PG_RESTORED_NAME}-1" -- psql -U postgres -c '\dt'
-```
+```yaml
 
 ## Troubleshooting
 
@@ -77,7 +77,7 @@ Se a restauração ficar presa em `Setting up primary` por muito tempo, confirme
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" delete cluster "${PG_RESTORED_NAME}"
-```
+```yaml
 
 ## Próximo passo
 

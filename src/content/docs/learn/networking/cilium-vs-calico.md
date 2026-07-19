@@ -11,7 +11,7 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 ## Comparação rápida
 
 | Aspecto | Cilium | Calico |
-|---------|--------|--------|
+| --------- | -------- | -------- |
 | **Tecnologia** | eBPF nativo (kernel 5.8+) | iptables/ebpf híbrido |
 | **Network policies** | ✅ L3-L7 | ✅ L3-L4 |
 | **Performance** | Alto (kernel) | Médio (iptables overhead) |
@@ -24,6 +24,7 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 ## Cilium — Moderno (eBPF)
 
 **Pontos fortes:**
+
 - Velocidade nativa do kernel (eBPF)
 - Service mesh integrado (sem Istio)
 - Observabilidade Hubble out-of-the-box
@@ -31,10 +32,12 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 - Melhor em workloads high-performance
 
 **Requisito:**
+
 - Kernel ≥ 5.8 (Linux 5.8+, ou RHEL 8.2+)
 - Sem Windows nodes (eBPF é Linux)
 
 **Quando usar:**
+
 - Performance crítica
 - Quer service mesh nativo
 - Labs/clusters modernos
@@ -44,6 +47,7 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 ## Calico — Maduro (iptables)
 
 **Pontos fortes:**
+
 - Suportado em kernels antigos (5.0+, até mais velhos)
 - Network policies sofisticadas
 - Suporte para AWS, GCP, on-prem
@@ -51,10 +55,12 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 - Suporte empresarial Tigera
 
 **Simplicidade:**
+
 - Menos dependências
 - Funciona em ambientes antigos
 
 **Quando usar:**
+
 - Clusters legados (kernel < 5.8)
 - Já usa BGP
 - Infraestrutura heterogênea
@@ -64,12 +70,14 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 ## Decisão prática
 
 **Cilium se:**
+
 - Kernel ≥ 5.8
 - Quer performance
 - Quer service mesh nativo
 - Lab moderno
 
 **Calico se:**
+
 - Kernels mais antigos
 - Precisa compatibilidade
 - Quer suporte empresarial (Tigera)
@@ -82,16 +90,18 @@ Ambas substituem Flannel (CNI padrão K3s), oferecendo networking mais robusto. 
 ## Instalação rápida
 
 ### Cilium
+
 ```bash
 helm repo add cilium https://helm.cilium.io
 helm install cilium cilium/cilium --namespace kube-system \
   --set kubeProxyReplacement=strict
-```
+```yaml
 
 ### Calico
+
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
-```
+```yaml
 
 ---
 
@@ -109,7 +119,7 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-```
+```yaml
 
 Cilium adiciona `CiliumNetworkPolicy` para L7 (DNS, HTTP).
 

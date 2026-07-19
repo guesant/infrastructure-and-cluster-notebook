@@ -9,7 +9,7 @@ sidebar:
 ```bash
 set -euo pipefail
 trap 'echo "Error on line $LINENO"' ERR
-```
+```yaml
 
 Roda script em modo estrito: exit on error, undefined vars, pipe failures. Trap imprime linha do erro.
 
@@ -22,7 +22,7 @@ Roda script em modo estrito: exit on error, undefined vars, pipe failures. Trap 
 
 # Ou com valor padrão
 : "${VAR:=${DEFAULT}}"
-```
+```yaml
 
 Garante que `VAR` está definida; se não, falha com mensagem clara. Segunda forma usa default se vazia.
 
@@ -38,7 +38,7 @@ for i in {1..5}; do
   echo "Tentativa $i falhou, retrying..."
   sleep $((2 ** i))  # exponential backoff
 done
-```
+```yaml
 
 Tenta comando até 5 vezes com backoff exponencial (2s, 4s, 8s, etc).
 
@@ -52,7 +52,7 @@ cleanup() {
 }
 tmpdir=$(mktemp -d)
 trap cleanup EXIT
-```
+```yaml
 
 Garante que `tmpdir` é removido ao sair (normal ou error).
 
@@ -65,7 +65,7 @@ for file in *.txt; do
   process_file "$file" &
 done
 wait  # aguarda todos
-```
+```yaml
 
 Processa múltiplos arquivos em paralelo, depois aguarda completar.
 
@@ -82,7 +82,7 @@ require_command() {
 }
 
 require_command docker
-```
+```yaml
 
 Valida que comando existe antes de usar.
 
@@ -102,7 +102,7 @@ Valida que comando existe antes de usar.
 
 # To uppercase (bash 4+)
 "${VAR^^}"
-```
+```yaml
 
 Bash parameter expansion sem chamar `sed`/`tr`.
 
@@ -117,7 +117,7 @@ NC='\033[0m'
 
 echo -e "${GREEN}OK${NC}"
 echo -e "${RED}Erro${NC}"
-```
+```yaml
 
 Cores em terminal (cuidado: pode quebrar em CI sem `-e`).
 
@@ -132,6 +132,6 @@ output=$(comando)
 
 # Rodar só se arquivo modificado há menos de 1 hora
 [[ $(find file -mmin -60) ]] && echo "Recente"
-```
+```yaml
 
 Atalhos comuns de condicional.

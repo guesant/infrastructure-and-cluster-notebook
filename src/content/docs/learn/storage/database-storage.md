@@ -22,7 +22,7 @@ flowchart LR
     Volume -->|"replica de forma síncrona"| ReplicaA["Réplica A"]
     Volume -->|"replica de forma síncrona"| ReplicaB["Réplica B"]
     Volume -->|"confirma escrita"| DB
-```
+```yaml
 
 Réplicas síncronas de armazenamento (Longhorn) e réplicas de banco de dados (streaming replication do PostgreSQL, gerenciada pelo CloudNativePG) resolvem problemas em camadas diferentes: a primeira protege o volume contra perda de disco; a segunda protege o serviço de banco contra perda do processo/nó primário e permite failover mais rápido. Um cluster PostgreSQL gerenciado pelo CloudNativePG normalmente usa réplicas de banco de dados como mecanismo primário de disponibilidade, com armazenamento distribuído como proteção adicional de durabilidade do disco.
 

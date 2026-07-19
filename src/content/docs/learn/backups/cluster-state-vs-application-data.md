@@ -22,7 +22,7 @@ flowchart TB
     Etcd -.->|"NÃO cobre"| VolumeData["Dados dentro de PersistentVolumes"]
     Etcd -.->|"NÃO cobre"| DBData["Dados de bancos de dados"]
     Etcd -.->|"NÃO cobre"| BootstrapMaterial["Material de bootstrap (chaves, credenciais externas)"]
-```
+```yaml
 
 Um cluster completo tem pelo menos quatro categorias de dado que precisam de estratégias de backup próprias: estado da API (etcd), dados de volumes (Longhorn), dados de bancos de dados (PostgreSQL/CloudNativePG), e material de bootstrap que vive fora do cluster por design (chaves age, credenciais de secret store).
 

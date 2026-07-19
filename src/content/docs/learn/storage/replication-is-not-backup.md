@@ -27,7 +27,7 @@ sequenceDiagram
     Engine->>R1: replica a escrita
     Engine->>R2: replica a escrita
     Note over R1,R2: Nenhuma réplica preserva o estado anterior
-```
+```yaml
 
 Um backup, por definição, é um ponto no tempo isolado da escrita corrente — só um snapshot anterior ao erro, copiado para fora do sistema de produção, permite voltar a um estado consistente.
 

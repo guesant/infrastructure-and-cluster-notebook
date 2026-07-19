@@ -11,12 +11,14 @@ Amazon EKS (Elastic Kubernetes Service) é Kubernetes puro gerenciado. AWS cuida
 ## O que EKS oferece
 
 **AWS gerencia:**
+
 - Control plane (API server, etcd, controllers)
 - Certificados e TLS
 - Patches e upgrades
 - Backups de etcd
 
 **Você gerencia:**
+
 - Nodes (EC2, Fargate, ou ambos)
 - CNI (Flannel, Cilium, Calico)
 - Aplicações
@@ -27,7 +29,7 @@ Amazon EKS (Elastic Kubernetes Service) é Kubernetes puro gerenciado. AWS cuida
 ## Comparação: K3s vs. RKE2 vs. EKS
 
 | Aspecto | K3s | RKE2 | EKS |
-|---------|-----|------|-----|
+| --------- | ----- | ------ | ----- |
 | **Setup** | 30s | 5 min | 10 min (via console) |
 | **Infra** | VMs gerenciadas | VMs gerenciadas | AWS gerenciado |
 | **Custo** | Mínimo | Mínimo | 0.10 $/hora control plane + nodes |
@@ -37,14 +39,16 @@ Amazon EKS (Elastic Kubernetes Service) é Kubernetes puro gerenciado. AWS cuida
 
 ## Quando usar EKS
 
-### ✅ Use EKS se:
+### ✅ Use EKS se
+
 - Já usa AWS
 - Production com requisitos SLA (AWS 99.95% uptime)
 - Precisa compliance AWS-native
 - Equipe pequena (quer delegar control plane)
 - Multi-tenancy (RBAC + IAM integrado)
 
-### ❌ Não use EKS se:
+### ❌ Não use EKS se
+
 - Multi-cloud (k3s/RKE2 portáveis)
 - Quer sair da AWS (lock-in)
 - Budget crítico (sem nodes = sem cost)
@@ -54,7 +58,7 @@ Amazon EKS (Elastic Kubernetes Service) é Kubernetes puro gerenciado. AWS cuida
 
 ## Arquitetura
 
-```
+```yaml
 AWS (Control plane)
   ├─ API Server (gerenciado)
   ├─ etcd (gerenciado)
@@ -63,12 +67,12 @@ AWS (Control plane)
 VPC (Você gerencia)
   ├─ EC2 nodes (opção classic)
   └─ Fargate (opção serverless, sem nodes visíveis)
-```
+```yaml
 
 ## Worker nodes: EC2 vs. Fargate
 
 | Opção | Controle | Custo | Uso |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **EC2** | Total | Fixo (mesmo sem usar) | Apps que precisam recursos estáveis |
 | **Fargate** | Mínimo | Por-recurso (pay-as-you-go) | Batch, dev/test, spiky workloads |
 
@@ -85,13 +89,14 @@ aws eks update-kubeconfig --region us-east-1 --name my-cluster
 
 # 3. Deploy apps (kubectl normal)
 kubectl apply -f app.yaml
-```
+```yaml
 
 ---
 
 ## Integração AWS
 
 EKS integra-se naturalmente com:
+
 - **IAM:** RBAC ligado a roles AWS
 - **ECR:** registry nativa
 - **RDS:** banco dados gerenciado (não em cluster)

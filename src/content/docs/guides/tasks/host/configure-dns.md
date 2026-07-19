@@ -18,7 +18,7 @@ Debian não habilita `systemd-resolved` por padrão — a resolução normalment
 ```bash
 readlink -f /etc/resolv.conf
 systemctl is-active systemd-resolved 2>/dev/null || true
-```
+```yaml
 
 Se a saída de `readlink` apontar para um arquivo gerado (`/run/...`), o arquivo é sobrescrito automaticamente pelo cliente DHCP ou pelo NetworkManager; edite a configuração da interface, não `/etc/resolv.conf` diretamente. Se `/etc/resolv.conf` for um arquivo comum, ele pode ser editado diretamente.
 
@@ -39,7 +39,7 @@ read -r -p "Domínio de busca (Enter para nenhum): " DNS_SEARCH_DOMAIN
     printf 'search %s\n' "${DNS_SEARCH_DOMAIN}"
   fi
 } >/etc/resolv.conf
-```
+```yaml
 
 Quando o host usa `ifupdown` com um arquivo de interface estático, declare os mesmos resolvers em `/etc/network/interfaces` (`dns-nameservers`) para que sobrevivam a um `ifdown`/`ifup`; do contrário a interface pode regravar `/etc/resolv.conf` sem eles.
 
@@ -50,7 +50,7 @@ Quando o host usa `ifupdown` com um arquivo de interface estático, declare os m
 ```bash
 resolvectl status 2>/dev/null || cat /etc/resolv.conf
 getent hosts docs.k3s.io
-```
+```yaml
 
 `getent hosts` deve retornar um endereço IP. Se falhar, confirme conectividade de saída na porta UDP/TCP 53 para os resolvers configurados antes de suspeitar da configuração local.
 

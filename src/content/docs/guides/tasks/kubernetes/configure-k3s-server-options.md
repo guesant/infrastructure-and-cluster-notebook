@@ -18,13 +18,13 @@ Esta página cobre como adicionar ou alterar uma opção existente. Para o campo
 ```bash
 cp /etc/rancher/k3s/config.yaml /etc/rancher/k3s/config.yaml.bak
 ${EDITOR:-vi} /etc/rancher/k3s/config.yaml
-```
+```yaml
 
 Mantenha o arquivo em YAML válido — uma chave duplicada ou indentação incorreta impede o K3s de iniciar. Depois de editar:
 
 ```bash
 systemctl restart k3s
-```
+```yaml
 
 Reiniciar o serviço em um manager único derruba a API por alguns segundos; em uma topologia HA, reinicie um servidor por vez e confirme `Ready` antes de seguir para o próximo.
 
@@ -47,7 +47,7 @@ Consulte a referência completa antes de adicionar uma opção não documentada 
 systemctl status k3s
 k3s kubectl get nodes
 journalctl -u k3s -n 50 --no-pager
-```
+```yaml
 
 Confirme que o serviço voltou a `active (running)`, o nó voltou a `Ready` e o journal não mostra erro de parsing do `config.yaml`.
 
@@ -60,7 +60,7 @@ Se o K3s não reiniciar, o `journalctl -u k3s` normalmente aponta a linha exata 
 ```bash
 cp /etc/rancher/k3s/config.yaml.bak /etc/rancher/k3s/config.yaml
 systemctl restart k3s
-```
+```yaml
 
 ## Próximo passo
 

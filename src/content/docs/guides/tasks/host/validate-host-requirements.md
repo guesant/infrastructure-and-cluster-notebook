@@ -17,7 +17,7 @@ Esta página confirma que o host atende aos requisitos mínimos do K3s antes da 
 nproc
 free --human
 df --human /var/lib/rancher
-```
+```yaml
 
 Um manager de produção pede no mínimo 2 vCPUs e 2 GiB de memória; ambientes de teste toleram menos, mas abaixo de 1 vCPU/512 MiB o control plane fica instável sob qualquer carga. Reserve espaço em disco suficiente em `/var/lib/rancher` para imagens de container, dados do etcd e, se aplicável, volumes do Longhorn.
 
@@ -29,14 +29,14 @@ Um manager de produção pede no mínimo 2 vCPUs e 2 GiB de memória; ambientes 
 uname -r
 cat /sys/fs/cgroup/cgroup.controllers
 lsmod | grep -E '^(br_netfilter|overlay)'
-```
+```yaml
 
 O K3s exige cgroups v2 (padrão no Debian 12) e os módulos `br_netfilter` e `overlay` carregados para rede de Pods e o driver de armazenamento de containers, respectivamente. Se `lsmod` não listar algum dos dois:
 
 ```bash
 modprobe br_netfilter overlay
 printf 'br_netfilter\noverlay\n' >/etc/modules-load.d/k3s.conf
-```
+```yaml
 
 ## Swap
 
@@ -44,14 +44,14 @@ printf 'br_netfilter\noverlay\n' >/etc/modules-load.d/k3s.conf
 
 ```bash
 swapon --show
-```
+```yaml
 
 O kubelet, por padrão, recusa iniciar com swap ativo. Desabilite-o e remova a entrada de `/etc/fstab` para que a mudança sobreviva a um reboot:
 
 ```bash
 swapoff --all
 sed -i '/\sswap\s/s/^/#/' /etc/fstab
-```
+```yaml
 
 Se o ambiente exigir manter swap (não recomendado para nós de cluster), a instalação do K3s precisa do argumento `--kubelet-arg=fail-swap-on=false`; documente essa decisão explicitamente.
 
@@ -66,7 +66,7 @@ net.ipv4.ip_forward = 1
 SYSCTL_CONF
 
 sysctl --system
-```
+```yaml
 
 `ip_forward` é necessário para o roteamento entre Pods e para o NAT usado pelo Service networking; `bridge-nf-call-iptables` garante que o tráfego em bridge passe pelas regras de firewall/NAT do host.
 
@@ -78,7 +78,7 @@ sysctl --system
 sysctl net.ipv4.ip_forward net.bridge.bridge-nf-call-iptables
 swapon --show
 cat /sys/fs/cgroup/cgroup.controllers
-```
+```yaml
 
 `ip_forward` deve retornar `1`, `swapon --show` não deve listar nada e `cgroup.controllers` deve listar `cpu`, `memory` e `pids` entre os controllers disponíveis.
 

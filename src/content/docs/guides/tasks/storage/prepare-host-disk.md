@@ -19,7 +19,7 @@ Os comandos abaixo apagam todo o conteúdo do disco selecionado. Confirme o iden
 
 ```bash
 lsblk --output NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE
-```
+```yaml
 
 Identifique o disco pelo tamanho e ausência de `MOUNTPOINT` — nunca pelo nome do dispositivo isoladamente, que pode variar entre reinicializações em alguns ambientes.
 
@@ -28,7 +28,7 @@ Identifique o disco pelo tamanho e ausência de `MOUNTPOINT` — nunca pelo nome
 ```bash
 read -r -p "Dispositivo a preparar (ex.: /dev/sdb): " TARGET_DISK
 blkid "${TARGET_DISK}" || printf 'Nenhum filesystem detectado (esperado para um disco novo).\n'
-```
+```yaml
 
 Se `blkid` retornar um filesystem existente com dados importantes, pare aqui — este procedimento assume um disco vazio ou que pode ser apagado.
 
@@ -39,13 +39,13 @@ Para um disco dedicado inteiro ao Longhorn, uma única partição é suficiente:
 ```bash
 parted --script "${TARGET_DISK}" mklabel gpt
 parted --script "${TARGET_DISK}" mkpart primary 0% 100%
-```
+```yaml
 
 ## Validação
 
 ```bash
 lsblk --output NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE "${TARGET_DISK}"
-```
+```yaml
 
 Confirme a partição criada antes de prosseguir para [criar o filesystem e montar](../create-filesystem-and-mount/).
 

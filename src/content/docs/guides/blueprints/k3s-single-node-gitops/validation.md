@@ -33,7 +33,7 @@ Publique um serviço de teste através do Gateway configurado e confirme:
 ```bash
 kubectl run smoke-test --image=nginx:1.29 --port=80 --restart=Never
 kubectl expose pod smoke-test --port=80 --target-port=80
-```
+```yaml
 
 Crie um `HTTPRoute` de teste apontando para o Service `smoke-test`, associado a um `Gateway` com listener TLS referenciando o `ClusterIssuer`. Acesse pelo hostname configurado e confirme que o certificado é válido e emitido pela cadeia esperada (Let's Encrypt).
 
@@ -42,7 +42,7 @@ Remova os recursos de teste depois de validar:
 ```bash
 kubectl delete pod smoke-test
 kubectl delete service smoke-test
-```
+```yaml
 
 ## Checkpoint final
 

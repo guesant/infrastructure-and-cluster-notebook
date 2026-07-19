@@ -106,7 +106,7 @@ spec:
       path: /metrics
       interval: 30s
       scrapeTimeout: 10s
-```
+```yaml
 
 Confirme também se `serviceMonitorSelector` e `serviceMonitorNamespaceSelector` da instância Prometheus aceitam esse objeto e se RBAC, TLS e NetworkPolicy permitem a coleta. Um manifesto aceito pela API não prova que o target foi descoberto nem que está `up`.
 
@@ -144,7 +144,7 @@ spec:
             summary: "API com taxa elevada de erros"
             description: "Mais de 5% das requisições falharam por 10 minutos; valor atual: {{ $value | humanizePercentage }}."
             runbook_url: "https://example.com/runbooks/api/high-error-rate"
-```
+```yaml
 
 Uma regra acionável contém:
 
@@ -230,7 +230,7 @@ Quando usar Prometheus Operator, estas consultas ajudam a localizar os objetos; 
 kubectl get servicemonitors,podmonitors,prometheusrules -A
 kubectl -n monitoring describe servicemonitor api
 kubectl -n monitoring describe prometheusrule api-alerts
-```
+```yaml
 
 Registre como evidência:
 
@@ -246,7 +246,7 @@ Dead-man switch e verificação externa:
 Retenção, armazenamento e cardinalidade observada:
 Silêncios criados e respectivas expirações:
 Falhas encontradas, responsável e prazo:
-```
+```yaml
 
 Capturas, exports e notificações anexadas como evidência devem ser redigidos antes do armazenamento.
 

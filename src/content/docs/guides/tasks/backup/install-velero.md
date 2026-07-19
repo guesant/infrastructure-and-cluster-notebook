@@ -23,14 +23,14 @@ helm install minio minio/minio \
   --set auth.rootPassword=velero-admin \
   --set auth.rootUser=velero-admin \
   --set persistence.size=50Gi
-```
+```yaml
 
 Obter endpoint:
 
 ```bash
 kubectl get svc -n minio minio
 # Use: http://minio.minio.svc.cluster.local:9000
-```
+```yaml
 
 ## Passo 2: Criar bucket e credenciais no MinIO
 
@@ -44,7 +44,7 @@ kubectl port-forward -n minio svc/minio 9000:9000 &
 # Criar bucket "velero" via console, ou via CLI:
 mc alias set minio http://localhost:9000 velero-admin velero-admin
 mc mb minio/velero
-```
+```yaml
 
 ## Passo 3: Criar secret com credenciais
 
@@ -60,7 +60,7 @@ kubectl create namespace velero
 kubectl create secret generic velero-credentials \
   --from-file=/tmp/velero-credentials \
   -n velero
-```
+```yaml
 
 ## Passo 4: Instalar Velero via Helm
 
@@ -78,7 +78,7 @@ helm install velero velero/velero \
   --set configuration.schedules.daily.schedule='0 2 * * *' \
   --set configuration.schedules.daily.template.ttl=720h \
   --set schedules.daily.includedNamespaces='*'
-```
+```yaml
 
 ## Passo 5: Verificar instalação
 
@@ -93,7 +93,7 @@ velero backup create test-backup --wait
 # Verificar status
 velero backup describe test-backup
 velero backup logs test-backup
-```
+```yaml
 
 ## Passo 6: Testar restauração
 
@@ -107,7 +107,7 @@ velero restore create --from-backup test-backup --wait
 # Verificar
 kubectl get ns
 kubectl get pods
-```
+```yaml
 
 ## Configuração com AWS S3
 
@@ -127,7 +127,7 @@ helm install velero velero/velero \
   --set configuration.backupStorageLocation.provider=aws \
   --set configuration.volumeSnapshotLocation.provider=aws \
   --set configuration.volumeSnapshotLocation.config.region=us-east-1
-```
+```yaml
 
 ## Agendamento de backups
 
@@ -136,7 +136,7 @@ velero schedule create nightly \
   --schedule="0 2 * * *" \
   --include-namespaces='*' \
   --ttl 720h
-```
+```yaml
 
 - `--schedule`: cron format.
 - `--ttl`: retenção (720h = 30 dias).
@@ -153,7 +153,7 @@ velero restore create --from-backup test-backup \
 velero restore create --from-backup test-backup \
   --include-resources deployments,services \
   --wait
-```
+```yaml
 
 ## Troubleshooting
 
@@ -166,7 +166,7 @@ kubectl get events -n velero
 
 # Verificar status de um backup
 velero backup describe test-backup --details
-```
+```yaml
 
 ## Referências
 

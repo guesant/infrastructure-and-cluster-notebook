@@ -36,7 +36,7 @@ Execute uma consulta simples depois de conectar:
 
 ```sql
 SELECT version();
-```
+```yaml
 
 ## Troubleshooting
 

@@ -16,7 +16,7 @@ Expandir um volume aumenta sua capacidade sem recriar o PVC nem perder dados —
 ```bash
 kubectl get storageclass "$(kubectl get pvc <nome> --namespace <namespace> -o jsonpath='{.spec.storageClassName}')" \
   -o jsonpath='{.allowVolumeExpansion}'
-```
+```yaml
 
 Deve retornar `true`. Se a classe não permitir expansão, siga [criar uma StorageClass](../create-storage-class/) com `allowVolumeExpansion: true` antes de prosseguir — uma classe existente não pode ser editada retroativamente para volumes já criados sem esse campo.
 
@@ -29,14 +29,14 @@ read -r -p "Nova capacidade (ex.: 20Gi): " NEW_SIZE
 
 kubectl patch pvc "${PVC_NAME}" --namespace "${PVC_NAMESPACE}" \
   --patch "{\"spec\": {\"resources\": {\"requests\": {\"storage\": \"${NEW_SIZE}\"}}}}"
-```
+```yaml
 
 ## Validação
 
 ```bash
 kubectl get pvc "${PVC_NAME}" --namespace "${PVC_NAMESPACE}"
 kubectl describe pvc "${PVC_NAME}" --namespace "${PVC_NAMESPACE}"
-```
+```yaml
 
 O campo `CAPACITY` deve refletir o novo tamanho. Alguns filesystems exigem que o Pod seja reiniciado para que o crescimento seja visível dentro do container — confirme com `df --human` de dentro do Pod depois do patch.
 

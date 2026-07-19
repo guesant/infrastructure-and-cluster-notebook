@@ -23,7 +23,7 @@ scp ./local/file.txt user@host:/remote/path/
 
 # Recursivo
 scp -r user@host:/remote/dir ./local/
-```
+```yaml
 
 **Vantagens:**
 
@@ -50,7 +50,7 @@ sftp user@host
 # get file.txt        → download
 # ls, cd, pwd         → navegação
 # quit                → sair
-```
+```yaml
 
 **Clientes:**
 
@@ -75,7 +75,7 @@ rsync -avz --delete /local/ user@host:/remote/
 
 # Com exclusões
 rsync -avz --exclude='*.tmp' /local/ user@host:/remote/
-```
+```yaml
 
 **Vantagens:**
 
@@ -98,12 +98,12 @@ Cliente FTP/SFTP com interface gráfica.
 
 **Setup:**
 
-```
+```yaml
 Protocolo: SFTP
 Host: example.com
 User: admin
 Port: 22
-```
+```yaml
 
 **Funcionalidade:**
 
@@ -124,7 +124,7 @@ Cliente S3-compatível para backup em object storage.
 ```bash
 mc alias set minio http://localhost:9000 minioadmin minioadmin
 mc mirror /local/path/ minio/backup/
-```
+```yaml
 
 **Cenário:** Backup de dados locais para MinIO/S3.
 

@@ -21,7 +21,7 @@ flowchart TB
     MesmoDisco["Mesmo disco"] -->|"nenhuma proteção adicional"| Falha1["Falha do disco destrói original e backup"]
     OutroDisco["Outro disco, mesmo host"] -->|"protege contra falha de disco"| Falha2["Falha do host ainda destrói ambos"]
     OutraConta["Outra conta/provedor/região"] -->|"protege contra falha de host, credencial comprometida e falha regional"| Falha3["Domínio de falha realmente independente"]
-```
+```yaml
 
 Um "outro bucket" na mesma conta de object storage não é isolamento suficiente contra uma credencial administrativa comprometida — quem tem acesso a um bucket geralmente tem acesso ao outro. Contas, projetos ou provedores separados isolam melhor contra esse cenário específico.
 

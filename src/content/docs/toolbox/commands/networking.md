@@ -13,16 +13,18 @@ ping example.com
 
 # Com timeout customizado
 ping -w 5000 example.com  # 5 segundos
-```
+```yaml
 
 **Quando usar:** verificar se um host está online, medir latência.
 
 **Considerações:**
+
 - ICMP pode ser bloqueado por firewall.
 - `-c`: número de pacotes (Linux).
 - `-W`: timeout (Linux).
 
 **Relacionado:**
+
 - [Testar rota](#testar-rota-para-um-host)
 - [Escanear porta](#escanear-porta-aberta)
 
@@ -40,16 +42,18 @@ telnet example.com 443
 
 # Com /dev/tcp (bash)
 timeout 1 bash -c 'cat </dev/null >$(echo /dev/tcp/example.com/443)' && echo "Aberta" || echo "Fechada"
-```
+```yaml
 
 **Quando usar:** verificar se uma porta está aberta e respondendo.
 
 **Considerações:**
+
 - netcat é mais portável.
 - telnet pode exigir instalação.
 - `/dev/tcp` é bash-específico, sem dependências.
 
 **Relacionado:**
+
 - [Testar conectividade](#testar-conectividade-para-um-host)
 - [Identificar processo em porta](#identificar-processo-escutando-uma-porta)
 
@@ -69,17 +73,19 @@ ss -tlnp | grep :8080
 
 # Filtrar por estado
 ss -tnp state ESTABLISHED
-```
+```yaml
 
 **Quando usar:** diagnosticar porta em uso, ver qual processo, monitorar conexões.
 
 **Considerações:**
+
 - `-t`: TCP, `-u`: UDP.
 - `-l`: listening, `-n`: numeric (não resolve hostnames).
 - `-p`: show process.
 - `ss` é mais rápido em kernels modernos.
 
 **Relacionado:**
+
 - [Identificar processo em porta](#identificar-processo-escutando-uma-porta)
 
 ---
@@ -95,16 +101,18 @@ ss -ltnp | grep :3000
 
 # Mais detalhes (sudo pode ser necessário)
 sudo lsof -i :3000
-```
+```yaml
 
 **Quando usar:** descobrir qual app está usando uma porta, diagnosticar conflitos.
 
 **Considerações:**
+
 - `lsof` requer privilégios para ver processos de outros usuários.
 - `-i`: internet sockets.
 - Útil antes de kill um processo.
 
 **Relacionado:**
+
 - [Listar conexões ativas](#listar-conexões-ativas)
 - [Matar processo](#matar-processo-por-pid)
 
@@ -119,16 +127,18 @@ mtr example.com  # modo interativo, mais detalhes
 
 # Apenas uma tentativa
 mtr -c 1 example.com
-```
+```yaml
 
 **Quando usar:** diagnosticar latência de rede, ver por quais hops uma conexão passa.
 
 **Considerações:**
+
 - `traceroute` mostra route estática.
 - `mtr` combina ping + traceroute, mostra estatísticas.
 - Pode ser bloqueado por firewalls.
 
 **Relacionado:**
+
 - [Testar conectividade](#testar-conectividade-para-um-host)
 - [Listar rotas](#listar-rotas-do-host)
 
@@ -145,15 +155,17 @@ route -n
 
 # Rota default
 ip route | grep default
-```
+```yaml
 
 **Quando usar:** verificar default gateway, debugar roteamento não está funcionando.
 
 **Considerações:**
+
 - `ip route` é preferido (comando `ip` unificado).
 - Sem `-n`: tenta resolver IPs em hostnames (mais lento).
 
 **Relacionado:**
+
 - [Testar rota](#testar-rota-para-um-host)
 
 ---
@@ -169,14 +181,16 @@ sudo ip route del 192.168.2.0/24 via 192.168.1.1
 
 # Verificar
 ip route show | grep 192.168.2
-```
+```yaml
 
 **Quando usar:** roteamento customizado, lab de rede, tunels.
 
 **Considerações:**
+
 - Requer `sudo`.
 - Mudanças são temporárias (perde ao reboot).
 - Para persistência: editar `/etc/netplan/` ou equivalente.
 
 **Relacionado:**
+
 - [Listar rotas](#listar-rotas-do-host)

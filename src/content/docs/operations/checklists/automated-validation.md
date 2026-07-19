@@ -13,11 +13,13 @@ Este documento cobre como executar checklists via scripts em vez de manualmente.
 Script: `src/scripts/check-cluster-health.sh`
 
 **Uso:**
+
 ```bash
 ./src/scripts/check-cluster-health.sh
-```
+```yaml
 
 **Saída:** JSON com status de:
+
 - Comandos disponíveis (kubectl, helm, jq)
 - Cluster acessível
 - Nós em estado Ready
@@ -25,6 +27,7 @@ Script: `src/scripts/check-cluster-health.sh`
 - API responsiva
 
 **Exemplo:**
+
 ```json
 {
   "timestamp": "2026-07-19T10:30:00Z",
@@ -42,7 +45,7 @@ Script: `src/scripts/check-cluster-health.sh`
     "api_responsive": "pass"
   }
 }
-```
+```yaml
 
 ## Integração no CI
 
@@ -62,13 +65,14 @@ Executado em cada push/PR que toque `src/scripts/`.
 
 Para cada checklist em `operations/checklists/`, criar script correspondente:
 
-```
+```yaml
 operations/checklists/cluster-operational-checklist.md
 ↓
 src/scripts/validate-cluster-operational.sh
-```
+```yaml
 
 **Estrutura do script:**
+
 ```bash
 #!/bin/bash
 # Validação de cluster-operational-checklist.md
@@ -86,12 +90,12 @@ check_item_2() {
 generate_report() {
   # Retornar JSON ou texto
 }
-```
+```yaml
 
 ### Checklists candidatos a automação
 
 | Checklist | Script | Verificações |
-|-----------|--------|-------------|
+| ----------- | -------- | ------------- |
 | Post-install | `validate-post-install.sh` | Nós, services, network |
 | Cluster operational | `validate-cluster-operational.sh` | Quorum, storage, logs |
 | Application readiness | `validate-app-readiness.sh` | Resources, probes, security |
@@ -102,11 +106,13 @@ generate_report() {
 ## Relatórios estruturados
 
 Todos os scripts retornam JSON para:
+
 - Consumir por CI/CD
 - Agregar em dashboard
 - Armazenar histórico
 
 **Formato padrão:**
+
 ```json
 {
   "timestamp": "ISO 8601",
@@ -125,7 +131,7 @@ Todos os scripts retornam JSON para:
     }
   ]
 }
-```
+```yaml
 
 ---
 

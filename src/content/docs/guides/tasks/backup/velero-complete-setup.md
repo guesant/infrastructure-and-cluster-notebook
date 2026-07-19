@@ -18,7 +18,7 @@ helm install velero vmware-tanzu/velero \
   --set configuration.backupStorageLocation.provider=aws \
   --set configuration.volumeSnapshotLocation.provider=aws \
   --set credentials.useSecret=true
-```
+```yaml
 
 ## Configuração S3 (AWS)
 
@@ -35,7 +35,7 @@ spec:
     prefix: velero
   config:
     region: us-east-1
-```
+```yaml
 
 ## Volume snapshots (EBS)
 
@@ -49,7 +49,7 @@ spec:
   provider: aws
   config:
     region: us-east-1
-```
+```yaml
 
 ## Criar primeiro backup
 
@@ -59,7 +59,7 @@ velero backup create my-first-backup \
 # Verificar
 velero backup describe my-first-backup
 velero backup logs my-first-backup
-```
+```yaml
 
 ## Backup automático (schedule)
 
@@ -69,7 +69,7 @@ velero schedule create daily-backup \
   --include-namespaces '*' \
   --default-volumes-to-restic \
   --wait
-```
+```yaml
 
 Roda backup diariamente às 02:00 UTC.
 
@@ -85,7 +85,7 @@ velero restore describe my-first-backup
 
 # Verificar progresso
 kubectl get pods -n velero
-```
+```yaml
 
 ## Exclude/Include namespaces
 
@@ -97,7 +97,7 @@ velero backup create prod-only \
 # Backup tudo exceto kube-system
 velero backup create all-except-system \
   --exclude-namespaces kube-system,kube-node-lease
-```
+```yaml
 
 ## Restic (volume backup via tarball)
 
@@ -106,7 +106,7 @@ Para volumes que não suportam snapshots (hostPath, NFS):
 ```bash
 velero backup create with-restic \
   --default-volumes-to-restic
-```
+```yaml
 
 Velero usa restic para fazer backup dos volumes como tarball (mais lento, mas funciona em qualquer storage).
 
@@ -125,7 +125,7 @@ Velero usa restic para fazer backup dos volumes como tarball (mais lento, mas fu
 velero restore create restore-api-only \
   --from-backup my-first-backup \
   --include-namespaces api
-```
+```yaml
 
 ## Próximas seções
 

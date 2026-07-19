@@ -27,7 +27,7 @@ flowchart LR
     SC -->|"identifica"| Provisioner["Provisionador (CSI)"]
     Provisioner -->|"cria"| PV["PersistentVolume"]
     PV -->|"vinculado a"| PVC
-```
+```yaml
 
 Essa indireção existe para que a aplicação (o manifesto do PVC) não precise conhecer detalhes do backend de armazenamento. O mesmo manifesto de PVC pode funcionar com Longhorn, um driver de nuvem ou NFS — apenas a `StorageClass` referenciada muda.
 

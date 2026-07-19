@@ -11,11 +11,13 @@ Logs e métricas são os pilares de observabilidade. Prometheus coleta métricas
 ## O problema
 
 **Sem observabilidade:**
+
 - Pod morre, você não vê por quê
 - API lenta, não sabe onde
 - Impossível debugar em produção
 
 **Com observabilidade:**
+
 - Grafana mostra CPU/memória/latência em tempo real
 - Loki centraliza logs de todos os pods
 - Alertas disparam antes de disaster
@@ -25,17 +27,20 @@ Logs e métricas são os pilares de observabilidade. Prometheus coleta métricas
 ## Prometheus — Métricas
 
 **O que é:**
+
 - Time-series database para métricas
 - Scrape targets (aplicações que expõem `/metrics`)
 - PromQL (linguagem de query)
 
 **Funcionalidade:**
+
 - Coleta métricas (CPU, memória, requisições, latência)
 - Retenção configurável (15d padrão)
 - Alertas via Alertmanager
 - Integração Grafana
 
 **Quando usar:**
+
 - Observabilidade padrão de Kubernetes
 - Métricas time-series
 - Alertas baseados em thresholds
@@ -43,24 +48,27 @@ Logs e métricas são os pilares de observabilidade. Prometheus coleta métricas
 ```bash
 helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring --create-namespace
-```
+```yaml
 
 ---
 
 ## Loki — Logs
 
 **O que é:**
+
 - Log aggregation simples (não indexa full-text)
 - Coleta via Promtail (agent) ou docker logging driver
 - Labels (ex: `job=api, container=web`)
 
 **Funcionalidade:**
+
 - Logs centralizados em um lugar
 - Retenção configurável
 - Query via LogQL (similar ao PromQL)
 - Integração Grafana
 
 **Quando usar:**
+
 - Logs de todos os pods em um lugar
 - Troubleshooting rápido
 - Sem elasticsearch complexity
@@ -68,35 +76,38 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 ```bash
 helm install loki loki-stack/loki-stack \
   --namespace logging --create-namespace
-```
+```yaml
 
 ---
 
 ## Grafana — Visualização
 
 **O que é:**
+
 - Dashboard + alerting visual
 - Conecta múltiplas data sources (Prometheus, Loki, Elasticsearch, etc.)
 
 **Funcionalidade:**
+
 - Dashboards em tempo real
 - Alertas visual
 - Thresholds automáticos
 - Plugins
 
 **Quando usar:**
+
 - Sempre (é o padrão de visualização)
 
 ```bash
 helm install grafana prometheus-community/grafana \
   --namespace monitoring
-```
+```yaml
 
 ---
 
 ## Stack típica
 
-```
+```yaml
 Aplicações
   ├─ Prometheus scrape /metrics (2-way)
   └─ Promtail shipper (logs → Loki)
@@ -106,14 +117,14 @@ Prometheus ← Alertmanager (alertas)
     Grafana (visualização)
        ↓
     Dashboard
-```
+```yaml
 
 ---
 
 ## Comparação com alternativas
 
 | Tool | Tipo | Simples? | Escala |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Prometheus** | Métricas | ✅ | ~1M series |
 | **Thanos** | Prometheus HA | ⚠️ | Multi-cluster |
 | **Loki** | Logs | ✅ | ⬆️ Escalável |
@@ -125,21 +136,23 @@ Prometheus ← Alertmanager (alertas)
 ## Alertas práticos
 
 ### Prometheus: Pod restartando
+
 ```yaml
 - alert: PodRestartingTooOften
   expr: rate(kube_pod_container_status_restarts_total[15m]) > 0.1
   for: 5m
   annotations:
     summary: "Pod {{ $labels.pod }} restarting too often"
-```
+```yaml
 
 ### Loki: Errors em logs
+
 ```yaml
 alerts:
   - alert: ErrorsIncreasing
     expr: |
       sum by (job) (rate({level="error"} [5m])) > 10
-```
+```yaml
 
 ---
 

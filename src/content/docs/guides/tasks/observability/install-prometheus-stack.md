@@ -29,7 +29,7 @@ helm upgrade --install kube-prometheus-stack kube-prometheus-stack \
   --set grafana.persistence.enabled=true \
   --set grafana.persistence.storageClassName="${MONITORING_STORAGE_CLASS}" \
   --set grafana.persistence.size="${GRAFANA_STORAGE_SIZE}"
-```
+```yaml
 
 Sem persistência configurada, o Prometheus e o Grafana perdem dados/dashboards a cada reinício do Pod — não deixe os campos de storage nos valores padrão sem revisão.
 
@@ -46,7 +46,7 @@ helm upgrade kube-prometheus-stack kube-prometheus-stack \
   --namespace monitoring \
   --reuse-values \
   --set prometheus.prometheusSpec.retention="${PROMETHEUS_RETENTION}"
-```
+```yaml
 
 ## Validação
 
@@ -56,7 +56,7 @@ helm upgrade kube-prometheus-stack kube-prometheus-stack \
 kubectl --namespace monitoring get pods
 kubectl --namespace monitoring get prometheus,alertmanager
 kubectl get crd servicemonitors.monitoring.coreos.com prometheusrules.monitoring.coreos.com
-```
+```yaml
 
 Todos os Pods devem estar `Running`, e os CRDs do Prometheus Operator devem existir antes de criar qualquer `ServiceMonitor`.
 
@@ -70,7 +70,7 @@ LOCAL_PORT="${LOCAL_PORT:-3000}"
 
 kubectl --namespace monitoring \
   port-forward service/kube-prometheus-stack-grafana "${LOCAL_PORT}:80"
-```
+```yaml
 
 A senha inicial do usuário `admin` é gerada e armazenada em um Secret:
 
@@ -78,7 +78,7 @@ A senha inicial do usuário `admin` é gerada e armazenada em um Secret:
 kubectl --namespace monitoring get secret kube-prometheus-stack-grafana \
   --output jsonpath='{.data.admin-password}' | base64 --decode
 printf '\n'
-```
+```yaml
 
 ## Troubleshooting
 
@@ -88,7 +88,7 @@ Se os Pods do Prometheus ficarem `Pending`, confirme capacidade da StorageClass 
 
 ```bash
 helm --namespace monitoring uninstall kube-prometheus-stack
-```
+```yaml
 
 :::danger
 A desinstalação não remove automaticamente os PVCs por padrão do Helm — confirme se isso é desejado antes de excluir os PersistentVolumeClaims manualmente.

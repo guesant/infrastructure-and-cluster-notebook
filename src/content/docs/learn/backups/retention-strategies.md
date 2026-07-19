@@ -20,7 +20,7 @@ flowchart LR
 
     Horarios["Últimas 24h: pontos horários"] --> Diarios["Últimos 30 dias: pontos diários"]
     Diarios --> Semanais["Últimos 6 meses: pontos semanais"]
-```
+```yaml
 
 O ponto crítico: uma política com muitos pontos recentes e nenhuma cópia anterior a uma janela de detecção de corrupção não atende a um incidente descoberto tardiamente. Se um erro lógico levou duas semanas para ser percebido, toda a retenção horária/diária já expirou — só uma retenção semanal/mensal salva a situação.
 

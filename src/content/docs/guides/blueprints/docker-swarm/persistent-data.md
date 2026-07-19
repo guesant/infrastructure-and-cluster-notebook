@@ -17,7 +17,7 @@ docker service create \
   --mount type=volume,source=mydata,target=/data \
   --name app \
   <imagem>
-```
+```yaml
 
 Adequado para **staging/dev** ou quando a aplicação replica dados (ex.: banco de dados distribuído, cache).
 
@@ -35,7 +35,7 @@ docker service create \
   --mount type=volume,source=<nome>,target=/data \
   --name db \
   <imagem>
-```
+```yaml
 
 Permite que um container seja reagendado em qualquer host e ainda acesse os mesmos dados.
 
@@ -49,7 +49,7 @@ docker service create \
   --mount type=volume,source=db_data,target=/data \
   --name db \
   postgres
-```
+```yaml
 
 Desvantagem: se `db-host-1` cai, o serviço fica indisponível.
 
@@ -62,16 +62,16 @@ Não há integração nativa com snapshot de volumes. Backup é responsabilidade
 pg_dump | gzip > /backup/db.sql.gz
 
 # Sincronizar /backup para storage externo (rsync, S3, etc.)
-```
+```yaml
 
 ## Checklist
 
-```
+```yaml
 ☐ Se aplicação precisa persitência: usar volume driver externo ou constraints
 ☐ Se múltiplas réplicas do app: são data-sharing aware? (ex.: raft, quorum)
 ☐ Procedimento de backup documentado e testado
 ☐ RTO/RPO definido (quanto tempo sem dados, quanto tempo para recuperar)
-```
+```yaml
 
 ## Referências
 

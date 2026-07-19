@@ -26,7 +26,7 @@ JAIL_PUBLISH=4321 ./jail-exec.sh bun run dev -- --host 0.0.0.0
 
 # Roda o lint (Markdown + MDX)
 ./jail-exec.sh bun run lint
-```
+```yaml
 
 A imagem padrão (`jail`) não tem `git`; o build local não preenche a data de última revisão de
 cada página (`lastUpdated`, baseada no histórico do Git) por esse motivo — isso só acontece no

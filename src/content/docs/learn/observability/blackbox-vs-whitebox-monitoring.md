@@ -27,7 +27,7 @@ flowchart LR
     subgraph Externo["Fora do domínio de falha"]
         Blackbox["Sonda externa"] -->|"HTTP/DNS/TLS"| App
     end
-```
+```yaml
 
 ## Alternativas
 

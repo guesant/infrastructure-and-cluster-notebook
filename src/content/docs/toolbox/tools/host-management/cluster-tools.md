@@ -20,7 +20,7 @@ brew install k9s
 
 # Via Linux package manager
 sudo apt install k9s
-```
+```yaml
 
 **Uso:**
 
@@ -31,7 +31,7 @@ k9s
 # :node       → listar nós
 # ? → ajuda
 # Seta + Enter → detalhe/logs
-```
+```yaml
 
 **Vantagens:**
 
@@ -75,7 +75,7 @@ helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
 helm install rancher rancher-latest/rancher \
   --namespace cattle-system \
   --set hostname=rancher.example.com
-```
+```yaml
 
 **Funcionalidade:**
 
@@ -98,7 +98,7 @@ docker run -d -p 9000:9000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   portainer/portainer-ce
 # Acessa em http://localhost:9000
-```
+```yaml
 
 **Funcionalidade:**
 
@@ -121,7 +121,7 @@ Dashboard web nativo para gerenciar Linux host.
 ```bash
 sudo apt install cockpit
 # Acessa em https://localhost:9090
-```
+```yaml
 
 **Funcionalidade:**
 
@@ -146,7 +146,7 @@ Dashboard Kubernetes leve (Electron + web).
 # Download: https://headlamp.dev/
 # Ou via container:
 docker run -d -p 8080:80 ghcr.io/kinvolk/headlamp:latest
-```
+```yaml
 
 **Funcionalidade:**
 

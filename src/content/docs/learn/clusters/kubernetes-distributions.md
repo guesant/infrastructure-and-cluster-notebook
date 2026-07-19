@@ -11,7 +11,7 @@ Kubernetes é um padrão; as distribuições implementam. Além de K3s/RKE2, exi
 ## Comparação rápida
 
 | Distribuição | Foco | Tamanho | Deploy |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **K3s** | Minimalista, dev | 50MB | 30s |
 | **RKE2** | Production + compliance | 700MB | 5 min |
 | **k0s** | Modular, edge | ~200MB | 2 min |
@@ -24,21 +24,25 @@ Kubernetes é um padrão; as distribuições implementam. Além de K3s/RKE2, exi
 ## k0s — Modular e leve
 
 **O que é:**
+
 - Distribuição minimalista da Mirantis
 - Totalmente customizável (escolhe cada componente)
 
 **Pontos fortes:**
+
 - Modular (remove controller, sidecar-inject, etc. conforme precisa)
 - Pequeno (200MB)
 - Fácil instalação (1 binário)
 - Edge-first (low-resource)
 
 **Quando usar:**
+
 - IoT / edge computing
 - Quer máxima customização
 - Resource-constrained
 
 **Trade-off:**
+
 - Menos maduro que K3s
 - Comunidade menor
 
@@ -47,20 +51,24 @@ Kubernetes é um padrão; as distribuições implementam. Além de K3s/RKE2, exi
 ## kubeadm — DIY puro
 
 **O que é:**
+
 - Ferramenta de bootstrap Kubernetes
 - Você configura tudo (networking, storage, addon)
 
 **Pontos fortes:**
+
 - Máxima flexibilidade
 - Aprende Kubernetes a fundo
 - Nenhuma opinião
 
 **Quando usar:**
+
 - Estou aprendendo Kubernetes
 - Preciso customização extrema
 - On-prem só (sem cloud provider)
 
 **Trade-off:**
+
 - Muito manual
 - Troubleshooting complexo
 
@@ -69,20 +77,24 @@ Kubernetes é um padrão; as distribuições implementam. Além de K3s/RKE2, exi
 ## MicroK8s — Um-clique
 
 **O que é:**
+
 - Kubernetes via snap (Ubuntu/Linux)
 - Tudo integrado (etcd, CNI, addons)
 
 **Pontos fortes:**
+
 - Um comando: `snap install microk8s`
 - Addons fáceis (gpu, ingress, storage)
 - Roda em laptop
 
 **Quando usar:**
+
 - Desenvolvimento local
 - Demo rápida
 - Não é production
 
 **Trade-off:**
+
 - Snap-only (Linux)
 - Não escalável
 
@@ -91,7 +103,7 @@ Kubernetes é um padrão; as distribuições implementam. Além de K3s/RKE2, exi
 ## Kubeadm vs. k0s vs. K3s
 
 | Aspecto | kubeadm | k0s | K3s |
-|---------|---------|-----|-----|
+| --------- | --------- | ----- | ----- |
 | **Setup** | Manual | Automated | Trivial |
 | **Learning** | Alto | Médio | Baixo |
 | **Customização** | Total | Alta | Média |
@@ -105,14 +117,17 @@ Kubernetes é um padrão; as distribuições implementam. Além de K3s/RKE2, exi
 **Comece com K3s** (padrão recomendado).
 
 **Mude para kubeadm se:**
+
 - Quer aprender Kubernetes a fundo
 - On-prem com exigências extremas
 
 **Use k0s se:**
+
 - Edge/IoT (resource-constrained)
 - Quer modularidade
 
 **Use MicroK8s se:**
+
 - Desenvolvimento local
 - Snap já instalado
 

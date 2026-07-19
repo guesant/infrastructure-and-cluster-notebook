@@ -32,7 +32,7 @@ EOF
 chmod +x /usr/local/bin/check-availability.sh
 
 echo '*/5 * * * * /usr/local/bin/check-availability.sh || echo "Falha na verificação externa" | mail -s "Alerta de disponibilidade" seu-email@exemplo.com' | crontab -
-```
+```yaml
 
 Ajuste o destino de notificação (`mail`, um webhook, um serviço de alerta) conforme os canais já usados pelo ambiente.
 

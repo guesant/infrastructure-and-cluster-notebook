@@ -16,7 +16,7 @@ Esta página cobre a rotina de verificação periódica dos backups de volumes L
 ```bash
 kubectl --namespace longhorn-system get backups.longhorn.io
 kubectl --namespace longhorn-system get recurringjobs.longhorn.io
-```
+```yaml
 
 Confirme que:
 
@@ -30,7 +30,7 @@ Um backupstore cheio falha silenciosamente para novos backups sem necessariament
 
 ```bash
 kubectl --namespace longhorn-system get settings.longhorn.io backup-target
-```
+```yaml
 
 Revise a capacidade do destino diretamente no provedor (S3, NFS) — o Longhorn não impõe um limite próprio além do que o destino permite.
 

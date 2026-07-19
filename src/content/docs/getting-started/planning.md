@@ -21,7 +21,7 @@ Depois da instalação, o token persistido pode ser consultado no primeiro servi
 
 ```bash
 cat /var/lib/rancher/k3s/server/node-token
-```
+```yaml
 
 ## Fontes e leitura adicional
 

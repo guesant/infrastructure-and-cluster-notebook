@@ -15,7 +15,7 @@ Esta página reúne as verificações usadas depois de instalar, expandir ou rec
 
 ```bash
 kubectl get nodes -o wide
-```
+```yaml
 
 Todos os nós esperados devem aparecer como `Ready`. Em uma topologia HA, confirme que a quantidade de managers corresponde à decisão de quorum tomada no planejamento.
 
@@ -26,7 +26,7 @@ Todos os nós esperados devem aparecer como `Ready`. Em uma topologia HA, confir
 ```bash
 kubectl get pods --all-namespaces
 kubectl get componentstatuses 2>/dev/null || true
-```
+```yaml
 
 Todos os Pods em `kube-system` devem estar `Running` ou `Completed`. `componentstatuses` está obsoleto em versões recentes do Kubernetes e pode não retornar nada — não é um sinal de erro.
 
@@ -37,7 +37,7 @@ Todos os Pods em `kube-system` devem estar `Running` ou `Completed`. `components
 ```bash
 k3s kubectl exec -n kube-system -it $(k3s kubectl get pods -n kube-system -l component=etcd -o jsonpath='{.items[0].metadata.name}' 2>/dev/null) -- etcdctl endpoint health 2>/dev/null \
   || k3s etcd-snapshot list
-```
+```yaml
 
 Quando o etcd embarcado não expõe um Pod inspecionável diretamente, `k3s etcd-snapshot list` confirma que o subsistema de datastore está funcional o suficiente para gerar snapshots.
 
@@ -47,7 +47,7 @@ Quando o etcd embarcado não expõe um Pod inspecionável diretamente, `k3s etcd
 
 ```bash
 kubectl run dns-test --rm -it --restart=Never --image=busybox:1.36 -- nslookup kubernetes.default
-```
+```yaml
 
 Deve resolver para o ClusterIP do Service `kubernetes` no namespace `default`. Uma falha aqui indica problema no CoreDNS antes mesmo de testar aplicações.
 
@@ -57,7 +57,7 @@ Deve resolver para o ClusterIP do Service `kubernetes` no namespace `default`. U
 
 ```bash
 kubectl run schedule-test --rm -it --restart=Never --image=busybox:1.36 -- true
-```
+```yaml
 
 Um Pod que inicia e termina com sucesso confirma agendamento, pull de imagem e rede básica funcionando ponta a ponta.
 

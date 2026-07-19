@@ -17,7 +17,7 @@ velero schedule create daily-backup \
   --schedule="0 2 * * *" \
   --include-namespaces='*' \
   --ttl 720h
-```
+```yaml
 
 Variações:
 
@@ -36,7 +36,7 @@ velero schedule create frequent \
 velero schedule create weekly \
   --schedule="0 4 0 * * 0" \
   --ttl 2160h  # 90 dias
-```
+```yaml
 
 ## Filtros granulares
 
@@ -47,7 +47,7 @@ velero schedule create prod-only \
   --schedule="0 2 * * *" \
   --include-namespaces 'prod-*,default' \
   --exclude-namespaces 'test,dev'
-```
+```yaml
 
 Incluir/excluir resources:
 
@@ -56,7 +56,7 @@ velero schedule create app-backup \
   --schedule="0 2 * * *" \
   --include-resources 'deployments,services,configmaps' \
   --exclude-resources 'secrets'
-```
+```yaml
 
 ## Políticas de retenção
 
@@ -74,7 +74,7 @@ velero schedule delete daily --confirm
 
 # Ver próxima execução
 velero schedule describe daily
-```
+```yaml
 
 ## Hooks de validação
 
@@ -104,7 +104,7 @@ spec:
 EOF
 
 kubectl apply -f backup-hook.yaml
-```
+```yaml
 
 ## Monitoramento
 
@@ -122,7 +122,7 @@ velero backup logs daily-backup-20260719
 
 # Listar restores
 velero restore get
-```
+```yaml
 
 ## Alertas
 
@@ -141,7 +141,7 @@ groups:
     expr: velero_backup_duration_seconds > 3600
     annotations:
       summary: "Velero backup demorando >1h"
-```
+```yaml
 
 ## Teste de recuperação regular
 
@@ -162,7 +162,7 @@ kubectl get all -n velero-test
 
 # Limpar teste
 kubectl delete namespace velero-test
-```
+```yaml
 
 ## Backup de PVCs com Velero Uploader
 
@@ -173,13 +173,13 @@ Se volumes não suportam snapshots nativos:
 helm upgrade velero velero/velero \
   --set configuration.volumeSnapshotLocation.provider=none \
   --set nodeAgent.enabled=true
-```
+```yaml
 
 Então volumes serão copiados via uploader (mais lento, mas mais portável).
 
 ## Disaster recovery checklist
 
-```
+```yaml
 ☐ Backups agendados e executo regularmente
   # velero schedule get
 
@@ -197,7 +197,7 @@ Então volumes serão copiados via uploader (mais lento, mas mais portável).
 
 ☐ Procedures de restauração documentados
   # Exemplo: restaurar namespace X sem downtime de Y
-```
+```yaml
 
 ## Referências
 

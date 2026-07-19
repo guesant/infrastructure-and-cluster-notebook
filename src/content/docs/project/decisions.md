@@ -36,7 +36,7 @@ docs/
 ├── reference/
 ├── contributing/
 └── project/
-```
+```yaml
 
 **Estrutura atual (antes da migração):** `getting-started/`, `concepts/`, `hosts/`,
 `kubernetes/{k3s,networking,security,extensions,workloads}`,

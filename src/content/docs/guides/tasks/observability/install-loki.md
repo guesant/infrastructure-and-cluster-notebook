@@ -30,7 +30,7 @@ helm upgrade --install loki loki \
   --set singleBinary.persistence.storageClass="${LOKI_STORAGE_CLASS}" \
   --set singleBinary.persistence.size="${LOKI_STORAGE_SIZE}" \
   --set loki.storage.type=filesystem
-```
+```yaml
 
 `replication_factor: 1` é apropriado apenas para nó único — em multinó, revise essa configuração para tolerância a falha real do próprio Loki.
 
@@ -49,7 +49,7 @@ data:
         access: proxy
 '
 kubectl --namespace monitoring rollout restart deployment/kube-prometheus-stack-grafana
-```
+```yaml
 
 ## Validação
 
@@ -58,7 +58,7 @@ kubectl --namespace monitoring rollout restart deployment/kube-prometheus-stack-
 ```bash
 kubectl --namespace monitoring get pods -l app.kubernetes.io/name=loki
 kubectl --namespace monitoring exec deployment/loki -- wget -qO- http://localhost:3100/ready
-```
+```yaml
 
 Deve retornar `ready`. No Grafana, confirme que o datasource Loki responde a uma consulta simples (`Explore` → Loki → `{namespace="monitoring"}`).
 
@@ -70,7 +70,7 @@ Se o Loki não iniciar, confirme capacidade da StorageClass e revise `kubectl --
 
 ```bash
 helm --namespace monitoring uninstall loki
-```
+```yaml
 
 ## Próximo passo
 

@@ -12,16 +12,18 @@ nslookup example.com
 dig example.com
 # ou
 host example.com
-```
+```yaml
 
 **Quando usar:** verificar que um domínio resolve, descobrir IP de um host.
 
 **Considerações:**
+
 - `nslookup` usa `/etc/resolv.conf`.
 - `dig` mostra mais detalhes (TTL, tipo de record).
 - `host` é mais breve.
 
 **Relacionado:**
+
 - [Testar conectividade](#testar-conectividade-dns-interno)
 - [Listar servidor DNS](#listar-servidor-dns-configurado)
 
@@ -33,15 +35,17 @@ host example.com
 cat /etc/resolv.conf
 # ou (systemd-resolved)
 resolvectl status
-```
+```yaml
 
 **Quando usar:** confirmar qual resolver está em uso (Google 8.8.8.8, Cloudflare, local, etc.).
 
 **Considerações:**
+
 - `/etc/resolv.conf` pode ser gerado automaticamente por systemd-resolved.
 - Em systemd: `resolvectl` mostra config por interface.
 
 **Relacionado:**
+
 - [Testar resolução](#testar-resolução-de-domínio)
 
 ---
@@ -51,15 +55,17 @@ resolvectl status
 ```bash
 dig @8.8.8.8 example.com
 # Força uso do Google DNS (8.8.8.8)
-```
+```yaml
 
 **Quando usar:** testar se um nameserver específico responde, contornar cache local.
 
 **Considerações:**
+
 - `@<IP>` especifica o resolver.
 - Útil para diagnóstico de DNS distribuído.
 
 **Relacionado:**
+
 - [Testar resolução](#testar-resolução-de-domínio)
 
 ---
@@ -76,16 +82,18 @@ dig +short example.com A
 
 # Todos: A, AAAA, MX, NS, TXT
 dig example.com +nocmd +noall +answer
-```
+```yaml
 
 **Quando usar:** auditoria de zona, descobrir todos os IPs/aliases.
 
 **Considerações:**
+
 - `ANY` pode ser bloqueado por alguns nameservers (política).
 - `+short` é mais legível.
 - `+nocmd +noall +answer` mostra só answers.
 
 **Relacionado:**
+
 - [Verificar record específico](#verificar-record-mx-txt-cname)
 
 ---
@@ -101,16 +109,18 @@ dig example.com TXT
 
 # Aliases (CNAME)
 dig example.com CNAME
-```
+```yaml
 
 **Quando usar:** validar email infrastructure, verificar SPF/DKIM, resolver aliases.
 
 **Considerações:**
+
 - MX: lower preference = higher priority (confuso!).
 - TXT: inclui SPF, DKIM, DMARC, verificação de domínio.
 - CNAME: não pode existir junto com A record.
 
 **Relacionado:**
+
 - [Listar todos os records](#listar-todos-os-records-de-um-domínio)
 
 ---
@@ -128,16 +138,18 @@ docker exec <container> nslookup myservice
 # Verificar CoreDNS
 kubectl get svc -n kube-system coredns
 kubectl logs -n kube-system -l k8s-app=kube-dns
-```
+```yaml
 
 **Quando usar:** diagnosticar resolução de services internas, verificar CoreDNS.
 
 **Considerações:**
+
 - FQDN em K3s: `<service>.<namespace>.svc.cluster.local`.
 - CoreDNS responde na porta 53 (UDP/TCP).
 - Logs de CoreDNS indicam cache misses.
 
 **Relacionado:**
+
 - [Testar resolução](#testar-resolução-de-domínio)
 
 ---
@@ -147,14 +159,16 @@ kubectl logs -n kube-system -l k8s-app=kube-dns
 ```bash
 time dig example.com
 # mostra tempo total de lookup
-```
+```yaml
 
 **Quando usar:** diagnosticar lentidão de DNS, comparar resolvers.
 
 **Considerações:**
+
 - Primeira query é mais lenta (cache miss).
 - Queries subsequentes usam cache (mais rápidas).
 - >100ms indica problema.
 
 **Relacionado:**
+
 - [Testar resolução](#testar-resolução-de-domínio)

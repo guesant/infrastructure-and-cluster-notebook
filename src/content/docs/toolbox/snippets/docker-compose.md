@@ -15,7 +15,7 @@ services:
     environment:
       ENV_VAR: "value"
     restart: unless-stopped
-```
+```yaml
 
 Serviço com porta publicada, env var, restart policy.
 
@@ -32,7 +32,7 @@ services:
       - app_cache:/app/cache      # named volume
     volumes:
       app_cache:
-```
+```yaml
 
 Bind mount (diretório host) e named volume (gerenciado pelo Docker).
 
@@ -55,7 +55,7 @@ services:
 networks:
   backend:
     driver: bridge
-```
+```yaml
 
 Services em rede customizada podem se comunicar pelo nome.
 
@@ -73,7 +73,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-```
+```yaml
 
 Container reinicia se health check falhar 3 vezes.
 
@@ -95,7 +95,7 @@ services:
   
   db:
     image: postgres
-```
+```yaml
 
 Define ordem de startup (web depende de api, que depende de db).
 
@@ -112,7 +112,7 @@ services:
       - DB_PORT=5432
       - DEBUG=${DEBUG:-false}
     env_file: .env
-```
+```yaml
 
 Environment inline, com defaults, ou desde arquivo `.env`.
 
@@ -129,7 +129,7 @@ services:
       args:
         VERSION: 1.0
     image: myapp:latest
-```
+```yaml
 
 Build imagem local em vez de pull.
 
@@ -151,6 +151,6 @@ services:
     restart: no
     volumes:
       - .:/app
-```
+```yaml
 
 Override automático em dev (volumes, rebuild, etc).

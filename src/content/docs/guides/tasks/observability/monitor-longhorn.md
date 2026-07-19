@@ -34,7 +34,7 @@ spec:
       path: /metrics
       interval: 30s
 EOF
-```
+```yaml
 
 ## Consultas essenciais
 
@@ -53,7 +53,7 @@ Um volume `degraded` significa que ao menos uma réplica está indisponível —
 
 ```bash
 kubectl --namespace monitoring get servicemonitor longhorn
-```
+```yaml
 
 Confirme nos targets do Prometheus que o target `longhorn` está `UP` e que as consultas acima retornam dados.
 

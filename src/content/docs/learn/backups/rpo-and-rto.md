@@ -22,7 +22,7 @@ flowchart LR
 
     UltimoBackup["Último ponto recuperável"] -->|"RPO: perda máxima tolerável"| Falha["Momento da falha"]
     Falha -->|"RTO: tempo máximo de indisponibilidade"| Restaurado["Serviço restaurado e validado"]
-```
+```yaml
 
 Nenhum dos dois é uma meta abstrata — ambos só têm valor quando medidos contra um teste de restauração real. Uma retenção diária não prova um RPO de 15 minutos; um script de restore nunca executado não prova nenhum RTO.
 

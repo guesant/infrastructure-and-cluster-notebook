@@ -26,7 +26,7 @@ spec:
         image: myapp:1.0
         ports:
         - containerPort: 8000
-```
+```yaml
 
 3 replicas de myapp com seletor por label.
 
@@ -46,7 +46,7 @@ spec:
   - port: 80
     targetPort: 8000
   type: LoadBalancer
-```
+```yaml
 
 Expõe deployment (NodePort, LoadBalancer, ou ClusterIP internal).
 
@@ -78,7 +78,7 @@ spec:
   - volumeMounts:
     - name: config
       mountPath: /etc/app
-```
+```yaml
 
 ConfigMap montado como volume.
 
@@ -104,7 +104,7 @@ containers:
       secretKeyRef:
         name: db-secret
         key: username
-```
+```yaml
 
 Secret com credenciais, referenciado por container.
 
@@ -122,7 +122,7 @@ containers:
     limits:
       cpu: "500m"
       memory: "512Mi"
-```
+```yaml
 
 Requests = garantido, Limits = máximo (OOM se exceder).
 
@@ -144,7 +144,7 @@ containers:
       path: /ready
       port: 8000
     initialDelaySeconds: 5
-```
+```yaml
 
 Liveness (reinicia se falha), Readiness (remove do LB se falha).
 
@@ -170,7 +170,7 @@ spec:
             name: myapp-svc
             port:
               number: 80
-```
+```yaml
 
 Expõe service via HTTP(S) por hostname.
 
@@ -199,7 +199,7 @@ volumes:
 - name: data
   persistentVolumeClaim:
     claimName: data-pvc
-```
+```yaml
 
 Volume persistente montado no container.
 
@@ -221,6 +221,6 @@ selector:
   - key: version
     operator: In
     values: ["v1", "v2"]
-```
+```yaml
 
 Labels para organizar e selecionar resources.

@@ -18,7 +18,7 @@ Um snapshot do etcd protege o estado da API Kubernetes (objetos, ConfigMaps, Sec
 ```bash
 k3s etcd-snapshot save --name "manual-$(date +%Y%m%d-%H%M%S)"
 k3s etcd-snapshot list
-```
+```yaml
 
 Crie um snapshot manual antes de qualquer atualização ou mudança de configuração relevante, além dos snapshots agendados automaticamente pelo K3s.
 
@@ -32,7 +32,7 @@ Um snapshot que permanece apenas no disco local não protege contra a perda do h
 LATEST_SNAPSHOT="$(ls -t /var/lib/rancher/k3s/server/db/snapshots/ | head -n1)"
 scp "/var/lib/rancher/k3s/server/db/snapshots/${LATEST_SNAPSHOT}" \
   usuario@destino-externo:/caminho/de/backup/
-```
+```yaml
 
 Ajuste o comando ao destino real (outro host, object storage, etc.) — o essencial é que o destino esteja fora do mesmo disco e, idealmente, fora do mesmo domínio de falha físico do host original.
 
@@ -43,7 +43,7 @@ O K3s já agenda snapshots automaticamente por padrão (a cada 12 horas, retendo
 ```yaml
 etcd-snapshot-schedule-cron: "0 */12 * * *"
 etcd-snapshot-retention: 5
-```
+```yaml
 
 O agendamento automático não copia os snapshots para fora do host sozinho — combine com uma rotina externa (cron, systemd timer) que sincronize o diretório de snapshots para o destino externo, ou configure `etcd-s3` para enviar diretamente a um storage compatível com S3.
 
@@ -63,7 +63,7 @@ k3s server \
   --cluster-reset-restore-path=/caminho/para/o/snapshot
 
 systemctl start k3s
-```
+```yaml
 
 Em um cluster com múltiplos managers, restaure em apenas um deles com `--cluster-reset`; os demais precisam ser removidos e reintegrados como servidores novos depois que o restaurado estiver `Ready` — não inicie os outros managers antigos apontando para o mesmo datastore restaurado.
 
@@ -75,7 +75,7 @@ Em um cluster com múltiplos managers, restaure em apenas um deles com `--cluste
 systemctl status k3s
 k3s kubectl get nodes
 k3s kubectl get pods --all-namespaces
-```
+```yaml
 
 Compare os recursos restaurados com o que era esperado no ponto do snapshot. Lembre que controllers, volumes ou endpoints externos referenciados pelos objetos restaurados podem não estar automaticamente disponíveis — veja a [ordem de recuperação completa](../backup-and-recovery/#ordem-de-recuperação).
 

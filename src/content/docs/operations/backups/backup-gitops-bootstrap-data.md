@@ -24,7 +24,7 @@ Além do backup dos dados acima, confirme que o próprio repositório Git tem re
 
 ```bash
 git clone --mirror "$(git -C gitops/ remote get-url origin)" gitops-mirror-backup.git
-```
+```yaml
 
 Armazene o mirror em um destino diferente do provedor Git principal (outra máquina, outro provedor).
 

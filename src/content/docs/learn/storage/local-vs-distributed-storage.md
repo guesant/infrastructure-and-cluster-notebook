@@ -30,7 +30,7 @@ flowchart TB
         Engine --> DiskB2["Réplica no nó B"]
         Engine --> DiskB3["Réplica no nó C"]
     end
-```
+```yaml
 
 Em um cluster de nó único, a distinção entre os dois é menor: não há outro nó para receber uma réplica, e a perda do único host afeta os dois modelos igualmente. A vantagem do armazenamento distribuído em nó único fica limitada à reconstrução de réplicas após a perda de um disco (não do host inteiro) e à possibilidade de expandir para multinó no futuro sem migrar de estratégia.
 

@@ -22,7 +22,7 @@ kubectl --namespace longhorn-system get backups.longhorn.io --sort-by=.status.sn
 
 echo "== PostgreSQL =="
 kubectl get backups --all-namespaces --sort-by=.status.stoppedAt | tail -5
-```
+```yaml
 
 Para cada seção, confirme que existe uma execução recente e sem falha, dentro do RPO definido para o dado correspondente.
 

@@ -21,7 +21,7 @@ Instale os pacotes:
 ```bash
 apt-get update
 apt-get install --yes fail2ban python3-systemd
-```
+```yaml
 
 Edite a jail do SSH:
 
@@ -29,7 +29,7 @@ Edite a jail do SSH:
 
 ```bash
 ${EDITOR:-nano} /etc/fail2ban/jail.d/sshd.local
-```
+```yaml
 
 ```ini
 [DEFAULT]
@@ -62,7 +62,7 @@ port = ssh
 backend = systemd
 # Modos disponíveis: normal, ddos, extra e aggressive.
 mode = normal
-```
+```yaml
 
 Valide antes de iniciar ou reiniciar:
 
@@ -70,13 +70,13 @@ Valide antes de iniciar ou reiniciar:
 
 ```bash
 fail2ban-client -t
-```
+```yaml
 
 A validação deve terminar com:
 
 ```text
 OK: configuration test is successful
-```
+```yaml
 
 Habilite e inicie o serviço:
 
@@ -84,7 +84,7 @@ Habilite e inicie o serviço:
 
 ```bash
 systemctl enable --now fail2ban
-```
+```yaml
 
 Depois de qualquer alteração, valide antes de reiniciar:
 
@@ -92,7 +92,7 @@ Depois de qualquer alteração, valide antes de reiniciar:
 
 ```bash
 fail2ban-client -t && systemctl restart fail2ban
-```
+```yaml
 
 Verifique o funcionamento:
 
@@ -102,13 +102,13 @@ Verifique o funcionamento:
 fail2ban-client ping
 fail2ban-client status
 fail2ban-client status sshd
-```
+```yaml
 
 A resposta do primeiro comando deve ser:
 
 ```text
 Server replied: pong
-```
+```yaml
 
 Consulte os logs quando necessário:
 
@@ -118,7 +118,7 @@ Consulte os logs quando necessário:
 journalctl --unit fail2ban --follow
 journalctl --unit ssh --follow
 journalctl --unit fail2ban --since "1 hour ago" | grep -E 'Ban|Unban'
-```
+```yaml
 
 ## Fontes e leitura adicional
 

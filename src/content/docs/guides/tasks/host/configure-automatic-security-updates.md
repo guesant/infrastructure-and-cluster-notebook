@@ -18,7 +18,7 @@ apt-get update
 apt-get install --yes unattended-upgrades apt-listchanges
 
 dpkg-reconfigure --priority=low unattended-upgrades
-```
+```yaml
 
 O `dpkg-reconfigure` habilita o timer `apt-daily-upgrade.timer`, que executa o `unattended-upgrades` periodicamente.
 
@@ -31,7 +31,7 @@ Revise `/etc/apt/apt.conf.d/50unattended-upgrades`: por padrão, o Debian já re
 ```bash
 grep -A2 '^Unattended-Upgrade::Origins-Pattern' /etc/apt/apt.conf.d/50unattended-upgrades
 grep '^Unattended-Upgrade::Automatic-Reboot' /etc/apt/apt.conf.d/50unattended-upgrades
-```
+```yaml
 
 Em um nó de cluster, `Automatic-Reboot` como `"false"` (o padrão comentado) exige intervenção manual para aplicar atualizações que pedem reinício — planeje essa janela junto com o [runbook de manutenção](../../../operations/maintenance/maintenance-runbook/). Habilitar reinício automático (`"true"`) simplifica a operação, mas pode derrubar um nó manager sem coordenação com os demais componentes do cluster.
 
@@ -42,7 +42,7 @@ Em um nó de cluster, `Automatic-Reboot` como `"false"` (o padrão comentado) ex
 ```bash
 systemctl status apt-daily-upgrade.timer
 unattended-upgrade --dry-run --debug
-```
+```yaml
 
 `--dry-run --debug` mostra quais pacotes seriam atualizados na próxima execução real, sem aplicar nada.
 
@@ -54,7 +54,7 @@ Se `--dry-run` não listar nenhum pacote mesmo com atualizações de segurança 
 
 ```bash
 systemctl disable --now apt-daily-upgrade.timer apt-daily.timer
-```
+```yaml
 
 ## Próximo passo
 

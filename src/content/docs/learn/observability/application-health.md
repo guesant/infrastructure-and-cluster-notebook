@@ -19,7 +19,7 @@ flowchart LR
     Running["Pod: Running<br/>(processo iniciado)"] --> Ready["Pod: Ready<br/>(readinessProbe passa)"]
     Ready --> Dependencias["Dependências saudáveis<br/>(banco, fila, APIs externas)"]
     Dependencias --> Disponivel["Aplicação de fato disponível<br/>(perspectiva do consumidor)"]
-```
+```yaml
 
 `Running` significa que o container iniciou e não terminou. `Ready` significa que a `readinessProbe` configurada passou — mas uma probe mal desenhada pode não verificar nada relevante (veja os antipadrões em [prontidão de workloads](../../../operations/checklists/application-readiness/#startup-readiness-e-liveness-probes)). Mesmo com Pods `Ready`, uma dependência externa degradada (banco lento, fila cheia) pode deixar a aplicação de fato indisponível para o consumidor, sem que nenhum sinal interno do Kubernetes capture isso.
 

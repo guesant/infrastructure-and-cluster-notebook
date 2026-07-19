@@ -16,7 +16,7 @@ Copie `/etc/rancher/k3s/k3s.yaml` para `~/.kube/config` na estação administrat
 chmod 0600 ~/.kube/config
 kubectl cluster-info
 kubectl auth can-i '*' '*' --all-namespaces
-```
+```yaml
 
 :::caution
 Esse kubeconfig é administrativo. Não o compartilhe com aplicações nem com usuários que não devam ter acesso total ao cluster.

@@ -37,7 +37,7 @@ spec:
     parameters:
       max_connections: "100"
 EOF
-```
+```yaml
 
 Em um cluster de nó único, `instances: 1` é a única opção realista — múltiplas instâncias não protegem contra a perda do único host físico, apenas do processo PostgreSQL isoladamente. Veja [decisões do blueprint](../../../../guides/blueprints/k3s-single-node-gitops/#decisões-adotadas) para o contexto dessa limitação.
 
@@ -48,7 +48,7 @@ Em um cluster de nó único, `instances: 1` é a única opção realista — mú
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" get cluster "${PG_CLUSTER_NAME}"
 kubectl --namespace "${PG_NAMESPACE}" get pods -l cnpg.io/cluster="${PG_CLUSTER_NAME}"
-```
+```yaml
 
 A coluna `STATUS` do `Cluster` deve mostrar `Cluster in healthy state`, e os Pods devem estar `Running` com uma réplica marcada como `primary` no rótulo `cnpg.io/instanceRole`.
 
@@ -60,7 +60,7 @@ Se os Pods ficarem `Pending`, confirme capacidade da `StorageClass` e do nó (ve
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" delete cluster "${PG_CLUSTER_NAME}"
-```
+```yaml
 
 :::danger
 Excluir o `Cluster` remove os Pods e, conforme a política de retenção do volume (veja [PersistentVolumes na prática](../../../../learn/storage/persistent-volumes/)), pode remover também os dados. Confirme a `reclaimPolicy` da StorageClass antes de excluir um cluster com dados importantes.

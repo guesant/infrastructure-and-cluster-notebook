@@ -37,7 +37,7 @@ flowchart LR
     Bound -->|"PVC excluído"| Policy{"reclaimPolicy"}
     Policy -->|"Delete"| Removed["PV e dados removidos"]
     Policy -->|"Retain"| Released["PV: Released (dados preservados)"]
-```
+```yaml
 
 Escolher `Retain` para dados críticos evita exclusão acidental por um `kubectl delete pvc` equivocado, ao custo de exigir limpeza manual de PVs órfãos.
 
