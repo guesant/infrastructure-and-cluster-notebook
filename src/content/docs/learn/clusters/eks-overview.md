@@ -58,15 +58,21 @@ Amazon EKS (Elastic Kubernetes Service) é Kubernetes puro gerenciado. AWS cuida
 
 ## Arquitetura
 
-```yaml
-AWS (Control plane)
-  ├─ API Server (gerenciado)
-  ├─ etcd (gerenciado)
-  └─ Controllers (gerenciado)
-
-VPC (Você gerencia)
-  ├─ EC2 nodes (opção classic)
-  └─ Fargate (opção serverless, sem nodes visíveis)
+```mermaid
+graph TB
+    subgraph AWS["AWS (Control plane)"]
+        API["API Server<br/>(gerenciado)"]
+        ETCD["etcd<br/>(gerenciado)"]
+        CTRL["Controllers<br/>(gerenciado)"]
+    end
+    
+    subgraph VPC["VPC (Você gerencia)"]
+        EC2["EC2 nodes<br/>(opção classic)"]
+        Fargate["Fargate<br/>(opção serverless<br/>sem nodes visíveis)"]
+    end
+    
+    API ↔ EC2
+    API ↔ Fargate
 ```
 
 ## Worker nodes: EC2 vs. Fargate

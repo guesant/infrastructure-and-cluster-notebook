@@ -18,13 +18,23 @@ Distributed tracing complementa logs e métricas — mostra o caminho completo d
 
 **Com tracing:**
 
-```yaml
-Request ID: abc123
-├─ Service A (200ms)
-│  ├─ Database query (50ms)
-│  └─ Call to Service B (100ms)
-│     ├─ Service B (80ms)
-│     └─ Call to Service C (20ms, ERROR)
+```mermaid
+graph TD
+    req["Request ID: abc123"]
+    sa["Service A<br/>200ms"]
+    db["Database query<br/>50ms"]
+    sb["Service B<br/>100ms"]
+    sb2["Service B<br/>80ms"]
+    sc["Service C<br/>20ms ERROR"]
+    
+    req --> sa
+    sa --> db
+    sa --> sb
+    sb --> sb2
+    sb2 --> sc
+    
+    classDef error fill:#ff6b6b
+    class sc error
 ```
 
 ## Jaeger — Distribuído, simples

@@ -110,13 +110,13 @@ Ter backup do `/var/lib/docker/swarm/` de um manager que era funcional.
 
    Isso reinitializa o cluster com um novo Raft, usando o backup como base.
 
-2. **Trazer de volta outros managers**:
+1. **Trazer de volta outros managers**:
 
    ```bash
    docker swarm join --token <MANAGER_TOKEN> <IP>:<PORT>
    ```
 
-3. **Verificar**:
+1. **Verificar**:
 
    ```bash
    docker node ls
@@ -130,10 +130,10 @@ Antes de colocar em produção, testar o procedimento:
 ```bash
 # Em um servidor de teste:
 1. Fazer backup de um manager
-2. Restaurar em nova máquina
-3. docker swarm init --force-new-cluster
-4. Verificar que services e configs estão lá
-5. Tentar deslocar um service
+1. Restaurar em nova máquina
+1. docker swarm init --force-new-cluster
+1. Verificar que services e configs estão lá
+1. Tentar deslocar um service
 ```
 
 ## Limitações

@@ -20,8 +20,6 @@ kubectl top nodes  # CPU/memória dos nós
 - `get nodes`: lista nós e status (Ready, NotReady).
 - `top`: requer metrics-server.
 
-**Relacionado:**
-
 ---
 
 ## Listar pods e status
@@ -47,8 +45,6 @@ kubectl get pods --field-selector=status.phase!=Running
 - `-A`: all namespaces.
 - `-o wide`: mais informações (IP, node).
 - `--field-selector`: filtrar por status.
-
-**Relacionado:**
 
 ---
 
@@ -79,8 +75,6 @@ kubectl logs <pod-name> --previous
 - `-f`: segue logs em tempo real.
 - `--previous`: útil após restart.
 
-**Relacionado:**
-
 ---
 
 ## Descrever um pod
@@ -101,8 +95,6 @@ kubectl describe pod <pod-name> | grep -A 10 Events:
 
 - Mostra: volumes, env vars, image, resource requests/limits.
 - **Events**: histórico recente do pod (pull failures, restarts, etc).
-
-**Relacionado:**
 
 ---
 
@@ -127,8 +119,6 @@ kubectl exec -it <pod-name> -c <container-name> -- /bin/bash
 - `--`: separa flags do kubectl do comando real.
 - Container precisa ter o binário (bash, sh, etc).
 
-**Relacionado:**
-
 ---
 
 ## Port-forward para um pod
@@ -151,8 +141,6 @@ kubectl port-forward svc/<service-name> 3000:8080
 - Default: escuta 127.0.0.1 (localhost só).
 - `--address 0.0.0.0`: qualquer interface.
 - Bloqueia o terminal; use `&` para background.
-
-**Relacionado:**
 
 ---
 
@@ -177,8 +165,6 @@ kubectl port-forward svc/<service-name> 8080:80
 - DNS: `<service>.<namespace>.svc.cluster.local`.
 - Dentro de pods: pode omitir namespace.
 - CoreDNS resolve automaticamente.
-
-**Relacionado:**
 
 ---
 
@@ -205,8 +191,6 @@ kubectl top pods --sort-by=memory
 - Requer metrics-server.
 - Mostra uso atual, não histórico.
 
-**Relacionado:**
-
 ---
 
 ## Ver CPU/memória limits
@@ -225,6 +209,3 @@ kubectl describe pod <pod-name> | grep -A 3 "Limits\|Requests"
 
 - Requests: garantido, limite inferior.
 - Limits: máximo que pode usar, OOM se exceder.
-
-**Relacionado:**
-

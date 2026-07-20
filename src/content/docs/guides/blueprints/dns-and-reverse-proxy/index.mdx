@@ -11,20 +11,22 @@ Este blueprint substitui port-forwards manuais por um setup permanente: **CoreDN
 
 ## O problema que este blueprint resolve
 
-```yaml
-Sem blueprint:
-  operator@laptop → kubectl port-forward svc/grafana :3000
-  (manual toda vez, quebra se laptop reconecta)
-  operator@laptop → kubectl port-forward svc/prometheus :9090
-  operator@laptop → kubectl port-forward svc/argocd :8080
-  (múltiplas janelas de terminal)
-
-Com blueprint:
-  operator@laptop → ssh bastion (ou tunnel VPN)
-  bastion → https://grafana.cluster.local
-  bastion → https://prometheus.cluster.local
-  bastion → https://argocd.cluster.local
-  (automático, uma porta 443, SNI roteia)
+```mermaid
+graph LR
+    subgraph Before["❌ Sem blueprint"]
+        L1["operator@laptop"]
+        L1 -->|port-forward :3000| G["Grafana<br/>(manual)"]
+        L1 -->|port-forward :9090| P["Prometheus<br/>(manual)"]
+        L1 -->|port-forward :8080| A["ArgoCD<br/>(manual)"]
+    end
+    
+    subgraph After["✅ Com blueprint"]
+        L2["operator@laptop"]
+        L2 -->|ssh bastion| B["Bastion"]
+        B -->|https://grafana.cluster.local| G2["Grafana<br/>(automático)"]
+        B -->|https://prometheus.cluster.local| P2["Prometheus<br/>(automático)"]
+        B -->|https://argocd.cluster.local| A2["ArgoCD<br/>(1 porta 443)"]
+    end
 ```
 
 ## O que está aqui
@@ -37,20 +39,16 @@ Com blueprint:
 
 ## Topologia
 
-```yaml
-┌─────────────────────────────────────────┐
-│  Admin laptop (ou bastion/VPN gateway)  │
-│  Rede: pode resolver cluster.local      │
-└────────────────────┬────────────────────┘
-                     │
-        ┌────────────┴──────────┐
-        │                       │
-   CoreDNS               Reverse Proxy
-   (cluster DNS)         (127.0.0.1:443)
-   resolve:               roteia:
-   - grafana.cluster.local  └─ grafana-svc:3000
-   - prometheus.cluster.local └─ prometheus-svc:9090
-   - argocd.cluster.local     └─ argocd-svc:8080
+```mermaid
+graph TD
+    Admin["Admin laptop<br/>(ou bastion/VPN gateway)<br/>Rede: pode resolver cluster.local"]
+    
+    DNS["CoreDNS<br/>(cluster DNS)<br/>resolve:<br/>- grafana.cluster.local<br/>- prometheus.cluster.local<br/>- argocd.cluster.local"]
+    
+    Proxy["Reverse Proxy<br/>(127.0.0.1:443)<br/>roteia:<br/>- grafana-svc:3000<br/>- prometheus-svc:9090<br/>- argocd-svc:8080"]
+    
+    Admin --> DNS
+    Admin --> Proxy
 ```
 
 ## Quando usar este blueprint
@@ -68,19 +66,13 @@ Com blueprint:
 
 CoreDNS rodando como serviço no cluster, reverse proxy no bastion/laptop:
 
-```yaml
-┌─ Dentro do cluster ─┐
-│ CoreDNS             │
-│ resolva .local      │
-└─────────────────────┘
-         ↑
-    (query DNS)
-         │
-┌─ Bastion/laptop ──────┐
-│ Reverse proxy         │
-│ (Nginx/HAProxy)       │
-│ 127.0.0.1:443         │
-└───────────────────────┘
+```mermaid
+graph TB
+    Cluster["Dentro do cluster<br/>CoreDNS<br/>resolve .local"]
+    
+    Bastion["Bastion/laptop<br/>Reverse proxy<br/>(Nginx/HAProxy)<br/>127.0.0.1:443"]
+    
+    Bastion -->|query DNS| Cluster
 ```
 
 **Quando:** cluster K3s com múltiplos admins.
@@ -89,11 +81,9 @@ CoreDNS rodando como serviço no cluster, reverse proxy no bastion/laptop:
 
 Ambos rodando fora do cluster (ex.: Pihole + Nginx no bastion):
 
-```yaml
-┌─ Bastion/servidor de infra ─┐
-│ CoreDNS + Reverse Proxy      │
-│ Resolve + roteia em paralelo │
-└──────────────────────────────┘
+```mermaid
+graph TB
+    Bastion["Bastion/servidor de infra<br/>CoreDNS + Reverse Proxy<br/>Resolve + roteia em paralelo"]
 ```
 
 **Quando:** cluster sem privilégio de admin, ou CoreDNS já rodando externamente.

@@ -23,8 +23,6 @@ ping -w 5000 example.com  # 5 segundos
 - `-c`: número de pacotes (Linux).
 - `-W`: timeout (Linux).
 
-**Relacionado:**
-
 ---
 
 ## Escanear porta aberta
@@ -48,8 +46,6 @@ timeout 1 bash -c 'cat </dev/null >$(echo /dev/tcp/example.com/443)' && echo "Ab
 - netcat é mais portável.
 - telnet pode exigir instalação.
 - `/dev/tcp` é bash-específico, sem dependências.
-
-**Relacionado:**
 
 ---
 
@@ -78,8 +74,6 @@ ss -tnp state ESTABLISHED
 - `-p`: show process.
 - `ss` é mais rápido em kernels modernos.
 
-**Relacionado:**
-
 ---
 
 ## Identificar processo escutando uma porta
@@ -103,8 +97,6 @@ sudo lsof -i :3000
 - `-i`: internet sockets.
 - Útil antes de kill um processo.
 
-**Relacionado:**
-
 ---
 
 ## Testar rota para um host
@@ -125,8 +117,6 @@ mtr -c 1 example.com
 - `traceroute` mostra route estática.
 - `mtr` combina ping + traceroute, mostra estatísticas.
 - Pode ser bloqueado por firewalls.
-
-**Relacionado:**
 
 ---
 
@@ -150,8 +140,6 @@ ip route | grep default
 - `ip route` é preferido (comando `ip` unificado).
 - Sem `-n`: tenta resolver IPs em hostnames (mais lento).
 
-**Relacionado:**
-
 ---
 
 ## Adicionar/remover rota
@@ -174,6 +162,3 @@ ip route show | grep 192.168.2
 - Requer `sudo`.
 - Mudanças são temporárias (perde ao reboot).
 - Para persistência: editar `/etc/netplan/` ou equivalente.
-
-**Relacionado:**
-

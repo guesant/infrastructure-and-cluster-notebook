@@ -15,22 +15,29 @@ Swarm é **mais simples** — um comando (`docker swarm init`) já cria o cluste
 
 ## Topologia recomendada
 
-```yaml
-┌─────────────────────────────────────────┐
-│  Load Balancer (HAProxy / DNS)          │
-│  exemplo.local:80, :443                 │
-└───────┬─────────────────────────────────┘
-        │
-    ┌───┴───┬──────────┬──────────┐
-    │       │          │          │
-[Manager-0] [Manager-1] [Manager-2]
-(LEADER)    (REPLICA)   (REPLICA)
-    │       │          │          │
-    └───────┴──────────┴──────────┘
-         Rede Overlay
-    │
-[Worker-0]  [Worker-1]  [Worker-2]
- (app)       (app)       (app)
+```mermaid
+graph TD
+    LB["Load Balancer<br/>(HAProxy / DNS)<br/>exemplo.local:80, :443"]
+    
+    M0["Manager-0<br/>LEADER"]
+    M1["Manager-1<br/>REPLICA"]
+    M2["Manager-2<br/>REPLICA"]
+    
+    W0["Worker-0<br/>(app)"]
+    W1["Worker-1<br/>(app)"]
+    W2["Worker-2<br/>(app)"]
+    
+    LB --> M0
+    LB --> M1
+    LB --> M2
+    
+    M0 -.->|Rede Overlay| W0
+    M1 -.->|Rede Overlay| W1
+    M2 -.->|Rede Overlay| W2
+    
+    M0 ↔ M1
+    M1 ↔ M2
+    M0 ↔ M2
 ```
 
 - **3 ou 5 managers**: quorum para tolerância a falhas. Managers também podem rodar workloads.

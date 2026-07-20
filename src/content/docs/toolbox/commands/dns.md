@@ -22,8 +22,6 @@ host example.com
 - `dig` mostra mais detalhes (TTL, tipo de record).
 - `host` é mais breve.
 
-**Relacionado:**
-
 ---
 
 ## Listar servidor DNS configurado
@@ -41,8 +39,6 @@ resolvectl status
 - `/etc/resolv.conf` pode ser gerado automaticamente por systemd-resolved.
 - Em systemd: `resolvectl` mostra config por interface.
 
-**Relacionado:**
-
 ---
 
 ## Resolver para um nameserver específico
@@ -58,8 +54,6 @@ dig @8.8.8.8 example.com
 
 - `@<IP>` especifica o resolver.
 - Útil para diagnóstico de DNS distribuído.
-
-**Relacionado:**
 
 ---
 
@@ -85,8 +79,6 @@ dig example.com +nocmd +noall +answer
 - `+short` é mais legível.
 - `+nocmd +noall +answer` mostra só answers.
 
-**Relacionado:**
-
 ---
 
 ## Verificar record MX, TXT, CNAME
@@ -109,8 +101,6 @@ dig example.com CNAME
 - MX: lower preference = higher priority (confuso!).
 - TXT: inclui SPF, DKIM, DMARC, verificação de domínio.
 - CNAME: não pode existir junto com A record.
-
-**Relacionado:**
 
 ---
 
@@ -137,8 +127,6 @@ kubectl logs -n kube-system -l k8s-app=kube-dns
 - CoreDNS responde na porta 53 (UDP/TCP).
 - Logs de CoreDNS indicam cache misses.
 
-**Relacionado:**
-
 ---
 
 ## Medir latência de resolução
@@ -155,6 +143,3 @@ time dig example.com
 - Primeira query é mais lenta (cache miss).
 - Queries subsequentes usam cache (mais rápidas).
 - >100ms indica problema.
-
-**Relacionado:**
-

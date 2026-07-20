@@ -28,8 +28,6 @@ git diff main...feature
 - `git diff`: sem staged, mostra unstaged.
 - `git diff --cached`: mostra staged changes.
 
-**Relacionado:**
-
 ---
 
 ## Fazer commit
@@ -53,8 +51,6 @@ git commit -m "todos os arquivos"
 - Padrão: [type]: [mensagem] (fix, feat, docs, etc).
 - `-m` múltiplas vezes para body.
 - Sem `-m`: abre editor.
-
-**Relacionado:**
 
 ---
 
@@ -82,8 +78,6 @@ git log -- filename
 - `--graph`: visualizar branches.
 - `--author`: filtrar por autor.
 - `--since`/`--until`: range de tempo.
-
-**Relacionado:**
 
 ---
 
@@ -113,8 +107,6 @@ git branch -d feature/my-feature
 - `-b`: create + checkout em um comando.
 - Branch local != remote (push para sincronizar).
 
-**Relacionado:**
-
 ---
 
 ## Merge de branches
@@ -137,8 +129,6 @@ git merge --abort
 - Sem `--no-ff`: fast-forward (sem commit merge se linear).
 - Conflitos requerem resolução manual.
 
-**Relacionado:**
-
 ---
 
 ## Reverter commit
@@ -160,8 +150,6 @@ git reset --hard HEAD~1  # Cuidado!
 
 - `revert`: seguro (novo commit que desfaz).
 - `reset --hard`: destrói histórco local (cuidado em branches compartilhadas).
-
-**Relacionado:**
 
 ---
 
@@ -189,8 +177,6 @@ git stash apply stash@{0}
 - `pop`: recupera e remove stash.
 - `apply`: recupera mas mantém stash.
 
-**Relacionado:**
-
 ---
 
 ## Push para remote
@@ -217,8 +203,6 @@ git push origin --delete feature/my-feature
 - `--force-with-lease`: mais seguro que `--force`.
 - Nunca force-push a main/master.
 
-**Relacionado:**
-
 ---
 
 ## Pull do remote
@@ -240,6 +224,3 @@ git pull --rebase
 
 - `pull` = fetch + merge.
 - `--rebase`: evita commits merge (histórico mais limpo).
-
-**Relacionado:**
-

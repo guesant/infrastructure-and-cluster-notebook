@@ -19,8 +19,6 @@ ssh-keygen -t ed25519 -C "seu-email@example.com" -f ~/.ssh/id_ed25519 -N ""
 - Sem `-f`: solicita filename.
 - Permissões: `chmod 600 ~/.ssh/id_ed25519`.
 
-**Relacionado:**
-
 ---
 
 ## Inspecionar certificado X.509
@@ -37,8 +35,6 @@ openssl x509 -in cert.pem -text -noout
 - `-noout`: não mostrar formato PEM.
 - Sem `-text`: mostra apenas fingerprint e serial.
 - Para certificados .der (binário): `-inform der -in cert.der`.
-
-**Relacionado:**
 
 ---
 
@@ -59,8 +55,6 @@ openssl x509 -in cert.pem -noout -enddate | cut -d= -f2
 - `-dates` mostra both notBefore e notAfter.
 - Para comparar com agora: `date -d "$(openssl x509 ... -enddate | cut -d= -f2)" +%s`.
 
-**Relacionado:**
-
 ---
 
 ## Converter certificado PEM to DER
@@ -76,8 +70,6 @@ openssl x509 -in cert.pem -outform der -out cert.der
 - `.pem`: texto ASCII (Base64), portável.
 - `.der`: binário, mais compacto, menos legível.
 - Reverso: `openssl x509 -inform der -in cert.der -out cert.pem`.
-
-**Relacionado:**
 
 ---
 
@@ -96,8 +88,6 @@ openssl req -new -key private.pem -out request.csr \
 - `-subj`: pula prompt interativo.
 - Depois: enviar `.csr` para CA.
 
-**Relacionado:**
-
 ---
 
 ## Verificar certificado de um servidor remoto
@@ -112,6 +102,3 @@ openssl s_client -connect example.com:443 -showcerts < /dev/null | openssl x509 
 
 - Conecta, recebe certificado, mostra detalhes.
 - Útil para health checks de certificados expirando.
-
-**Relacionado:**
-

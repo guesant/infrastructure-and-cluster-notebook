@@ -107,16 +107,22 @@ helm install grafana prometheus-community/grafana \
 
 ## Stack típica
 
-```yaml
-Aplicações
-  ├─ Prometheus scrape /metrics (2-way)
-  └─ Promtail shipper (logs → Loki)
-       ↓
-Prometheus ← Alertmanager (alertas)
-       ↓
-    Grafana (visualização)
-       ↓
-    Dashboard
+```mermaid
+graph TD
+    Apps["Aplicações"]
+    Prom["Prometheus"]
+    Loki["Loki"]
+    AM["Alertmanager"]
+    Grafana["Grafana"]
+    Dashboard["Dashboard"]
+    
+    Apps -->|scrape /metrics| Prom
+    Apps -->|Promtail shipper| Loki
+    Prom --> AM
+    Prom --> Grafana
+    Loki --> Grafana
+    AM --> Grafana
+    Grafana --> Dashboard
 ```
 
 ---

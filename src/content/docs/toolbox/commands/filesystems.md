@@ -26,8 +26,6 @@ du -sh /* | sort -h | tail -10
 - `-h`: human-readable (K, M, G).
 - `-s`: summarize (não recursive para cada dir).
 
-**Relacionado:**
-
 ---
 
 ## Verificar inodes
@@ -47,8 +45,6 @@ find / -xdev -printf '%h\n' 2>/dev/null | sort | uniq -c | sort -rn | head -10
 - Inodes = número de arquivos/diretórios.
 - Um arquivo pequeno = 1 inode.
 - Limite: filesystem can run out of inodes antes de ficar sem espaço.
-
-**Relacionado:**
 
 ---
 
@@ -75,8 +71,6 @@ sudo umount /mnt/nfs
 - `-t`: tipo (nfs, cifs, etc).
 - `-o`: opções (rw=read-write, hard=block on failure).
 - `umount`: desmontar antes de remover device.
-
-**Relacionado:**
 
 ---
 
@@ -106,8 +100,6 @@ chmod -R 755 /path/to/dir
 - Octal: 4=read, 2=write, 1=execute; primeiro dígito=user, second=group, third=others.
 - `-R`: recursivo (cuidado!).
 
-**Relacionado:**
-
 ---
 
 ## Mudar owner de arquivo
@@ -133,8 +125,6 @@ sudo chown -R user:group /path/to/dir
 - Requer `sudo` (ou ser dono do arquivo).
 - `-R`: recursivo.
 - Formato: `user:group`.
-
-**Relacionado:**
 
 ---
 
@@ -166,8 +156,6 @@ find /path -name "*.log" -exec gzip {} \;
 - `-delete`: remove (cuidado!).
 - `-exec`: rodar comando em cada resultado.
 
-**Relacionado:**
-
 ---
 
 ## Buscar conteúdo dentro de arquivos
@@ -194,6 +182,3 @@ grep -B2 -A2 "pattern" file.txt
 - `-i`: case-insensitive.
 - `-B/-A`: linhas antes/depois.
 - `-v`: invert (não contém).
-
-**Relacionado:**
-

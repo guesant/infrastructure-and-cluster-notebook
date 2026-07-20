@@ -31,17 +31,39 @@ Fase 5 cobriu:
 
 ## Arquitetura multi-zona
 
-```yaml
-Data Center A        Data Center B         Data Center C
-  ├─ K3s server 1     ├─ K3s server 2      ├─ K3s server 3
-  │  ├─ etcd          │  ├─ etcd           │  ├─ etcd
-  │  └─ API 6443      │  └─ API 6443       │  └─ API 6443
-  │
-  ├─ Worker 1         ├─ Worker 2          ├─ Worker 3
-  └─ Worker 4         └─ Worker 5          └─ Worker 6
-
-Cloud LB (multi-zona)
-  └─ 6443 (API servers)
+```mermaid
+graph TB
+    subgraph DC_A["Data Center A"]
+        S1["K3s Server 1<br/>etcd, API 6443"]
+        W1["Worker 1"]
+        W2["Worker 4"]
+        S1 --> W1
+        S1 --> W2
+    end
+    
+    subgraph DC_B["Data Center B"]
+        S2["K3s Server 2<br/>etcd, API 6443"]
+        W3["Worker 2"]
+        W4["Worker 5"]
+        S2 --> W3
+        S2 --> W4
+    end
+    
+    subgraph DC_C["Data Center C"]
+        S3["K3s Server 3<br/>etcd, API 6443"]
+        W5["Worker 3"]
+        W6["Worker 6"]
+        S3 --> W5
+        S3 --> W6
+    end
+    
+    LB["Cloud LB (multi-zona)<br/>6443 API servers"]
+    LB --> S1
+    LB --> S2
+    LB --> S3
+    S1 ↔ S2
+    S2 ↔ S3
+    S1 ↔ S3
 ```
 
 Perder DC A inteiro → cluster continua (quorum em B+C).
@@ -160,11 +182,11 @@ Recomendação: ambos (app-level + datastore-level).
 
 ## SLA e RTO/RPO
 
-| Métrica   | Objetivo   | Significado                      |
-| --------- | ---------- | -------------------------------- |
-| **Uptime** | 99.9%      | 8.7 horas downtime/ano           |
-| **RTO**    | < 15 min   | Tempo para voltar online         |
-| **RPO**    | < 1 min    | Dados perdem menos de 1 min      |
+| Métrica    | Objetivo  | Significado               |
+| ---------- | --------- | ------------------------- |
+| **Uptime** | 99.9%     | 8.7h downtime/ano         |
+| **RTO**    | < 15 min  | Tempo para voltar online  |
+| **RPO**    | < 1 min   | Perda máxima de 1 min     |
 
 Para 99.9%:
 

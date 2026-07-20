@@ -12,13 +12,17 @@ A escolha impacta arquitetura, operação, e resiliência. Este guia compara os 
 
 Cada servidor K3s vem com etcd embutido. Os servidores se coordenam via replicação de etcd entre eles.
 
-```yaml
-[Servidor 0]    [Servidor 1]    [Servidor 2]
-   etcd            etcd            etcd
-    |              |               |
-    └──────────────┴───────────────┘
-      Replicação de etcd (Raft)
-           quorum = 2/3
+```mermaid
+graph TB
+    S0["Servidor 0<br/>etcd"]
+    S1["Servidor 1<br/>etcd"]
+    S2["Servidor 2<br/>etcd"]
+    
+    S0 ↔|Raft<br/>replicação| S1
+    S1 ↔|Raft<br/>replicação| S2
+    S0 ↔|Raft<br/>replicação| S2
+    
+    Note["quorum = 2/3"]
 ```
 
 ### Vantagens
@@ -40,19 +44,17 @@ Cada servidor K3s vem com etcd embutido. Os servidores se coordenam via replica�
 
 O estado é armazenado em um banco de dados separado (Postgres, MySQL, etcd externo), e os servidores K3s são **stateless**.
 
-```yaml
-[Servidor 0]  [Servidor 1]  [Servidor 2]
-    |             |             |
-    └─────────────┴─────────────┘
-           Sem estado local
-                 |
-          (todos apontam para)
-                 |
-        ┌────────────────┐
-        │  Postgres ou   │
-        │  etcd Externo  │
-        │  (gerenciado)  │
-        └────────────────┘
+```mermaid
+graph TB
+    S0["Servidor 0<br/>Stateless"]
+    S1["Servidor 1<br/>Stateless"]
+    S2["Servidor 2<br/>Stateless"]
+    
+    DB["Postgres ou etcd Externo<br/>(gerenciado)"]
+    
+    S0 --> DB
+    S1 --> DB
+    S2 --> DB
 ```
 
 ### Vantagens

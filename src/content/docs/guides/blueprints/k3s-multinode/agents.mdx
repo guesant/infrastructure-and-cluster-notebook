@@ -11,18 +11,32 @@ Agentes (também chamados "workers") são nós que **apenas executam workloads**
 
 ## Topologias
 
-```yaml
-Topologia A: 1 servidor + agentes
-  [Servidor] (control plane + etcd)
-     ↑
-     └─→ [Agente 1] (workloads)
-     └─→ [Agente 2] (workloads)
-     └─→ [Agente N] (workloads)
-
-Topologia B: 3 servidores + agentes (recomendado para HA)
-  [Servidor 0] ← quorum etcd ─→ [Servidor 1] ← quorum etcd ─→ [Servidor 2]
-     ↑                                ↑                            ↑
-     └─→ [Agente 1, 2, ..., N] (apenas executam workloads)
+```mermaid
+graph TD
+    subgraph TopA["Topologia A: 1 servidor + agentes"]
+        S["Servidor<br/>control plane + etcd"]
+        A1["Agente 1<br/>workloads"]
+        A2["Agente 2<br/>workloads"]
+        AN["Agente N<br/>workloads"]
+        S --> A1
+        S --> A2
+        S --> AN
+    end
+    
+    subgraph TopB["Topologia B: 3 servidores + agentes (recomendado para HA)"]
+        S0["Servidor 0"]
+        S1["Servidor 1"]
+        S2["Servidor 2"]
+        AS["Agentes 1, 2, ..., N<br/>apenas executam workloads"]
+        
+        S0 ↔|quorum etcd| S1
+        S1 ↔|quorum etcd| S2
+        S0 ↔|quorum etcd| S2
+        
+        S0 --> AS
+        S1 --> AS
+        S2 --> AS
+    end
 ```
 
 ## Instalação de agentes

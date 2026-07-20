@@ -16,17 +16,24 @@ Velero é um backup automático para Kubernetes e volumes persistentes. Diferent
 
 ## Como funciona
 
-```yaml
-Velero (CLI + controller no cluster)
-  ├─ Lê estado do cluster (via API)
-  ├─ Serializa resources em YAML
-  ├─ Snapshots/copia volumes (via provider de storage)
-  └─ Armazena tudo em object storage (S3, etc.)
-
-Na recuperação:
-  ├─ Cria namespace novo (ou sobrescreve)
-  ├─ Restaura resources via `kubectl apply`
-  └─ Reconecta volumes restaurados
+```mermaid
+graph LR
+    subgraph Backup["Backup"]
+        A["Lê estado do cluster<br/>via API"]
+        B["Serializa resources<br/>em YAML"]
+        C["Snapshots/copia<br/>volumes"]
+        D["Armazena tudo<br/>em S3/storage"]
+        A --> B --> C --> D
+    end
+    
+    subgraph Recovery["Recuperação"]
+        E["Cria namespace novo<br/>ou sobrescreve"]
+        F["Restaura resources<br/>via kubectl apply"]
+        G["Reconecta volumes<br/>restaurados"]
+        E --> F --> G
+    end
+    
+    Backup -.-> Recovery
 ```
 
 ## Diferença: etcd snapshot vs. Velero

@@ -28,8 +28,6 @@ docker ps -s
 - `ps -a`: inclui exited.
 - `STATUS`: Up, Exited, Paused.
 
-**Relacionado:**
-
 ---
 
 ## Ver logs de um container
@@ -56,8 +54,6 @@ docker logs -t <container>
 - `-t`: mostrar timestamps.
 - `--tail N`: últimas N linhas.
 
-**Relacionado:**
-
 ---
 
 ## Executar comando em um container
@@ -80,8 +76,6 @@ docker exec -u www-data <container> whoami
 - `-it`: interactive + TTY (necessário para shell).
 - Container precisa estar rodando.
 - `/bin/sh` é mais portável que `/bin/bash` (alpine, etc).
-
-**Relacionado:**
 
 ---
 
@@ -106,8 +100,6 @@ docker inspect --format='{{json .Config.Env}}' <container> | jq .
 - `--format`: filtrar campos específicos.
 - Útil para automação.
 
-**Relacionado:**
-
 ---
 
 ## Listar imagens
@@ -130,8 +122,6 @@ docker images -f dangling=true
 - `REPOSITORY:TAG`: nome completo.
 - `SIZE`: tamanho descompactado.
 - Imagens dangling são intermediárias não tagueadas.
-
-**Relacionado:**
 
 ---
 
@@ -160,8 +150,6 @@ docker image prune
 - `image prune`: limpa imagens não usadas.
 - `container prune`: limpa containers parados.
 
-**Relacionado:**
-
 ---
 
 ## Build de imagem
@@ -185,8 +173,6 @@ docker build --build-arg VERSION=1.0 -t myapp:1.0 .
 - `-t`: tag.
 - `-f`: Dockerfile alternativo.
 - Build layers são cacheadas (melhorar se mudar deps antes de code).
-
-**Relacionado:**
 
 ---
 
@@ -213,6 +199,3 @@ docker logout
 - `docker login`: salva credenciais em `~/.docker/config.json`.
 - Tag deve incluir registry.
 - Credentials sensíveis (use access tokens, não senha).
-
-**Relacionado:**
-

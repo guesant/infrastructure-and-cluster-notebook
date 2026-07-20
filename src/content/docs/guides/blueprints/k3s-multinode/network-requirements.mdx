@@ -39,27 +39,20 @@ Se você tiver instalado:
 
 ## Diagrama
 
-```
-                             ┌─────────────────────────────┐
-                             │ Servidor 0 (líder etcd)     │
-                             │ - 6443 (API)                │
-                             │ - 2379-2380 (etcd peer)     │
-                             └──────────┬──────────────────┘
-                                        │
-                       TCP 2379-2380    │    TCP 2379-2380
-                       (etcd peer)      │    (etcd peer)
-                                        │
-         ┌──────────────────────────────┼──────────────────────────────┐
-         │                              │                              │
-         ▼                              ▼                              ▼
-    Servidor 1                    Servidor 2                    Agente 1, 2, ...
-    TCP 6443 (API)               TCP 6443 (API)               TCP 6443 → Servidores
-    TCP 10250                    TCP 10250                    TCP 10250 (kubelet)
-    UDP 8472 (flannel)          UDP 8472 (flannel)          UDP 8472 (flannel)
+```mermaid
+graph TB
+    S0["Servidor 0 (líder etcd)<br/>- 6443 API<br/>- 2379-2380 etcd peer"]
+    S1["Servidor 1<br/>- 6443 API<br/>- 2379-2380 etcd peer<br/>- 10250 kubelet<br/>- 8472 flannel"]
+    S2["Servidor 2<br/>- 6443 API<br/>- 2379-2380 etcd peer<br/>- 10250 kubelet<br/>- 8472 flannel"]
+    A["Agentes 1, 2, ...<br/>- 6443 → Servidores<br/>- 10250 kubelet<br/>- 8472 flannel"]
     
-    ◄─────────────────────────────────────────────────────────────────►
-                  UDP 8472 (VXLAN — overlay network)
-                  TCP 10250 (kubelet — node-to-node comms)
+    S0 -->|TCP 2379-2380<br/>etcd peer| S1
+    S0 -->|TCP 2379-2380<br/>etcd peer| S2
+    S1 ↔|UDP 8472 VXLAN<br/>TCP 10250 kubelet| S2
+    S1 ↔|UDP 8472 VXLAN<br/>TCP 10250 kubelet| A
+    S2 ↔|UDP 8472 VXLAN<br/>TCP 10250 kubelet| A
+    S1 <-->|TCP 6443 API| A
+    S2 <-->|TCP 6443 API| A
 ```
 
 ## Configuração passo a passo
