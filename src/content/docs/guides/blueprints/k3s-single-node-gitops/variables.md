@@ -23,7 +23,7 @@ Referência única dos valores que precisam ser decididos antes ou durante a imp
 
 ## Checkpoint
 
-Cada variável relevante ao escopo escolhido (nem todo cluster usa todos os módulos opcionais) está decidida e, quando sensível, registrada em um gerenciador de segredos — não em texto claro no repositório ou em anotações locais.
+Cada variável relevante ao escopo escolhido (nem todo cluster usa todos os módulos opcionais) está decidida e, quando sensível, registrada em um gerenciador de segredos, não em texto claro no repositório ou em anotações locais.
 
 ## Fontes e leitura adicional
 

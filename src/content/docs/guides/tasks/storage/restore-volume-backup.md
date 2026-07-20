@@ -1,13 +1,14 @@
 ---
 title: Restaurar backup de um volume Longhorn
+description: Como restaurar um backup do Longhorn como um novo volume, sem substituir o original, e criar o PV/PVC estático para montá-lo em um Pod de teste.
 sidebar:
-  order: 7
+  order: 8
 ---
 
 > **Pré-requisitos:** [backup de volume configurado](../configure-volume-backup/) e um backup existente no backupstore.
 > **Versões testadas:** Longhorn 1.12.0.
 
-Restaurar um backup cria um novo volume a partir de um ponto salvo — não substitui o volume original no lugar. Isso permite validar a restauração sem afetar o volume em produção, mesmo em um drill.
+Restaurar um backup cria um novo volume a partir de um ponto salvo; não substitui o volume original no lugar. Isso permite validar a restauração sem afetar o volume em produção, mesmo em um drill.
 
 ## Listar backups disponíveis
 
@@ -68,11 +69,11 @@ EOF
 kubectl --namespace longhorn-system get volumes.longhorn.io "${RESTORED_VOLUME_NAME}"
 ```
 
-Confirme `state: attached` ou `detached` conforme esperado, e monte o volume em um Pod de teste para validar a integridade dos dados (não apenas a existência do volume) — a mesma lógica do [roteiro de restore drill](../../../../operations/backups/backup-and-recovery/#roteiro-de-restore-drill).
+Confirme `state: attached` ou `detached` conforme esperado, e monte o volume em um Pod de teste para validar a integridade dos dados (não apenas a existência do volume): a mesma lógica do [roteiro de restore drill](../../../../operations/backups/backup-and-recovery/#roteiro-de-restore-drill).
 
 ## Troubleshooting
 
-Se o volume restaurado ficar preso em `attaching`, confirme que nenhum outro Pod já reivindicou o mesmo `volumeHandle` — o Longhorn não permite dois PVs apontando para o mesmo volume simultaneamente.
+Se o volume restaurado ficar preso em `attaching`, confirme que nenhum outro Pod já reivindicou o mesmo `volumeHandle`: o Longhorn não permite dois PVs apontando para o mesmo volume simultaneamente.
 
 ## Rollback
 
@@ -87,4 +88,4 @@ Depois de validar a integridade, decida se o volume restaurado substitui o origi
 
 ## Fontes e leitura adicional
 
-- [Longhorn — Restore from a Backup](https://longhorn.io/docs/1.12.0/snapshots-and-backups/backup-and-restore/restore-from-a-backup/): referência oficial do processo de restauração.
+- [Longhorn: Restore from a Backup](https://longhorn.io/docs/1.12.0/snapshots-and-backups/backup-and-restore/restore-from-a-backup/): referência oficial do processo de restauração.

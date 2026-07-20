@@ -1,7 +1,8 @@
 ---
 title: Longhorn
+description: Como preparar as dependências dos nós e instalar o Longhorn via Helm, o provisionador CSI de armazenamento em blocos distribuído usado por este notebook.
 sidebar:
-  order: 2
+  order: 1
 ---
 
 import ScriptHelper from '../../../../../components/ScriptHelper.astro';
@@ -37,7 +38,7 @@ Em Debian e Ubuntu:
 
 > **Executar em:** cada nó manager ou agent que armazenará volumes Longhorn, como `root`.
 
-```yaml
+```bash
 apt-get update
 apt-get install --yes \
   bash \
@@ -60,7 +61,7 @@ Carregue os módulos usados pelo engine V1 e por volumes criptografados:
 
 > **Executar em:** cada nó manager ou agent que armazenará volumes Longhorn, como `root`.
 
-```yaml
+```bash
 modprobe iscsi_tcp
 modprobe nfs
 modprobe dm_crypt
@@ -70,7 +71,7 @@ Persista os módulos para os próximos boots:
 
 > **Executar em:** cada nó manager ou agent que armazenará volumes Longhorn, como `root`.
 
-```yaml
+```bash
 cat >/etc/modules-load.d/longhorn.conf <<'EOF'
 nfs
 dm_crypt
@@ -82,7 +83,7 @@ Valide cada nó antes de instalar o chart:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG`, acesso à API e `longhornctl`.
 
-```yaml
+```bash
 longhornctl check preflight
 ```
 
@@ -110,7 +111,7 @@ Valide a instalação:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG`, acesso à API e `longhornctl`.
 
-```yaml
+```bash
 kubectl --namespace longhorn-system get pods
 kubectl --namespace longhorn-system get daemonsets
 helm --namespace longhorn-system status longhorn
@@ -123,7 +124,7 @@ Quando `kubectl` e o kubeconfig estiverem na estação local:
 
 > **Executar em:** estação administrativa com `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 read -r -p "Porta local para a interface do Longhorn [8080]: " LOCAL_PORT
 LOCAL_PORT="${LOCAL_PORT:-8080}"
 
@@ -137,7 +138,7 @@ Quando o port-forward precisar rodar em um manager, execute nele:
 
 > **Executar em:** nó manager com `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 read -r -p "Porta no manager para a interface do Longhorn [8080]: " MANAGER_PORT
 MANAGER_PORT="${MANAGER_PORT:-8080}"
 
@@ -169,8 +170,8 @@ Antes de atualizar ou remover o Longhorn, confirme a saúde das réplicas, o des
 
 ## Fontes e leitura adicional
 
-- [Arquitetura e conceitos do Longhorn 1.12.0](https://longhorn.io/docs/1.12.0/concepts/): fundamenta engines, réplicas, CSI, snapshots e armazenamento secundário.
-- [Requisitos e instalação do Longhorn 1.12.0](https://longhorn.io/docs/1.12.0/deploy/install/): lista sistemas suportados, dependências dos nós e métodos oficiais de instalação.
-- [longhornctl](https://longhorn.io/docs/1.12.0/advanced-resources/longhornctl/): documenta os comandos de preflight, operação, recuperação e diagnóstico usados nesta página.
-- [Backup e restauração](https://longhorn.io/docs/1.12.0/snapshots-and-backups/backup-and-restore/): orienta a configuração do destino, a criação de backups e a restauração de volumes.
-- [Boas práticas](https://longhorn.io/docs/1.12.0/best-practices/): reúne recomendações de réplicas, discos, capacidade, desempenho e operação.
+- [Longhorn: Arquitetura e conceitos (1.12.0)](https://longhorn.io/docs/1.12.0/concepts/): fundamenta engines, réplicas, CSI, snapshots e armazenamento secundário.
+- [Longhorn: Requisitos e instalação (1.12.0)](https://longhorn.io/docs/1.12.0/deploy/install/): lista sistemas suportados, dependências dos nós e métodos oficiais de instalação.
+- [Longhorn: `longhornctl`](https://longhorn.io/docs/1.12.0/advanced-resources/longhornctl/): documenta os comandos de preflight, operação, recuperação e diagnóstico usados nesta página.
+- [Longhorn: Backup e restauração](https://longhorn.io/docs/1.12.0/snapshots-and-backups/backup-and-restore/): orienta a configuração do destino, a criação de backups e a restauração de volumes.
+- [Longhorn: Boas práticas](https://longhorn.io/docs/1.12.0/best-practices/): reúne recomendações de réplicas, discos, capacidade, desempenho e operação.

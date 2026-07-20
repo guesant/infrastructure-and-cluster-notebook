@@ -1,85 +1,53 @@
 ---
 title: Docker Swarm vs. Kubernetes
+description: Compara Swarm e Kubernetes (K3s) por instalação, curva de aprendizado, recursos e operação, para decidir qual usar em um cluster pequeno.
 sidebar:
   order: 5
 ---
 
 > **Para quem é:** quem está decidindo se um cluster pequeno deve usar Swarm ou Kubernetes (K3s).
 
-Swarm e Kubernetes são orquestradores — ambos executam containers em múltiplas máquinas. A escolha não é binária, depende do cenário.
-
-## Comparação rápida
+Swarm e Kubernetes são orquestradores: ambos executam containers em múltiplas máquinas coordenadas. A escolha entre eles depende do cenário, não de qual é objetivamente melhor.
 
 | Critério | Docker Swarm | Kubernetes (K3s) |
 | --- | --- | --- |
-| **Instalação** | `docker swarm init` (1 comando) | ~5-10 minutos de setup |
-| **Aprendizado** | Baixo — Docker Compose + serviços | Alto — conceitos novos (pods, services, namespaces) |
-| **Autoscaling** | Manual | HPA automático (opcional) |
-| **Storage** | Local ou driver externo | CSI integrado (mais opções) |
-| **Networking** | Overlay overlay + mesh ingress | CNI plugável (Flannel, Calico, etc.) |
-| **Escalabilidade** | ~1000 nós (teórico) | 5000+ nós testados |
-| **Mercado/Jobs** | Niche (Docker-focused) | Onipresente (cloud native) |
-| **Cost operacional** | Baixo | Médio (mais componentes) |
+| Instalação | `docker swarm init`, um comando | Alguns minutos de setup |
+| Curva de aprendizado | Baixa, estende Docker Compose | Alta, introduz conceitos novos (Pods, Services, namespaces) |
+| Autoscaling | Manual | HPA automático, opcional |
+| Storage | Local ou driver externo | CSI integrado, mais opções |
+| Rede | Overlay com mesh ingress | CNI plugável (Flannel, Calico, etc.) |
+| Escala testada | Ordem de centenas de nós | Milhares de nós |
+| Adoção no mercado | Nicho, focado em Docker | Amplamente adotado no ecossistema cloud native |
+| Custo operacional | Baixo | Médio, mais componentes para operar |
 
-## Quando usar Swarm
+## Quando Swarm é suficiente
 
-- **Equipe pequena** (1-5 devops/ops).
-- **Cluster < 50 nós**.
-- **Já usa Docker Compose** — Swarm estende naturalmente.
-- **Setup rápido** — ambiente de teste, staging, labs.
-- **Habilidade com Docker** > Kubernetes.
-- **Requisitos simples** — não precisa HPA, RBAC fino, ou CSI avançado.
+Para uma equipe pequena (poucos operadores), um cluster com poucas dezenas de nós, e uma equipe que já conhece Docker Compose bem o suficiente para que Swarm seja uma extensão natural em vez de um novo aprendizado. Um exemplo típico é um ambiente de três máquinas rodando API, banco de dados e cache, sem necessidade de HPA, RBAC granular ou um driver CSI avançado.
 
-Exemplo: 3 máquinas rodando API + DB + cache com Docker Compose.
+## Quando Kubernetes é necessário
 
-## Quando usar Kubernetes (K3s)
+Quando a escalabilidade precisa crescer de dezenas para milhares de nós sem redesenho da arquitetura, quando o mercado ou a stack de destino (EKS, GKE) já giram em torno de Kubernetes, ou quando recursos como HPA, ingress controllers plugáveis, RBAC granular e namespaces multi-tenant são requisitos reais, não apenas desejáveis. Um fluxo GitOps com Argo CD ou Flux também pressupõe Kubernetes. Um exemplo típico é um cluster de dezenas de nós com múltiplos times, autoscaling e políticas de rede diferentes por namespace.
 
-- **Equipe com experiência** — ou disposição de aprender.
-- **Escalabilidade crítica** — de 10 para 1000 nós sem redesign.
-- **Mercado exige Kubernetes** — e você quer usar a mesma tecnologia que usaria no EKS/GKE.
-- **Recursos avançados** — HPA, ingress controller plugável, RBAC, namespaces multi-tenancy.
-- **Workflow GitOps** — Argo CD, Flux, etc.
-- **Cluster de produção robusto** — que precisa sobreviver a atualizações sem downtime.
+## Cenários híbridos
 
-Exemplo: 5-50 nós com múltiplos times, requisitos de autoscaling, diferentes estratégias de net policy por namespace.
+Não é incomum combinar as duas ferramentas por ambiente: Swarm para staging ou desenvolvimento, onde a simplicidade compensa, e K3s para produção, onde a robustez importa mais. Outra combinação comum usa Docker Compose para testes rápidos, Swarm para implantações pequenas e Kubernetes para os clusters maiores, escolhendo a ferramenta pelo tamanho real do problema em cada estágio.
 
-## Casos híbridos
-
-Não é raro ver:
-
-- **Swarm para staging/dev** (simplicidade) + **K3s para prod** (robustez).
-- **Docker Swarm internamente** (operações locais) + **Kubernetes em cloud** (EKS/GKE para escalabilidade pública).
-- **Ambos coexistindo** — Docker Compose para testes rápidos, Swarm para pequenos deploys, K3s para clusters maiores.
-
-## Manutenção operacional
+## Operação no dia a dia
 
 | Atividade | Swarm | K3s |
 | --- | --- | --- |
-| Atualizar cluster | `systemctl restart docker` em cada nó | Rolling update, sem downtime |
-| Monitoramento | Ferramentas genéricas (Prometheus) | Prometheus + kube-state-metrics (mais contexto) |
-| Troubleshooting | `docker service ps`, `docker logs` | `kubectl describe`, `kubectl logs`, `kubectl events` |
-| Backup | Backup do `/var/lib/docker/swarm/` | Backup do etcd |
+| Atualizar o cluster | Reiniciar o Docker em cada nó | Rolling update, sem downtime |
+| Monitoramento | Ferramentas genéricas (Prometheus) | Prometheus com kube-state-metrics, mais contexto sobre objetos |
+| Troubleshooting | `docker service ps`, `docker logs` | `kubectl describe`, `kubectl logs`, `kubectl get events` |
+| Backup | Backup do diretório de estado do Swarm | Backup do etcd (veja [fundamentos de backup](../../backups/backup-fundamentals/)) |
 | Escalabilidade | Manual (`docker service scale`) | Automática (HPA) ou manual (`kubectl scale`) |
-
-## Tendência na indústria
-
-- **Kubernetes domina cloud native** — todos os grandes provedores oferecem.
-- **Swarm é niche** — Docker Inc. não investe ativamente; comunidade é pequena.
-- **K3s é a alternativa leve** — "Kubernetes mas simples".
-
-Se o projeto pode crescer além de um cluster pequeno, Kubernetes é mais futurology-proof.
 
 ## Decisão prática
 
-1. Começa pequeno? **Use Swarm** (setup rápido, menos overhead).
-2. Já sabe Kubernetes? **Use K3s** (familiaridade).
-3. Equipe em crescimento? **K3s** (mais documentação, mais hiring pool).
-4. Ambiente crítico? **K3s** (mais robustez, mais opções).
-
-E não há vergonha em começar com Swarm e migrar depois — containers são containers.
+Comece por Swarm quando a prioridade for um setup rápido com o menor overhead possível, e por K3s quando a equipe já tiver familiaridade com Kubernetes ou estiver crescendo o suficiente para que a documentação e o mercado de trabalho maiores em torno de Kubernetes pesem a favor. Ambientes críticos, que exigem mais robustez e mais opções de operação, também favorecem K3s. Migrar de Swarm para Kubernetes depois é uma trajetória comum e não representa um erro de decisão inicial: os dois falam a linguagem de containers, e a migração reaproveita a maior parte do conhecimento adquirido.
 
 ## Referências
 
-- [Docker Swarm vs Kubernetes comparison](https://docs.docker.com/engine/swarm/): visão oficial do Docker.
-- [K3s documentation](https://docs.k3s.io/): guia oficial do K3s.
-- [Kubernetes vs Docker — what's the difference?](https://kubernetes.io/docs/concepts/overview/): documentação oficial do Kubernetes.
+- [Docker: Swarm mode overview](https://docs.docker.com/engine/swarm/): visão oficial do Docker.
+- [K3s: documentação oficial](https://docs.k3s.io/): guia oficial do K3s.
+- [Kubernetes: Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/): visão oficial dos componentes do Kubernetes.

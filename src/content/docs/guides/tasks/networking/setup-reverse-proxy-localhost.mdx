@@ -1,248 +1,175 @@
 ---
 title: Configurar reverse proxy em localhost
+description: Como configurar Nginx ou HAProxy na porta 443 de um bastion ou laptop administrativo para rotear, por SNI, para os serviços internos resolvidos pela zona DNS do guia anterior.
 sidebar:
   order: 5
 ---
 
-> **Para quem é:** operadores com CoreDNS configurado (Passo anterior) que querem rotear requests ao localhost.
-> **Ambientes:** bastion externo, laptop com VPN, ou servidor de infraestrutura.
+> **Pré-requisitos:** [CoreDNS configurado para a zona `internal`](../setup-coredns-internal/), acesso root ao host que vai rodar o proxy (bastion ou laptop administrativo), Nginx ou HAProxy instalado.
+> **Versões testadas:** Nginx 1.25, HAProxy 2.8.
 
-Configurar um reverse proxy (Nginx, HAProxy) para rotear requests de `127.0.0.1:443` para serviços internos, usando SNI para identificar o domínio.
+O guia anterior faz `grafana.internal` resolver para `127.0.0.1`. Essa resolução sozinha não abre nenhuma conexão: falta um processo escutando em `127.0.0.1:443` que receba a conexão TLS e decida, a partir do nome pedido pelo cliente, para qual serviço interno encaminhar. É esse processo que este guia configura, usando o campo SNI (Server Name Indication, o nome de domínio que o cliente TLS envia antes da negociação, visível mesmo sem descriptografar a conexão) para escolher o destino.
 
-## Opção A: Nginx (recomendado para simplicidade)
+Repare que os nomes administrativos (`grafana.internal`) e os nomes reais dos Services no cluster (`grafana-svc.default.svc.cluster.local`) pertencem a espaços de nomes diferentes: o primeiro é a convenção local criada no guia anterior para o operador digitar; o segundo é a resolução real de Service do Kubernetes, usada pelo proxy para alcançar o backend. As duas opções abaixo resolvem o mesmo problema com desenhos diferentes: a Opção A (Nginx) termina o TLS no proxy usando um certificado autoassinado compartilhado; a Opção B (HAProxy) inspeciona o SNI sem descriptografar e repassa a conexão TLS intacta até o backend. Escolha a Opção A quando quiser um único certificado simples para todo o acesso administrativo; escolha a Opção B quando os backends já tiverem certificados próprios válidos e o objetivo for preservá-los ponta a ponta.
 
-### Passo 1: Gerar certificado auto-assinado
+## Opção A: Nginx (termina TLS no proxy)
 
-```yaml
-# Gerar chave e certificado para *.local
+Gere um certificado autoassinado cobrindo os nomes administrativos que serão publicados:
+
+> **Executar em:** host que vai rodar o proxy, como `root`.
+
+```bash
+mkdir -p /etc/nginx/certs
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/nginx/certs/local.key \
-  -out /etc/nginx/certs/local.crt \
-  -subj "/CN=*.cluster.local" \
-  -addext "subjectAltName=DNS:*.cluster.local,DNS:cluster.local"
-
-# Certificado é auto-assinado (browser avisa, mas funciona)
+  -keyout /etc/nginx/certs/internal.key \
+  -out /etc/nginx/certs/internal.crt \
+  -subj "/CN=*.internal" \
+  -addext "subjectAltName=DNS:grafana.internal,DNS:prometheus.internal,DNS:argocd.internal"
 ```
 
-### Passo 2: Criar configuração Nginx
+`subjectAltName` precisa listar cada nome administrativo explicitamente (um `CN` com curinga sozinho não é suficiente para navegadores modernos); acrescente um `DNS:` por serviço adicionado no guia anterior e regenere o certificado quando a lista mudar.
 
-```yaml
-cat > /etc/nginx/sites-available/local-proxy <<'EOF'
-# Upstream servers (serviços internos)
+Crie o arquivo de configuração do site:
+
+```nginx
+# /etc/nginx/sites-available/internal-proxy
 upstream grafana_backend {
-  server grafana-svc.default.svc.cluster.local:3000;
+    server grafana-svc.default.svc.cluster.local:3000;
 }
 
 upstream prometheus_backend {
-  server prometheus-svc.default.svc.cluster.local:9090;
+    server prometheus-svc.default.svc.cluster.local:9090;
 }
 
 upstream argocd_backend {
-  server argocd-server.argocd.svc.cluster.local:443;
+    server argocd-server.argocd.svc.cluster.local:443;
 }
 
-# HTTPS listener (SNI-based routing)
 server {
-  listen 127.0.0.1:443 ssl;
-  server_name ~^(?<subdomain>.*)\.cluster\.local$;
-  
-  ssl_certificate     /etc/nginx/certs/local.crt;
-  ssl_certificate_key /etc/nginx/certs/local.key;
-  
-  # Desabilitar verificação de certificado upstream (auto-assinados)
-  proxy_ssl_verify off;
-  
-  # Roteamento por SNI (subdomain)
-  location / {
-    if ($subdomain = "grafana") {
-      proxy_pass http://grafana_backend;
-      break;
+    listen 127.0.0.1:443 ssl;
+    server_name grafana.internal prometheus.internal argocd.internal;
+
+    ssl_certificate     /etc/nginx/certs/internal.crt;
+    ssl_certificate_key /etc/nginx/certs/internal.key;
+
+    # Os backends usam certificados internos do cluster; desabilitar a
+    # verificação evita falhas por CA não reconhecida nesta camada.
+    proxy_ssl_verify off;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    location / {
+        if ($host = grafana.internal) {
+            proxy_pass http://grafana_backend;
+        }
+        if ($host = prometheus.internal) {
+            proxy_pass http://prometheus_backend;
+        }
+        if ($host = argocd.internal) {
+            proxy_pass https://argocd_backend;
+        }
     }
-    
-    if ($subdomain = "prometheus") {
-      proxy_pass http://prometheus_backend;
-      break;
-    }
-    
-    if ($subdomain = "argocd") {
-      proxy_pass https://argocd_backend;
-      break;
-    }
-    
-    # Default: 404
-    return 404;
-  }
-  
-  # Headers padrão
-  proxy_set_header Host $host;
-  proxy_set_header X-Real-IP $remote_addr;
-  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  proxy_set_header X-Forwarded-Proto $scheme;
 }
-
-# HTTP para HTTPS redirect (opcional)
-server {
-  listen 127.0.0.1:80;
-  server_name ~^(?<subdomain>.*)\.cluster\.local$;
-  
-  location / {
-    return 301 https://$host$request_uri;
-  }
-}
-EOF
-
-# Ativar site
-sudo ln -s /etc/nginx/sites-available/local-proxy /etc/nginx/sites-enabled/
-
-# Testar configuração
-sudo nginx -t
-
-# Restart
-sudo systemctl restart nginx
 ```
 
-## Opção B: HAProxy (para multi-protocol)
+Ative o site e valide a sintaxe antes de recarregar:
 
-### Passo 1: Criar certificado (igual a Nginx)
+> **Executar em:** host que vai rodar o proxy, como `root`.
 
-```yaml
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/haproxy/certs/local.key \
-  -out /etc/haproxy/certs/local.crt \
-  -subj "/CN=*.cluster.local"
-
-# Combinar em arquivo único (HAProxy exige)
-cat /etc/haproxy/certs/local.key /etc/haproxy/certs/local.crt > /etc/haproxy/certs/local.pem
-chmod 600 /etc/haproxy/certs/local.pem
+```bash
+ln -sf /etc/nginx/sites-available/internal-proxy /etc/nginx/sites-enabled/internal-proxy
+nginx -t
+systemctl reload nginx
 ```
 
-### Passo 2: Configuração HAProxy
+`nginx -t` detecta erros de sintaxe antes de qualquer interrupção; nunca recarregue sem essa checagem passar primeiro.
 
-```yaml
-cat > /etc/haproxy/haproxy.cfg <<'EOF'
+## Opção B: HAProxy (passthrough por SNI)
+
+Diferente do Nginx acima, o HAProxy aqui não termina TLS: ele apenas inspeciona o SNI da negociação e encaminha os bytes originais, criptografados, até o backend. Não é necessário nenhum certificado no HAProxy.
+
+Configure o frontend e os backends:
+
+> **Executar em:** host que vai rodar o proxy, como `root`.
+
+```text
+# /etc/haproxy/haproxy.cfg
 global
-  log stdout local0
+    log stdout local0
 
 defaults
-  mode http
-  timeout connect 5000
-  timeout client 50000
-  timeout server 50000
+    mode tcp
+    timeout connect 5s
+    timeout client 50s
+    timeout server 50s
 
-# Frontend HTTPS (listen)
-frontend local_https
-  bind 127.0.0.1:443 ssl crt /etc/haproxy/certs/local.pem
-  mode tcp  # TCP mode (não HTTP) para máxima compatibilidade
-  default_backend grafana_backend
-  
-  # SNI routing (baseado em domínio TLS)
-  tcp-request inspect-delay 1s
-  tcp-request content accept if { req_ssl_hello_type 1 }
-  
-  # Identificar servidor backend por SNI
-  use_backend grafana_backend if { ssl_fc_sni -i grafana.cluster.local }
-  use_backend prometheus_backend if { ssl_fc_sni -i prometheus.cluster.local }
-  use_backend argocd_backend if { ssl_fc_sni -i argocd.cluster.local }
+frontend internal_https
+    bind 127.0.0.1:443
+    tcp-request inspect-delay 2s
+    tcp-request content accept if { req.ssl_hello_type 1 }
 
-# Backends
+    use_backend grafana_backend if { req.ssl_sni -i grafana.internal }
+    use_backend prometheus_backend if { req.ssl_sni -i prometheus.internal }
+    use_backend argocd_backend if { req.ssl_sni -i argocd.internal }
+    default_backend grafana_backend
+
 backend grafana_backend
-  mode tcp
-  server grafana grafana-svc.default.svc.cluster.local:3000 check
+    server grafana grafana-svc.default.svc.cluster.local:3000 check
 
 backend prometheus_backend
-  mode tcp
-  server prometheus prometheus-svc.default.svc.cluster.local:9090 check
+    server prometheus prometheus-svc.default.svc.cluster.local:9090 check
 
 backend argocd_backend
-  mode tcp
-  server argocd argocd-server.argocd.svc.cluster.local:443 check ssl verify none
-EOF
-
-# Restart
-sudo systemctl restart haproxy
+    server argocd argocd-server.argocd.svc.cluster.local:443 check
 ```
 
-## Passo 3: Testar acesso
+Como o tráfego chega intacto ao backend, cada serviço precisa apresentar seu próprio certificado válido para essa conexão (o Argo CD, por exemplo, atende TLS diretamente na porta 443 do Service `argocd-server`); não há um certificado único do proxy cobrindo todos os nomes, ao contrário da Opção A.
 
-```yaml
-# Desde o mesmo host (ou via SSH)
-curl -k https://grafana.cluster.local
+Valide a configuração e recarregue:
 
-# Esperado: resposta do Grafana (login page, etc.)
-# -k ignora aviso de certificado auto-assinado
-
-# Ou via navegador
-# https://grafana.cluster.local (browser avisa "untrusted cert")
+```bash
+haproxy -c -f /etc/haproxy/haproxy.cfg
+systemctl reload haproxy
 ```
 
-## Passo 4: Adicionar ao /etc/hosts (se CoreDNS não está disponível)
+## Validação
 
-Se CoreDNS não resolve externamente:
+> **Executar em:** host que roda o proxy, ou qualquer estação que resolva os nomes administrativos pela zona configurada no guia anterior.
 
-```yaml
-# Adicionar manualmente ao /etc/hosts
-sudo bash -c 'cat >> /etc/hosts <<EOF
-127.0.0.1 grafana.cluster.local
-127.0.0.1 prometheus.cluster.local
-127.0.0.1 argocd.cluster.local
-EOF'
+```bash
+curl -k https://grafana.internal
 ```
 
-## Problemas comuns
+Deve retornar a página de login do Grafana (ou o corpo esperado do serviço testado). `-k` ignora o aviso de certificado autoassinado da Opção A; na Opção B (passthrough), o certificado apresentado é o do backend, então `-k` só é necessário se esse certificado também não for confiável pela estação cliente.
 
-### "Connection refused"
+## Troubleshooting
 
-**Causa:** reverse proxy não está ouvindo ou serviço backend não está acessível.
+Comece verificando se o proxy está de fato escutando antes de suspeitar de roteamento:
 
-**Solução:**
-```yaml
-# Verificar que proxy está ouvindo
-sudo netstat -tuln | grep 127.0.0.1:443
-
-# Testar conectividade ao backend (ex.: Grafana)
-curl -k https://grafana-svc.default.svc.cluster.local:3000
-
-# Se dentro de K3s:
-kubectl port-forward -n default svc/grafana 3000:3000 &
-curl localhost:3000
+```bash
+ss -tlnp 'sport = :443'
 ```
 
-### "SSL_ERROR_BAD_CERT_DOMAIN" (navegador)
+Se nada aparecer, o serviço (`nginx` ou `haproxy`) não subiu; revise `journalctl -u nginx` ou `journalctl -u haproxy` para o erro de inicialização. Se o proxy está escutendo mas a conexão retorna erro de destino errado ou 404, confirme que o `server_name`/`req.ssl_sni` corresponde exatamente ao nome usado no `curl`, incluindo a ausência de `www.` ou de subdomínios extras. Se a conexão chega ao proxy mas falha ao alcançar o backend, teste a resolução do nome de Service Kubernetes diretamente a partir do host do proxy; se ele não estiver na rede de Pods do cluster, esses nomes internos do Kubernetes não são alcançáveis dali, e o proxy precisa rodar dentro do cluster ou ter uma rota específica até a rede de Pods.
 
-**Causa:** certificado não cobre o domínio.
+## Rollback
 
-**Solução:**
-```yaml
-# Regenerar certificado com SANs corretos
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/nginx/certs/local.key \
-  -out /etc/nginx/certs/local.crt \
-  -subj "/CN=*.cluster.local" \
-  -addext "subjectAltName=DNS:*.cluster.local,DNS:grafana.cluster.local,DNS:prometheus.cluster.local,DNS:argocd.cluster.local"
+```bash
+rm -f /etc/nginx/sites-enabled/internal-proxy
+systemctl reload nginx
 ```
 
-### "Upstream timed out"
-
-**Causa:** reverse proxy não consegue alcançar o backend.
-
-**Solução:**
-```yaml
-# Verificar firewall
-sudo ufw allow 3000  # para Grafana, etc.
-
-# Testar ping ao backend
-ping grafana-svc.default.svc.cluster.local
-
-# Se em K3s, pode precisar de port-forward ou exposição do serviço
-```
+Para HAProxy, restaure a configuração anterior a partir de um backup ou remova o `frontend internal_https` e os backends associados antes de recarregar.
 
 ## Próximo passo
 
-- [Validar setup](../validate-dns-and-proxy/) — checklist pós-implantação.
-- [Split-horizon DNS (conceito)](../../learn/networking/split-horizon-dns/) — entender arquitetura.
+Com a cadeia completa funcionando (resolução DNS seguida de roteamento TLS), acrescente novos serviços repetindo os dois guias: uma entrada em [CoreDNS](../setup-coredns-internal/) e um bloco de roteamento aqui. Para publicar um serviço para o público externo, em vez de apenas para operadores, use [Gateway API e Traefik](../configure-traefik-gateway-api/), que resolve exposição pública com certificados emitidos por uma CA real.
 
 ## Fontes e leitura adicional
 
-- [Nginx — Reverse Proxy](https://nginx.org/en/docs/http/ngx_http_proxy_module.html): documentação oficial.
-- [HAProxy — Configuration Manual](https://www.haproxy.org/): detalhes de configuração.
-- [OpenSSL — Self-Signed Certificates](https://www.openssl.org/docs/man3.0/man1/openssl-req.html): gerar certificados.
+- [Nginx: Reverse Proxy](https://nginx.org/en/docs/http/ngx_http_proxy_module.html): referência do módulo `proxy_pass` e diretivas relacionadas.
+- [HAProxy: Configuration Manual](https://www.haproxy.org/#docs): referência completa de `frontend`, `backend` e inspeção de SNI sem terminação de TLS.
+- [OpenSSL: `req`](https://docs.openssl.org/master/man1/openssl-req/): referência do comando usado para gerar o certificado autoassinado.

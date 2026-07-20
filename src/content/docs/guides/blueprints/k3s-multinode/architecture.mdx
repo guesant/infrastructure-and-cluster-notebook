@@ -1,12 +1,13 @@
 ---
 title: Arquitetura de quorum e etcd
+description: Como o etcd embarcado do K3s usa o algoritmo Raft para manter consenso entre servidores, o que é quorum e como ele determina quantas falhas o cluster tolera.
 sidebar:
   order: 2
 ---
 
 > **Para quem é:** operadores que precisam entender como K3s mantem consenso em múltiplos servidores, antes de começar o operacional.
 
-Em um cluster K3s multinode com etcd embarcado, os servidores se comunicam para manter um registro distribuído do estado do cluster. Essa comunicação segue o algoritmo **Raft**, que exige um **quorum** — um consenso entre a maioria dos servidores. Sem um quorum funcional, o cluster trava.
+Em um cluster K3s multinode com etcd embarcado, os servidores se comunicam para manter um registro distribuído do estado do cluster. Essa comunicação segue o algoritmo **Raft**, que exige um **quorum**: um consenso entre a maioria dos servidores. Sem um quorum funcional, o cluster trava.
 
 ## Como funciona
 
@@ -29,11 +30,11 @@ Um **servidor líder** coordena todas as escritas. Cada mudança é proposta aos
 
 ## Quorum
 
-O quorum é a quantidade **mínima de servidores que precisam estar saudáveis** para que o cluster funcione. Para N servidores:
-
-```yaml
-Quorum = floor(N / 2) + 1
-```
+O quorum é a quantidade mínima de servidores que precisam estar saudáveis para que o cluster
+continue funcionando. Para um cluster com N servidores, o quorum é `floor(N / 2) + 1`: o menor
+número inteiro que já representa mais da metade de N. É por isso que adicionar um servidor a mais
+em um cluster com número par nem sempre aumenta a tolerância a falhas, como a tabela mostra a
+seguir.
 
 | Servidores | Quorum | Tolerância de falha |
 | --- | --- | --- |
@@ -43,7 +44,7 @@ Quorum = floor(N / 2) + 1
 | 5 | 3 | 2 (pode perder 2) |
 | 7 | 4 | 3 (pode perder 3) |
 
-**Em 3 servidores**, o quorum é 2 — você pode perder 1 servidor e o cluster continua operacional. Se perder 2, o cluster fica travado: nenhuma nova decisão pode ser tomada.
+Em 3 servidores, o quorum é 2: é possível perder 1 servidor e o cluster continua operacional. Se perder 2, o cluster fica travado, e nenhuma nova decisão pode ser tomada.
 
 ## Cenários de falha
 
@@ -113,6 +114,6 @@ flowchart LR
 
 ## Fontes e leitura adicional
 
-- [K3s — High Availability Etcd](https://docs.k3s.io/datastore/ha-embedded): implementação de HA no K3s.
+- [K3s: High Availability Etcd](https://docs.k3s.io/datastore/ha-embedded): implementação de HA no K3s.
 - [etcd Raft Consensus](https://etcd.io/docs/v3.5/learning/design-client/): especificação do algoritmo Raft usado pelo etcd.
-- [Disaster Recovery — K3s](https://docs.k3s.io/datastore/backup-restore): backup e restore de etcd no K3s.
+- [K3s: Disaster Recovery](https://docs.k3s.io/datastore/backup-restore): backup e restore de etcd no K3s.

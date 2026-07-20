@@ -1,5 +1,6 @@
 ---
 title: Configurar backups do PostgreSQL
+description: Como configurar o destino de backup, arquivamento contínuo de WAL e backups completos agendados no CloudNativePG, com validação da política de retenção.
 sidebar:
   order: 5
 ---
@@ -94,9 +95,9 @@ Remover o `ScheduledBackup` não apaga backups já existentes no destino nem int
 
 ## Próximo passo
 
-Teste a restauração — um backup nunca testado não é confiável. Veja [restaurar um cluster PostgreSQL](../restore-postgresql-cluster/).
+Teste a restauração: um backup nunca testado não é confiável. Veja [restaurar um cluster PostgreSQL](../restore-postgresql-cluster/).
 
 ## Fontes e leitura adicional
 
-- [CloudNativePG — Backup on object stores](https://cloudnative-pg.io/documentation/current/backup_barmanobjectstore/): referência oficial de configuração de backup via Barman Cloud.
-- [CloudNativePG — Backup and Recovery](https://cloudnative-pg.io/documentation/current/backup_recovery/): visão geral de estratégias de backup e recuperação suportadas.
+- [CloudNativePG: Backup on object stores](https://cloudnative-pg.io/documentation/current/backup_barmanobjectstore/): referência oficial de configuração de backup via Barman Cloud.
+- [CloudNativePG: Backup and Recovery](https://cloudnative-pg.io/documentation/current/backup_recovery/): visão geral de estratégias de backup e recuperação suportadas.

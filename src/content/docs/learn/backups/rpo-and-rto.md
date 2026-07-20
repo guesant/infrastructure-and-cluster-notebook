@@ -11,9 +11,9 @@ RPO e RTO são as duas perguntas que toda estratégia de backup precisa responde
 
 ## Como funciona
 
-**RPO** (Recovery Point Objective) é a perda máxima de dados tolerável, medida em tempo. Um RPO de 15 minutos significa que, no pior caso, a restauração pode perder até 15 minutos de dados desde o último ponto recuperável — não que o backup "roda a cada 15 minutos" necessariamente, mas que o mecanismo (backup completo + logs incrementais, por exemplo) garante um ponto recuperável dentro dessa janela.
+**RPO** (Recovery Point Objective) é a perda máxima de dados tolerável, medida em tempo. Um RPO de 15 minutos significa que, no pior caso, a restauração pode perder até 15 minutos de dados desde o último ponto recuperável: não que o backup "roda a cada 15 minutos" necessariamente, mas que o mecanismo (backup completo + logs incrementais, por exemplo) garante um ponto recuperável dentro dessa janela.
 
-**RTO** (Recovery Time Objective) é o tempo máximo tolerável para restabelecer o serviço, contado do início do incidente até a funcionalidade restaurada — não apenas até "os arquivos foram copiados de volta".
+**RTO** (Recovery Time Objective) é o tempo máximo tolerável para restabelecer o serviço, contado do início do incidente até a funcionalidade restaurada, não apenas até "os arquivos foram copiados de volta".
 
 ```mermaid
 flowchart LR
@@ -24,11 +24,11 @@ flowchart LR
     Falha -->|"RTO: tempo máximo de indisponibilidade"| Restaurado["Serviço restaurado e validado"]
 ```
 
-Nenhum dos dois é uma meta abstrata — ambos só têm valor quando medidos contra um teste de restauração real. Uma retenção diária não prova um RPO de 15 minutos; um script de restore nunca executado não prova nenhum RTO.
+Nenhum dos dois é uma meta abstrata; ambos só têm valor quando medidos contra um teste de restauração real. Uma retenção diária não prova um RPO de 15 minutos; um script de restore nunca executado não prova nenhum RTO.
 
 ## Alternativas
 
-Para dados de baixa criticidade, um RPO/RTO frouxo (horas ou dias) é uma escolha deliberada e razoável — nem todo dado precisa do mesmo nível de proteção.
+Para dados de baixa criticidade, um RPO/RTO frouxo (horas ou dias) é uma escolha deliberada e razoável: nem todo dado precisa do mesmo nível de proteção.
 
 ## Quando definir RPO/RTO rigorosos
 
@@ -50,4 +50,4 @@ RPO define a frequência mínima de backup e a existência (ou não) de logs inc
 
 ## Referências
 
-- [K3s — Backup and Restore](https://docs.k3s.io/datastore/backup-restore): referência de RPO implícito no agendamento de snapshots do etcd.
+- [K3s: Backup and Restore](https://docs.k3s.io/datastore/backup-restore): referência de RPO implícito no agendamento de snapshots do etcd.

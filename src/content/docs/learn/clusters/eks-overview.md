@@ -1,136 +1,80 @@
 ---
-title: EKS — Kubernetes gerenciado AWS
+title: "EKS: Kubernetes gerenciado na AWS"
+description: Explica o que a AWS gerencia e o que o operador continua gerenciando no Amazon EKS, e quando vale a pena trocar um cluster self-hosted por um gerenciado.
 sidebar:
   order: 9
 ---
 
-> **Para quem é:** equipes na AWS que querem Kubernetes sem manter control plane.
+> **Para quem é:** equipes na AWS avaliando se compensa parar de manter o control plane do próprio cluster.
 
-Amazon EKS (Elastic Kubernetes Service) é Kubernetes puro gerenciado. AWS cuida do control plane; você gerencia worker nodes.
+Amazon EKS (Elastic Kubernetes Service) é Kubernetes padrão com o control plane operado pela AWS. A API que uma aplicação ou um operador usa é a mesma de qualquer outra distribuição; a diferença está em quem mantém a API Server, o etcd e os controllers no ar.
 
-## O que EKS oferece
+## O que muda de responsabilidade
 
-**AWS gerencia:**
-
-- Control plane (API server, etcd, controllers)
-- Certificados e TLS
-- Patches e upgrades
-- Backups de etcd
-
-**Você gerencia:**
-
-- Nodes (EC2, Fargate, ou ambos)
-- CNI (Flannel, Cilium, Calico)
-- Aplicações
-- Networking
-
----
-
-## Comparação: K3s vs. RKE2 vs. EKS
+A AWS assume o control plane (API Server, etcd, controllers), a emissão e renovação dos certificados internos, os patches de versão e os backups do etcd. O operador continua responsável pelos worker nodes (EC2, Fargate, ou uma combinação dos dois), pelo CNI escolhido (Flannel, Cilium, Calico), pelas aplicações e por sua própria configuração de rede dentro da VPC.
 
 | Aspecto | K3s | RKE2 | EKS |
-| --------- | ----- | ------ | ----- |
-| **Setup** | 30s | 5 min | 10 min (via console) |
-| **Infra** | VMs gerenciadas | VMs gerenciadas | AWS gerenciado |
-| **Custo** | Mínimo | Mínimo | 0.10 $/hora control plane + nodes |
-| **Scale** | Pequeno (100s nós) | Médio (1000s) | Ilimitado |
-| **Compliance** | Nenhum | CIS/FIPS | CIS/FedRAMP/HIPAA |
-| **Lock-in** | Nenhum | Nenhum | AWS (ec2, iam, rds) |
+| --- | --- | --- | --- |
+| Setup | Segundos | Minutos | Minutos, via console ou `eksctl` |
+| Infraestrutura | VMs geridas pelo operador | VMs geridas pelo operador | Control plane gerido pela AWS |
+| Escala | Centenas de nós | Milhares de nós | Sem limite prático imposto pela distribuição |
+| Compliance | Nenhuma certificação nativa | CIS, FIPS | CIS, FedRAMP, HIPAA, conforme a região e configuração |
+| Portabilidade | Total | Total | Preso ao ecossistema AWS (EC2, IAM, RDS) |
 
-## Quando usar EKS
+## Quando EKS compensa
 
-### ✅ Use EKS se
+Quando a equipe já opera na AWS e quer delegar o control plane em vez de mantê-lo, quando o ambiente precisa de um SLA formal sobre a disponibilidade da API, quando a certificação de compliance nativa da AWS já cobre o requisito regulatório do ambiente, ou quando a integração entre RBAC e IAM simplifica a gestão de acesso de uma equipe pequena sem especialista dedicado em Kubernetes.
 
-- Já usa AWS
-- Production com requisitos SLA (AWS 99.95% uptime)
-- Precisa compliance AWS-native
-- Equipe pequena (quer delegar control plane)
-- Multi-tenancy (RBAC + IAM integrado)
+## Quando EKS não é a escolha certa
 
-### ❌ Não use EKS se
-
-- Multi-cloud (k3s/RKE2 portáveis)
-- Quer sair da AWS (lock-in)
-- Budget crítico (sem nodes = sem cost)
-- On-prem só (EKS precisa AWS)
-
----
+Quando o ambiente precisa ser portável entre provedores de nuvem (K3s e RKE2 não têm esse acoplamento), quando evitar lock-in com a AWS é uma prioridade arquitetural, quando o orçamento não comporta o custo fixo do control plane gerenciado além do custo dos nós, ou quando o ambiente é inteiramente on-premises, já que o EKS depende da infraestrutura da AWS por definição.
 
 ## Arquitetura
 
 ```mermaid
 graph TB
-    subgraph AWS["AWS (Control plane)"]
-        API["API Server<br/>(gerenciado)"]
-        ETCD["etcd<br/>(gerenciado)"]
-        CTRL["Controllers<br/>(gerenciado)"]
+    subgraph AWS["AWS: control plane gerenciado"]
+        API["API Server"]
+        ETCD["etcd"]
+        CTRL["Controllers"]
     end
-    
-    subgraph VPC["VPC (Você gerencia)"]
-        EC2["EC2 nodes<br/>(opção classic)"]
-        Fargate["Fargate<br/>(opção serverless<br/>sem nodes visíveis)"]
+
+    subgraph VPC["VPC do operador"]
+        EC2["Nós EC2<br/>(modelo clássico)"]
+        Fargate["Fargate<br/>(modelo serverless,<br/>sem nós visíveis)"]
     end
-    
+
     API <--> EC2
     API <--> Fargate
 ```
 
-## Worker nodes: EC2 vs. Fargate
+Nós EC2 oferecem controle total sobre o hardware subjacente, com custo fixo independente de uso; Fargate cobra por recurso efetivamente consumido, sem expor a máquina virtual por trás do Pod, o que favorece cargas em lote, ambientes de desenvolvimento e workloads com picos irregulares de demanda.
 
-| Opção | Controle | Custo | Uso |
-| --- | --- | --- | --- |
-| **EC2** | Total | Fixo (mesmo sem usar) | Apps que precisam recursos estáveis |
-| **Fargate** | Mínimo | Por-recurso (pay-as-you-go) | Batch, dev/test, spiky workloads |
+## Provisionar um cluster
 
----
-
-## Setup (muito rápido)
+> **Executar em:** estação administrativa com `eksctl` e credenciais AWS configuradas.
 
 ```bash
-# 1. Criar cluster (via console ou eksctl)
 eksctl create cluster --name my-cluster --region us-east-1
-
-# 2. Configurar kubeconfig
 aws eks update-kubeconfig --region us-east-1 --name my-cluster
-
-# 3. Deploy apps (kubectl normal)
 kubectl apply -f app.yaml
 ```
 
----
+## Integração com o ecossistema AWS
 
-## Integração AWS
-
-EKS integra-se naturalmente com:
-
-- **IAM:** RBAC ligado a roles AWS
-- **ECR:** registry nativa
-- **RDS:** banco dados gerenciado (não em cluster)
-- **Secrets Manager:** secrets centralizadas
-- **CloudWatch:** logs centralizados
-- **ALB:** load balancer nativo
-
----
+O EKS se integra nativamente com IAM (RBAC ligado a roles da AWS), ECR (registry de imagens), RDS (bancos de dados gerenciados fora do cluster), Secrets Manager, CloudWatch (logs e métricas centralizados) e o Application Load Balancer da AWS como ingress nativo. Essa integração é o principal argumento a favor do EKS para equipes já profundamente investidas no ecossistema AWS; é também o principal fator de lock-in para quem valoriza portabilidade.
 
 ## Custo
 
-- Control plane: $0.10/hora (~$73/mês)
-- Nodes: preço EC2 normal (~$0.05/hora micro)
-- Data transfer: padrão AWS
-
-**ROI:** controle plane gerenciado economiza overhead ops.
-
----
+O EKS cobra uma taxa fixa por hora pelo control plane, além do custo normal dos nós EC2 ou Fargate e da transferência de dados. Os valores mudam com frequência e variam por região; consulte a [calculadora oficial de preços do EKS](https://aws.amazon.com/eks/pricing/) para uma estimativa atual em vez de confiar em números fixados neste texto. Esse custo do control plane é o principal trade-off financeiro frente a um cluster self-hosted como K3s: o operador paga pela conveniência de não operar o control plane, não apenas pelos nós.
 
 ## Próximas seções
 
-- [Instalar EKS](../../../guides/tasks/kubernetes/install-eks/) — step-by-step com eksctl.
-- [EKS vs. K3s](../../../learn/clusters/rke2-vs-k3s/) — escolher entre opções.
-
----
+- [RKE2 vs. K3s](../rke2-vs-k3s/): compara as duas opções self-hosted deste notebook entre si.
+- [Kubernetes gerenciado vs. self-hosted](../managed-vs-selfhosted/): aprofunda a decisão entre delegar o control plane ou operá-lo, usando o EKS como exemplo de opção gerenciada.
 
 ## Referências
 
-- [EKS documentation](https://docs.aws.amazon.com/eks/): guia oficial.
-- [eksctl](https://eksctl.io/): ferramenta CLI para EKS.
-- [Kubernetes on AWS](https://aws.amazon.com/kubernetes/): visão AWS.
+- [AWS: documentação do EKS](https://docs.aws.amazon.com/eks/): guia oficial.
+- [eksctl: documentação oficial](https://eksctl.io/): ferramenta de linha de comando para provisionar e gerenciar clusters EKS.
+- [AWS: Kubernetes on AWS](https://aws.amazon.com/kubernetes/): visão geral da oferta.

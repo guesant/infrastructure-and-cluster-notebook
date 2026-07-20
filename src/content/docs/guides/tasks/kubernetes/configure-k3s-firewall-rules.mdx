@@ -1,5 +1,6 @@
 ---
 title: Firewall dos nós
+description: Como liberar a comunicação interna do cluster K3s (API, Flannel VXLAN/WireGuard, etcd embarcado) no firewall dos hosts manager e agent.
 sidebar:
   order: 7
 ---
@@ -26,7 +27,7 @@ Somente nos managers:
 
 > **Executar em:** todos os nós manager, como `root`.
 
-```yaml
+```bash
 bash <<'EOF'
 set -euo pipefail
 
@@ -49,7 +50,7 @@ Se a API também for administrada por uma rede separada, acrescente uma regra TC
 
 ## Fontes e leitura adicional
 
-- [K3s — Requirements: Networking](https://docs.k3s.io/installation/requirements#networking) — Mantém a tabela oficial de portas, origens e destinos exigidos por API, Flannel, kubelet e etcd.
-- [K3s — Basic Network Options](https://docs.k3s.io/networking/basic-network-options) — Detalha os backends VXLAN e WireGuard do Flannel e as opções de rede alternativas.
-- [Ubuntu Server — Firewall](https://ubuntu.com/server/docs/how-to/security/firewalls/) — Referência oficial do Ubuntu para configurar e revisar regras com UFW.
-- [Kubernetes — Service](https://kubernetes.io/docs/concepts/services-networking/service/) — Explica os tipos de Service, incluindo `NodePort` e `LoadBalancer`, que podem exigir portas adicionais nos hosts.
+- [K3s: Requirements (Networking)](https://docs.k3s.io/installation/requirements#networking): mantém a tabela oficial de portas, origens e destinos exigidos por API, Flannel, kubelet e etcd.
+- [K3s: Basic Network Options](https://docs.k3s.io/networking/basic-network-options): detalha os backends VXLAN e WireGuard do Flannel e as opções de rede alternativas.
+- [Ubuntu Server: Firewall](https://ubuntu.com/server/docs/how-to/security/firewalls/): referência oficial do Ubuntu para configurar e revisar regras com UFW.
+- [Kubernetes: Service](https://kubernetes.io/docs/concepts/services-networking/service/): explica os tipos de Service, incluindo `NodePort` e `LoadBalancer`, que podem exigir portas adicionais nos hosts.

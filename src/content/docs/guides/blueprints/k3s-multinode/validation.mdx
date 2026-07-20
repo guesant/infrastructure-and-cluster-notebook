@@ -1,22 +1,25 @@
 ---
 title: Validar o cluster multinode
+description: Checklist de verificação pós-implantação para um cluster K3s multinode, cobrindo nós, componentes de sistema, quorum de etcd, rede overlay, DNS e scheduling de pods.
 sidebar:
   order: 8
 ---
 
 > **Para quem é:** quem acabou de instalar servidores e agentes e quer confirmar que tudo está saudável antes de começar a usar.
 
-Um checklist rápido após a implantação de um cluster multinode K3s. Execute todos os passos abaixo em um dos servidores (com `sudo` conforme necessário).
+Este é um checklist de verificação a ser executado logo após a implantação de um cluster
+multinode K3s, antes de colocá-lo em uso. Execute todos os passos abaixo em um dos servidores,
+com `sudo` conforme necessário.
 
 ## 1. Verificar nós
 
-```yaml
+```bash
 sudo kubectl get nodes -o wide
 ```
 
 **Esperado:** todos os nós aparecem com `STATUS = Ready`; `ROLES` mostram `control-plane,master` para servidores e nada para agentes.
 
-```yaml
+```text
 NAME         STATUS   ROLES                  AGE    VERSION
 servidor-0   Ready    control-plane,master   5m     v1.36.0+k3s1
 servidor-1   Ready    control-plane,master   3m     v1.36.0+k3s1
@@ -24,21 +27,22 @@ servidor-2   Ready    control-plane,master   2m     v1.36.0+k3s1
 agente-1     Ready    <none>                 90s    v1.36.0+k3s1
 ```
 
-**Se algum nó está `NotReady`:**
-```yaml
+Se algum nó está `NotReady`:
+
+```bash
 kubectl describe node <nome-nó>
-# Procure por "Conditions" — mensagens de erro indicam problema
+# Procure pela seção "Conditions": mensagens de erro ali indicam a causa
 ```
 
 ## 2. Verificar componentes de controle
 
-```yaml
+```bash
 sudo kubectl get pods -n kube-system
 ```
 
 **Esperado:** pods como `coredns`, `local-path-provisioner`, `metrics-server` devem estar `Running` ou `Completed`.
 
-```yaml
+```text
 NAME                           READY   STATUS    RESTARTS   AGE
 coredns-869cb4b5bc-xyz1x       1/1     Running   0          5m
 local-path-provisioner-xyz2y   1/1     Running   0          5m
@@ -49,30 +53,25 @@ metrics-server-abc3d           1/1     Running   0          5m
 
 Em qualquer servidor:
 
-```yaml
+```bash
 sudo kubectl get endpoints kubernetes -n default
 ```
 
-**Esperado:** endpoint aponta para todos os servidores.
+**Esperado:** o endpoint aponta para todos os servidores. Isso confirma que a API considera todos
+eles parte do cluster, o que já é um bom indicador indireto de quorum saudável, já que um servidor
+fora do quorum não permanece registrado como endpoint por muito tempo.
 
-Ou, mais detalhado (em versões recentes):
-
-```yaml
-# Tentar listar membros de etcd (requer kubectl corretamente configurado)
-sudo kubectl exec -n kube-system <etcd-pod-name> -- \
-  etcdctl member list
-
-# Exemplo output:
-# 1a2b3c4d, started, servidor-0, https://10.0.0.10:2380, https://10.0.0.10:2379, false
-# 2c3d4e5f, started, servidor-1, https://10.0.0.11:2380, https://10.0.0.11:2379, false
-# 3d4e5f6g, started, servidor-2, https://10.0.0.12:2380, https://10.0.0.12:2379, false
-```
+O etcd do K3s roda embarcado no próprio processo `k3s`, não como um pod separado em
+`kube-system`; por isso não há um `etcdctl member list` padrão aplicável da mesma forma que em
+clusters onde o etcd roda como pod estático. Para inspecionar o Raft diretamente, consulte a
+[documentação de HA com etcd embarcado](https://docs.k3s.io/datastore/ha-embedded) da versão
+instalada.
 
 ## 4. Verificar conectividade entre nós
 
 Testar que cada nó consegue alcançar os outros:
 
-```yaml
+```bash
 # De servidor-0, testar conexão à API nos outros servidores
 for ip in 10.0.0.11 10.0.0.12; do
   echo "Testing $ip..."
@@ -86,13 +85,13 @@ done
 
 ## 5. Verificar rede overlay (Flannel)
 
-```yaml
+```bash
 sudo kubectl get pods -n kube-flannel
 ```
 
 **Esperado:** 1 pod flannel por nó, todos `Running`.
 
-```yaml
+```text
 NAME                   READY   STATUS    RESTARTS   AGE
 kube-flannel-ds-abc1x  1/1     Running   0          5m
 kube-flannel-ds-def2y  1/1     Running   0          5m
@@ -104,7 +103,7 @@ kube-flannel-ds-jkl4w  1/1     Running   0          5m
 
 Criar um pod de teste em cada agente:
 
-```yaml
+```bash
 # Criar 3 réplicas de Nginx
 kubectl create deployment nginx --image=nginx:latest --replicas=3
 
@@ -118,7 +117,7 @@ kubectl get pods -o wide | grep nginx
 
 Depois limpar:
 
-```yaml
+```bash
 kubectl delete deployment nginx
 ```
 
@@ -126,7 +125,7 @@ kubectl delete deployment nginx
 
 Se tiver Longhorn ou outro storage instalado:
 
-```yaml
+```bash
 sudo kubectl get storageclass
 sudo kubectl get pv
 ```
@@ -135,7 +134,7 @@ sudo kubectl get pv
 
 ## 8. Verificar DNS
 
-```yaml
+```bash
 # Criar um pod de teste
 kubectl run -it --rm debug --image=alpine --restart=Never -- sh
 
@@ -151,7 +150,7 @@ ping -c1 10.0.0.10   # IP de um nó
 
 ## 9. Verificar API Kubernetes
 
-```yaml
+```bash
 # Health check
 sudo curl -k https://localhost:6443/healthz
 
@@ -160,7 +159,7 @@ sudo curl -k https://localhost:6443/healthz
 
 Se usa load balancer, testar também:
 
-```yaml
+```bash
 curl -k https://api.seu-cluster.local:6443/healthz
 # (substitua pelo seu endpoint de LB)
 ```
@@ -169,7 +168,7 @@ curl -k https://api.seu-cluster.local:6443/healthz
 
 Procurar por erros recentes nos servidores:
 
-```yaml
+```bash
 # Logs do K3s
 sudo journalctl -u k3s -n 20 --no-pager | grep -i error
 
@@ -195,9 +194,9 @@ Se tudo passou, seu cluster está pronto para uso! Siga para [Operação nó a n
 
 ## Próximo passo
 
-- [Operação nó a nó](../node-maintenance/) — atualização e manutenção sem downtime.
-- [Falha e recuperação](../failure-and-recovery/) — runbooks para cenários de falha.
+- [Operação nó a nó](../node-maintenance/): atualização e manutenção sem downtime.
+- [Falha e recuperação](../failure-and-recovery/): runbooks para cenários de falha.
 
 ## Fontes e leitura adicional
 
-- [Kubernetes — Cluster Validation](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-cluster/): guia oficial de debugging.
+- [Kubernetes: Cluster Validation](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-cluster/): guia oficial de debugging.

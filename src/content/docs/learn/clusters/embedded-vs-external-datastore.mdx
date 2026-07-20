@@ -1,152 +1,81 @@
 ---
 title: etcd embarcado vs. datastore externo
+description: Compara o etcd embarcado do K3s com um datastore externo (PostgreSQL, MySQL, etcd dedicado) e explica quando cada escolha reduz a complexidade operacional.
 sidebar:
   order: 6
 ---
 
-Em um cluster K3s, o estado do cluster é armazenado em um **datastore** (banco de dados). K3s oferece dois caminhos: etcd embarcado (dentro de cada servidor K3s) ou um datastore externo (Postgres, MySQL, etcd separado).
-
-A escolha impacta arquitetura, operação, e resiliência. Este guia compara os dois.
+Em um cluster K3s, o estado do cluster é armazenado em um datastore. K3s oferece dois caminhos: etcd embarcado, rodando dentro de cada servidor, ou um datastore externo (PostgreSQL, MySQL, ou um cluster etcd separado). A escolha afeta a arquitetura, a operação e a forma como o cluster se recupera de uma falha.
 
 ## etcd embarcado
 
-Cada servidor K3s vem com etcd embutido. Os servidores se coordenam via replicação de etcd entre eles.
+Cada servidor K3s roda seu próprio etcd, e os servidores se coordenam entre si por replicação Raft.
 
 ```mermaid
 graph TB
     S0["Servidor 0<br/>etcd"]
     S1["Servidor 1<br/>etcd"]
     S2["Servidor 2<br/>etcd"]
-    
-    S0 <-->|Raft<br/>replicação| S1
-    S1 <-->|Raft<br/>replicação| S2
-    S0 <-->|Raft<br/>replicação| S2
-    
-    Note["quorum = 2/3"]
+
+    S0 <-->|"Raft<br/>replicação"| S1
+    S1 <-->|"Raft<br/>replicação"| S2
+    S0 <-->|"Raft<br/>replicação"| S2
 ```
 
-### Vantagens
-
-- **Simples:** não há componente externo para gerenciar
-- **Acoplado:** K3s cuida de quorum, replicação, backup
-- **Replicação automática:** mudanças são replicadas entre servidores
-- **Sem dependência:** se você não tem Postgres/etcd externo disponível, este é seu caminho
-
-### Desvantagens
-
-- **Quorum em K3s:** você precisa de número ímpar de servidores (3, 5, 7...)
-- **Perda de quorum = perda total:** sem datastore externo para recuperar, você precisa de backup de etcd
-- **Operação de etcd:** você gerencia backup, restore, possíveis corrupções de etcd
-- **Escalabilidade:** etcd tem limites (não é feito para 100+ nós)
-- **Tightly coupled:** dificuldade em separar control plane de dados
+A vantagem central é a simplicidade: não há nenhum componente externo para provisionar ou operar, e o próprio K3s cuida de quorum, replicação e snapshot. Isso soma duas restrições diretas. Primeiro, o número de servidores precisa ser ímpar (veja [quorum em clusters distribuídos](../quorum/) para o porquê), o que limita a flexibilidade de escala do control plane. Segundo, perder quorum (mais da metade dos servidores ao mesmo tempo) trava o cluster inteiro sem um datastore externo para recuperar o estado; a única saída é restaurar um snapshot do etcd.
 
 ## Datastore externo
 
-O estado é armazenado em um banco de dados separado (Postgres, MySQL, etcd externo), e os servidores K3s são **stateless**.
+O estado fica em um banco separado, e os servidores K3s passam a ser stateless.
 
 ```mermaid
 graph TB
-    S0["Servidor 0<br/>Stateless"]
-    S1["Servidor 1<br/>Stateless"]
-    S2["Servidor 2<br/>Stateless"]
-    
-    DB["Postgres ou etcd Externo<br/>(gerenciado)"]
-    
+    S0["Servidor 0<br/>stateless"]
+    S1["Servidor 1<br/>stateless"]
+    S2["Servidor 2<br/>stateless"]
+
+    DB["PostgreSQL ou etcd externo<br/>(gerenciado separadamente)"]
+
     S0 --> DB
     S1 --> DB
     S2 --> DB
 ```
 
-### Vantagens
+Desacoplar o datastore do control plane remove a exigência de número ímpar de servidores (é possível ter um, dois, dez) e transfere a responsabilidade de quorum e replicação para o datastore externo, que tipicamente já tem sua própria estratégia de alta disponibilidade madura (replicação do PostgreSQL, por exemplo). O custo é uma segunda superfície de operação: o datastore externo se torna crítico (se ele cai, todos os servidores K3s caem com ele), sua alta disponibilidade não é automática só por estar "fora" do K3s, e mantê-la tem um custo real, seja em infraestrutura própria ou em uma oferta gerenciada de banco de dados.
 
-- **Desacoplado:** K3s não gerencia quorum — o datastore externo faz
-- **Simples topologia:** você pode ter 1, 2, 5, ou 100 servidores K3s
-- **Escalabilidade:** datastore externo gerencia sua própria replicação
-- **Menos operação de etcd:** você não gerencia etcd embarcado
-- **Simples recuperação:** restaurar datastore = restaurar cluster
-
-### Desvantagens
-
-- **Dependência adicional:** datastore externo é crítico; se cair, todo K3s cai
-- **Operação duplicada:** você precisa manter HA do datastore (não é automático)
-- **Custoso:** Postgres/etcd gerenciado em nuvem é caro
-- **Complexidade:** setup inicial é mais envolvido
-
-## Comparação lado a lado
+## Comparação
 
 | Aspecto | etcd embarcado | Datastore externo |
 | --- | --- | --- |
-| **Setup** | Simples (K3s faz tudo) | Complexo (precisa de DBA/sysadmin) |
-| **Número de servidores** | Deve ser ímpar (3, 5, 7...) | Qualquer número (1, 2, 3, 10, 100...) |
-| **Quorum** | Gerenciado por K3s | Gerenciado pelo datastore |
-| **Backup** | Você faz snapshot de etcd | Datastore externo faz (geralmente automático) |
-| **Recuperação** | Manual: restaurar etcd, reiniciar K3s | Manual: restaurar datastore, reiniciar K3s |
-| **Perda de 1 servidor** | Se quorum OK, continua | K3s continua (pode perder todos os servidores, datastore sobrevive) |
-| **Perda do datastore** | N/A (não é externo) | Total (todos os servidores ficam inacessíveis) |
-| **Custo (infra)** | 3-5 máquinas boas | 3-5 máquinas boas + gerenciamento do datastore |
-| **Custo (operação)** | Médio (etcd é complexo) | Alto (DBA, monitoramento, backups) |
+| Setup | Simples, o K3s cuida de tudo | Mais envolvido, exige operar o banco |
+| Número de servidores | Precisa ser ímpar (3, 5, 7...) | Qualquer número |
+| Quorum | Gerenciado pelo K3s | Gerenciado pelo datastore |
+| Backup | Snapshot de etcd | O mecanismo de backup do datastore escolhido |
+| Perda de um servidor | Cluster continua, se o quorum se mantiver | Cluster continua, servidores são substituíveis |
+| Perda do datastore | Não aplicável (não existe datastore externo) | Todos os servidores ficam inacessíveis |
+| Custo de operação | Médio (operar etcd bem exige atenção) | Alto (soma a operação do datastore) |
 
-## Quando usar cada um?
+## Quando usar etcd embarcado
 
-### Use etcd embarcado se:
+Quando o objetivo é HA simples com três a cinco servidores, não existe infraestrutura de banco de dados já disponível para reaproveitar, os discos dos servidores são rápidos o suficiente para o padrão de I/O intensivo do etcd, e a equipe está disposta a manter uma rotina real de backup e restauração de etcd testada.
 
-- ✅ Você quer HA simples (3-5 servidores)
-- ✅ Não tem infraestrutura de banco de dados existente
-- ✅ Seus servidores têm disco rápido (etcd é I/O intensivo)
-- ✅ Você consegue gerenciar quorum (números ímpares)
-- ✅ Você está disposto a fazer backup/restore de etcd
+## Quando usar datastore externo
 
-### Use datastore externo se:
+Quando já existe PostgreSQL, MySQL ou etcd gerenciado disponível para reaproveitar, a topologia precisa de flexibilidade no número de servidores K3s, o cluster deve crescer muito além do que o etcd embarcado suporta confortavelmente, ou a separação entre control plane e dados é uma exigência arquitetural explícita.
 
-- ✅ Você já tem Postgres/MySQL/etcd gerenciado
-- ✅ Você quer flexibilidade no número de servidores K3s
-- ✅ Você tem DBA disponível para gerenciar o datastore
-- ✅ Seu cluster vai crescer muito (100+ nós)
-- ✅ Você quer máxima separação entre control plane e dados
+## Migrar de embarcado para externo
 
-## Exemplo: Labs vs. Produção
-
-### Lab (etcd embarcado)
-
-```yaml
-# 3 máquinas virtuais (8GB RAM cada, disco SSD)
-# Fácil para estudar, testar, mudar configuração
-
-for i in 0 1 2; do
-  curl -sfL https://get.k3s.io | \
-    K3S_URL=https://servidor-0:6443 \
-    K3S_TOKEN=... sh -
-done
-```
-
-### Produção (datastore externo, Postgres gerenciado)
-
-```yaml
-# N servidores K3s apontando para Postgres (RDS, CloudSQL, ou self-hosted)
-# Mais robusto, mas exige operação do banco
-
-for i in 0 1 2 3 4; do
-  curl -sfL https://get.k3s.io | \
-    sh -s - server \
-      --datastore-endpoint=postgres://... \
-      --write-kubeconfig-mode 644
-done
-```
-
-## Migrar de etcd embarcado para externo
-
-Possível, mas complexo. Exigência: backup de etcd embarcado, restauração em Postgres, atualização dos servidores.
-
-**Não é recomendado durante operação em produção.** Deixe para planejamento de upgrade major.
+É possível, mas exige um processo cuidadoso: backup do etcd embarcado, restauração dos dados no novo datastore, e reconfiguração de cada servidor para apontar para ele. Não é uma migração recomendada durante operação em produção sem uma janela de manutenção planejada; trate como parte de um projeto de upgrade maior, não como um ajuste incremental.
 
 ## Tópicos relacionados
 
-- [Topologias recomendadas](../../guides/blueprints/k3s-multinode/topologies/): escolher entre 1/3/N servidores
-- [Quorum em clusters distribuídos](./quorum/): entender quorum e replicação
-- [K3s — Datastore Configuration](https://docs.k3s.io/datastore/): documentação oficial
+- [Topologias recomendadas](../../../guides/blueprints/k3s-multinode/topologies/): escolher entre uma, três ou mais réplicas de servidor.
+- [Quorum em clusters distribuídos](../quorum/): entender quorum e replicação antes de escolher a topologia do datastore.
+- [Alta disponibilidade avançada](../advanced-ha/): o que fica além da escolha entre etcd embarcado e datastore externo.
 
 ## Fontes e leitura adicional
 
-- [K3s — External Datastore](https://docs.k3s.io/datastore/external-datastore): setup com Postgres/MySQL/etcd
-- [K3s — High Availability](https://docs.k3s.io/datastore/ha-embedded): etcd embarcado
-- [Postgres — High Availability](https://www.postgresql.org/docs/current/different-replication-solutions.html): se você escolher Postgres externo
+- [K3s: Datastore Configuration](https://docs.k3s.io/datastore): documentação oficial das opções de datastore.
+- [K3s: External Datastore](https://docs.k3s.io/datastore/external-datastore): setup com PostgreSQL, MySQL ou etcd externo.
+- [K3s: High Availability with Embedded DB](https://docs.k3s.io/datastore/ha-embedded): setup com etcd embarcado.
+- [PostgreSQL: High Availability, Load Balancing, and Replication](https://www.postgresql.org/docs/current/different-replication-solutions.html): referência para quem escolher PostgreSQL externo.

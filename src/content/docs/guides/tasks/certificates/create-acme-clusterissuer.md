@@ -1,5 +1,6 @@
 ---
 title: Criar um ClusterIssuer ACME
+description: Como configurar um ClusterIssuer do cert-manager com ACME e desafio DNS-01, incluindo a credencial do provedor DNS e a validação em staging antes de produção.
 sidebar:
   order: 2
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** [cert-manager instalado](../install-cert-manager/), credencial de API do provedor DNS com permissão para criar/remover registros TXT na zona alvo.
 > **Versões testadas:** cert-manager v1.21.0.
 
-Um `ClusterIssuer` declara como o cert-manager deve emitir certificados para o cluster inteiro, em vez de um único namespace. Esta página usa ACME com desafio DNS-01, que permite emitir certificados wildcard e não exige que o serviço já esteja publicamente acessível — a validação acontece criando um registro DNS temporário, não recebendo uma requisição HTTP.
+Um `ClusterIssuer` declara como o cert-manager deve emitir certificados para o cluster inteiro, em vez de um único namespace. Esta página usa ACME com desafio DNS-01, que permite emitir certificados wildcard e não exige que o serviço já esteja publicamente acessível: a validação acontece criando um registro DNS temporário, não recebendo uma requisição HTTP.
 
 O exemplo usa Cloudflare como provedor DNS; o cert-manager suporta outros provedores nativamente ou por webhook. Ajuste `solvers` conforme o provedor real do ambiente.
 
@@ -52,7 +53,7 @@ spec:
 EOF
 ```
 
-Use o servidor de staging (`https://acme-staging-v02.api.letsencrypt.org/directory`) enquanto valida a configuração — o ambiente de produção do Let's Encrypt aplica limites de taxa por domínio que uma tentativa malsucedida repetida pode esgotar.
+Use o servidor de staging (`https://acme-staging-v02.api.letsencrypt.org/directory`) enquanto valida a configuração: o ambiente de produção do Let's Encrypt aplica limites de taxa por domínio que uma tentativa malsucedida repetida pode esgotar.
 
 ## Validação
 
@@ -69,7 +70,7 @@ Para confirmar o fluxo completo, emita um certificado de teste referenciando est
 
 ## Troubleshooting
 
-Se o `Challenge` ficar preso em `pending`, confirme a propagação do registro TXT pelos resolvers configurados em `DNS01_RECURSIVE_NAMESERVERS` na instalação do cert-manager — um resolver desatualizado pode não enxergar o registro recém-criado antes do timeout padrão.
+Se o `Challenge` ficar preso em `pending`, confirme a propagação do registro TXT pelos resolvers configurados em `DNS01_RECURSIVE_NAMESERVERS` na instalação do cert-manager; um resolver desatualizado pode não enxergar o registro recém-criado antes do timeout padrão.
 
 ## Rollback
 
@@ -88,4 +89,4 @@ Referencie este `ClusterIssuer` em um `Gateway` com listener TLS (veja [Gateway 
 
 - [Desafio ACME DNS-01](https://cert-manager.io/docs/configuration/acme/dns01/): referência oficial dos provedores suportados e da configuração do solver.
 - [ACME Issuer](https://cert-manager.io/docs/configuration/acme/): explica `server`, `email`, `privateKeySecretRef` e o ciclo de vida da conta ACME.
-- [Rate limits — Let's Encrypt](https://letsencrypt.org/docs/rate-limits/): documenta os limites de emissão e a razão para validar no ambiente de staging primeiro.
+- [Let's Encrypt: Rate Limits](https://letsencrypt.org/docs/rate-limits/): documenta os limites de emissão e a razão para validar no ambiente de staging primeiro.

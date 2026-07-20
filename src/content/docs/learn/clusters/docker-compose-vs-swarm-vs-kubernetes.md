@@ -1,27 +1,25 @@
 ---
 title: Docker Compose vs. Swarm vs. Kubernetes
+description: Compara as três ferramentas de orquestração de containers por escopo (um host, um pequeno cluster, produção escalável) e por trajetória de aprendizado.
 sidebar:
   order: 6
 ---
 
 > **Para quem é:** quem está começando com containers e não sabe qual ferramenta escolher.
 
-Há três formas de orquestrar containers: Compose (local/dev), Swarm (pequeno cluster), Kubernetes (produção/escalável).
-
-## Resumo rápido
+Docker Compose, Docker Swarm e Kubernetes resolvem o mesmo problema geral (rodar múltiplos containers coordenados) em escopos diferentes: um único host para desenvolvimento, um pequeno cluster de poucos hosts, ou uma plataforma de produção escalável, respectivamente.
 
 | Nível | Ferramenta | Ideal para | Escopo |
 | --- | --- | --- | --- |
-| **Dev/local** | Docker Compose | Um desenvolvedor, máquina local | Um host |
-| **Pequeno cluster** | Docker Swarm | Equipe pequena, < 50 nós | Múltiplos hosts, um datacenter |
-| **Produção/cloud** | Kubernetes (K3s, EKS, GKE) | Escalabilidade, multi-tenancy, automação | Múltiplos datacenters, escala pública |
+| Dev/local | Docker Compose | Um desenvolvedor, máquina local | Um host |
+| Pequeno cluster | Docker Swarm | Equipe pequena, poucas dezenas de nós | Múltiplos hosts, um datacenter |
+| Produção/cloud | Kubernetes (K3s, EKS, GKE) | Escalabilidade, multi-tenancy, automação | Múltiplos datacenters, escala pública |
 
 ## Docker Compose
 
-É uma **ferramenta de desenvolvimento**, não de produção.
+Compose é uma ferramenta de desenvolvimento, não de produção: tudo roda na mesma máquina, coordenado por um único comando (`docker compose up`).
 
 ```yaml
-version: '3'
 services:
   web:
     image: nginx
@@ -33,53 +31,21 @@ services:
       POSTGRES_PASSWORD: example
 ```
 
-Tudo roda na **mesma máquina**, via `docker-compose up`.
-
-**Quando usar:**
-
-- Seu laptop.
-- CI/CD local.
-- Testing rápido.
-- Pequenos ambientes (< 1GB RAM).
-
-**Limitações:**
-
-- Sem escalabilidade.
-- Sem alta disponibilidade.
-- Sem orquestração entre hosts.
-- Não usa conceitos de rede overlay, service discovery, etc.
+Use Compose no laptop, em CI/CD local, ou em ambientes pequenos que não precisam sobreviver à perda da única máquina onde rodam. Ele não oferece escalabilidade além de um host, alta disponibilidade, nem os conceitos de rede overlay e service discovery que Swarm e Kubernetes introduzem para coordenar múltiplos hosts.
 
 ## Docker Swarm
 
-É uma **plataforma de orquestração** para clusters pequenos.
-
-Sintaxe: Docker Compose YAML + `docker service` em vez de `docker-compose`:
+Swarm estende o modelo do Compose para múltiplos hosts coordenados por um quorum de managers, usando uma sintaxe próxima: `docker service create` no lugar de `docker compose up`.
 
 ```bash
 docker service create --replicas 3 -p 80:8080 nginx
 ```
 
-Tudo roda em **múltiplos hosts** coordenados via quorum de managers.
-
-**Quando usar:**
-
-- 2-50 nós.
-- Sua equipe conhece Docker (Compose).
-- Setup e operação simples.
-- Staging/QA.
-
-**Limitações (vs. Kubernetes):**
-
-- Sem HPA automático.
-- Sem RBAC fino.
-- Sem namespaces.
-- Sem service mesh.
+Swarm é uma escolha razoável para equipes pequenas que já conhecem Docker Compose, com clusters de poucas dezenas de nós e requisitos operacionais simples (staging, QA, ambientes internos). Ele não oferece autoscaling automático, RBAC granular, namespaces, nem service mesh: recursos que Kubernetes trata como parte do modelo central, não como extensões.
 
 ## Kubernetes (K3s)
 
-É uma **plataforma de orquestração** robusto-pra-escala-industrial.
-
-Sintaxe: YAML declarativo (pods, services, deployments):
+Kubernetes declara o estado desejado em manifests YAML e reconcilia continuamente o cluster para esse estado, com conceitos que Compose e Swarm não têm: namespaces, RBAC granular, ingress controllers plugáveis e um driver CSI para armazenamento.
 
 ```yaml
 apiVersion: apps/v1
@@ -97,51 +63,23 @@ spec:
         app: nginx
     spec:
       containers:
-      - name: nginx
-        image: nginx
+        - name: nginx
+          image: nginx
 ```
 
-Tudo roda em **múltiplos hosts** com conceitos avançados (namespaces, RBAC, ingress, CSI).
-
-**Quando usar:**
-
-- Qualquer cluster que precisa crescer.
-- Automação (HPA, rollouts automáticos).
-- Multi-tenancy (namespaces).
-- Integração com ecossistema cloud native (Prometheus, Grafana, Argo CD, Cert-manager).
-- Produção.
+Kubernetes vale o investimento quando o cluster precisa crescer sem redesenho, quando automação (HPA, rollouts progressivos) e multi-tenancy são requisitos reais, ou quando o ambiente já se integra ao ecossistema cloud native (Prometheus, Grafana, Argo CD, cert-manager). K3s reduz especificamente o custo de operar Kubernetes em ambientes pequenos, sem abrir mão dessas capacidades.
 
 ## Trajetória típica
 
-```yaml
-Laptop
-  ↓ (desenvolvimento)
-Docker Compose
-  ↓ (teste em cluster pequeno)
-Docker Swarm
-  ↓ (crescimento / requisitos estritos)
-Kubernetes (K3s ou EKS)
-  ↓ (escala, multi-region, SaaS)
-EKS / GKE / AKS
-```
-
-Ou direto:
-
-```yaml
-Laptop (Compose) → Kubernetes (K3s)
-```
-
-(muitas equipes pulam Swarm por causa do mercado — Kubernetes é onipresente.)
+A progressão mais comum começa em Compose para desenvolvimento local, passa por um cluster pequeno (Swarm ou já Kubernetes) para os primeiros testes multi-host, e termina em Kubernetes de produção, self-hosted (K3s) ou gerenciado (EKS, GKE, AKS) conforme a escala exigir. Muitas equipes pulam Swarm inteiramente e vão direto de Compose para K3s: como o mercado de trabalho e o ecossistema de ferramentas giram em torno de Kubernetes, o tempo investido em aprendê-lo tende a ter retorno mais direto do que aprender Swarm primeiro.
 
 ## Recomendação
 
-1. **Começando agora?** Escolha K3s (em vez de Swarm). Investimento educacional tem mais retorno.
-2. **Projeto pessoal/lab pequeno?** Compose ou Swarm, conforme gosto.
-3. **Produção?** K3s mínimo.
+Para quem está começando agora, K3s costuma valer mais o investimento educacional do que Swarm, mesmo em um projeto pequeno, porque o conhecimento se transfere diretamente para qualquer cluster de produção depois. Para um projeto pessoal ou laboratório sem pretensão de produção, Compose ou Swarm continuam sendo escolhas razoáveis conforme a preferência. Para produção, Kubernetes (K3s ou uma oferta gerenciada) é o piso recomendado.
 
 ## Referências
 
-- [Docker Compose documentation](https://docs.docker.com/compose/): guia oficial.
-- [Docker Swarm documentation](https://docs.docker.com/engine/swarm/): guia oficial.
-- [Kubernetes documentation](https://kubernetes.io/docs/): guia oficial.
-- [K3s documentation](https://docs.k3s.io/): guia oficial do K3s.
+- [Docker Compose: documentação oficial](https://docs.docker.com/compose/): guia oficial.
+- [Docker Swarm: documentação oficial](https://docs.docker.com/engine/swarm/): guia oficial.
+- [Kubernetes: documentação oficial](https://kubernetes.io/docs/): guia oficial.
+- [K3s: documentação oficial](https://docs.k3s.io/): guia oficial do K3s.

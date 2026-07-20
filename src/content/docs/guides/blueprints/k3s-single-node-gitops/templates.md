@@ -52,9 +52,9 @@ Leia [`templates/gitops/README.md`](https://github.com/guesant/infrastructure-an
 
 ## Fontes e leitura adicional
 
-- [Cluster bootstrapping — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): base do padrão App-of-Apps usado pelos templates.
-- [kube-prometheus-stack — Prometheus Community](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack): chart e valores oficiais da pilha de monitoramento apresentada.
+- [Argo CD: Cluster bootstrapping](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): base do padrão App-of-Apps usado pelos templates.
+- [kube-prometheus-stack (Prometheus Community)](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack): chart e valores oficiais da pilha de monitoramento apresentada.
 - [Introdução ao Grafana](https://grafana.com/docs/grafana/latest/introduction/): explica dashboards, fontes de dados e o papel do Grafana na visualização.
 - [Visão geral do Rancher](https://ranchermanager.docs.rancher.com/getting-started/overview): descreve a camada de administração opcional oferecida pelo Rancher.
 - [Instalação do CloudNativePG](https://cloudnative-pg.io/docs/1.30/installation_upgrade/): orienta sobre instalação, CRDs e atualização do operator.
-- [Gateway API — Kubernetes SIG Network](https://gateway-api.sigs.k8s.io/): referência dos Gateways e HTTPRoutes usados nos exemplos de publicação.
+- [Gateway API (Kubernetes SIG Network)](https://gateway-api.sigs.k8s.io/): referência dos Gateways e HTTPRoutes usados nos exemplos de publicação.

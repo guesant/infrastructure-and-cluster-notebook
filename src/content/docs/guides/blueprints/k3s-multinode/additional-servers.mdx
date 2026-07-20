@@ -1,5 +1,6 @@
 ---
 title: Adicionar servidores adicionais
+description: Como adicionar o segundo e o terceiro servidor a um cluster K3s multinode, com o passo extra de registro no quorum de etcd que não existe no single-node.
 sidebar:
   order: 5
 ---
@@ -19,7 +20,7 @@ Adicionar um novo servidor a um cluster K3s multinode é similar ao single-node,
 
 No novo servidor (servidor-1), execute:
 
-```yaml
+```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.36.0+k3s1 sh -s - server \
   --server https://<ip-primeiro-servidor>:6443 \
   --token <seu-token-de-join> \
@@ -32,7 +33,7 @@ Substitua:
 
 Exemplo real:
 
-```yaml
+```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.36.0+k3s1 sh -s - server \
   --server https://10.0.0.10:6443 \
   --token 'K102abc123::server:xyz789' \
@@ -41,15 +42,16 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.36.0+k3s1 sh -s - server \
 
 ## Passo 2: Aguardar sincronização
 
-Espere ~20-30 segundos enquanto etcd sincroniza entre os dois servidores. No servidor-1, verifique:
+Espere de 20 a 30 segundos enquanto o etcd sincroniza entre os dois servidores. No servidor-1,
+verifique:
 
-```yaml
+```bash
 sudo kubectl get nodes
 ```
 
-Ambos servidores devem aparecer como `Ready`:
+Ambos os servidores devem aparecer como `Ready`:
 
-```yaml
+```text
 NAME         STATUS   ROLES                  AGE   VERSION
 servidor-0   Ready    control-plane,master   2m    v1.36.0+k3s1
 servidor-1   Ready    control-plane,master   30s   v1.36.0+k3s1
@@ -57,30 +59,30 @@ servidor-1   Ready    control-plane,master   30s   v1.36.0+k3s1
 
 ## Passo 3: Adicionar servidor-2 (se usando 3 servidores)
 
-Repita os passos 1-2 no servidor-2, apontando ainda para servidor-0 como `--server`:
+Repita os passos 1 e 2 no servidor-2, apontando ainda para servidor-0 como `--server`:
 
-```yaml
+```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.36.0+k3s1 sh -s - server \
   --server https://10.0.0.10:6443 \
   --token 'K102abc123::server:xyz789' \
   --write-kubeconfig-mode 644
 ```
 
-Quando servidor-2 estiver `Ready`, você tem quorum completo (3 servidores, quorum = 2).
+Quando servidor-2 estiver `Ready`, o cluster tem quorum completo: 3 servidores, quorum = 2.
 
 ## Verificação de quorum
 
-Depois que 3 servidores estão `Ready`, verifique que etcd tem quorum saudável:
+Depois que os 3 servidores estão `Ready`, o sinal mais confiável de que o etcd tem quorum
+saudável é justamente esse: todos os servidores aparecendo como `Ready` simultaneamente, já que um
+servidor sem conexão ao quorum não consegue manter esse status por muito tempo. Para investigar
+mais a fundo em caso de dúvida, os logs do próprio K3s expõem o estado do etcd:
 
-```yaml
-# Em qualquer servidor, listar membros de etcd
-sudo k3s secrets-encrypt status
-
-# Ou (em versões antigas) inspecionar logs de etcd
+```bash
 sudo journalctl -u k3s -f | grep etcd
 ```
 
-Saída esperada: nenhuma "RAFT error" — todos os membros devem estar sincronizados.
+Nenhuma mensagem de erro relacionada a Raft nos logs recentes indica que os membros estão
+sincronizados.
 
 ## Problemas comuns
 
@@ -89,19 +91,21 @@ Saída esperada: nenhuma "RAFT error" — todos os membros devem estar sincroniz
 **Causa:** firewall bloqueando porta 6443 entre servidores.
 
 **Solução:**
-```yaml
+
+```bash
 # No servidor novo, testar conectividade ao primeiro
 sudo nc -zv 10.0.0.10 6443
 ```
 
-Se falhar, configure firewall conforme [requisitos de rede](../network-requirements/).
+Se falhar, configure o firewall conforme [requisitos de rede](../network-requirements/).
 
 ### Servidor novo fica "NotReady"
 
-**Causa:** etcd não sincronizou ainda, ou há problema de disco/memória.
+**Causa:** etcd não sincronizou ainda, ou há problema de disco ou memória.
 
 **Solução:**
-```yaml
+
+```bash
 # Verificar logs
 sudo journalctl -u k3s -n 50
 
@@ -114,7 +118,8 @@ sleep 60 && sudo kubectl get nodes
 **Causa:** token copiado incorretamente (espaços, quebras de linha).
 
 **Solução:** copie novamente do arquivo no servidor-0 com cuidado:
-```yaml
+
+```bash
 # No servidor-0
 sudo cat /var/lib/rancher/k3s/server/node-token
 # copiar sem espaços/quebras
@@ -122,11 +127,11 @@ sudo cat /var/lib/rancher/k3s/server/node-token
 
 ## Próximo passo
 
-- [Adicionar agentes K3s](../../../tasks/kubernetes/join-k3s-agent/) — para workers sem control plane.
-- [Balancear a API](../api-endpoint/) — configurar endpoint DNS para admin/cliente.
-- [Validar o cluster](../validation/) — checklist de verificação.
+- [Adicionar agentes K3s](../../../tasks/kubernetes/join-k3s-agent/): para workers sem control plane.
+- [Balancear a API](../api-endpoint/): configurar endpoint DNS para admin/cliente.
+- [Validar o cluster](../validation/): checklist de verificação.
 
 ## Fontes e leitura adicional
 
-- [K3s — High Availability Setup](https://docs.k3s.io/datastore/ha-embedded): guia oficial.
-- [K3s — Token Format](https://docs.k3s.io/cli/token): estrutura do token de join.
+- [K3s: High Availability Setup](https://docs.k3s.io/datastore/ha-embedded): guia oficial.
+- [K3s: Token Format](https://docs.k3s.io/cli/token): estrutura do token de join.

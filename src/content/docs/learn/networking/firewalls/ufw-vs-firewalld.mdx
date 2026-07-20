@@ -7,15 +7,15 @@ sidebar:
 
 > **Para quem é:** quem precisa decidir entre [UFW](../ufw/) e [firewalld](../firewalld/) para um host novo e ainda não tem uma convenção estabelecida.
 
-Nenhuma das duas ferramentas é estritamente superior — ambas configuram o mesmo [netfilter](../linux-firewall-fundamentals/) por baixo, com modelos de organização diferentes. A escolha certa depende da topologia de rede do host e da convenção já adotada no ambiente, não de uma comparação de recursos.
+Nenhuma das duas ferramentas é estritamente superior: ambas configuram o mesmo [netfilter](../linux-firewall-fundamentals/) por baixo, com modelos de organização diferentes. A escolha certa depende da topologia de rede do host e da convenção já adotada no ambiente, não de uma comparação de recursos.
 
 ## Comparação por critério
 
 | Critério | UFW | firewalld |
 | --- | --- | --- |
 | Modelo de organização | Lista linear de regras + política padrão por direção | Zonas nomeadas, uma por nível de confiança |
-| Curva de aprendizado inicial | Baixa — sintaxe curta para casos simples | Média — exige entender zonas antes da primeira regra |
-| Múltiplas interfaces com confiança distinta | Possível, mas exige regra por interface | Modelo nativo — cada interface associada a uma zona |
+| Curva de aprendizado inicial | Baixa: sintaxe curta para casos simples | Média: exige entender zonas antes da primeira regra |
+| Múltiplas interfaces com confiança distinta | Possível, mas exige regra por interface | Modelo nativo: cada interface associada a uma zona |
 | Runtime vs. persistente | Regras têm efeito imediato; política padrão exige reload | Distinção explícita entre `--permanent` e runtime, ambas exigem gerenciamento consciente |
 | Convenção de distribuição | Comum em Debian/Ubuntu | Comum em distribuições da família RHEL |
 | Sintaxe para regras complexas | Limitada; casos avançados exigem `iptables`/`nftables` diretamente | Rich rules cobrem mais casos sem sair do firewalld |
@@ -30,7 +30,7 @@ Host com múltiplas interfaces de rede exigindo tratamento diferente (ex.: uma i
 
 ## O que não muda com a escolha
 
-Nenhuma das duas ferramentas protege automaticamente uma porta publicada pelo Docker da forma que a política padrão do host sugere — veja [portas publicadas pelo Docker](../docker-published-ports/). A escolha entre UFW e firewalld não elimina essa necessidade de atenção adicional.
+Nenhuma das duas ferramentas protege automaticamente uma porta publicada pelo Docker da forma que a política padrão do host sugere. Veja [portas publicadas pelo Docker](../docker-published-ports/). A escolha entre UFW e firewalld não elimina essa necessidade de atenção adicional.
 
 ## Páginas relacionadas
 
@@ -40,5 +40,5 @@ Nenhuma das duas ferramentas protege automaticamente uma porta publicada pelo Do
 
 ## Referências
 
-- [Firewall — Ubuntu Server documentation](https://documentation.ubuntu.com/server/how-to/security/firewalls/): referência oficial do UFW.
-- [Conceitos do firewalld — documentação oficial](https://firewalld.org/documentation/concepts.html): referência oficial do modelo de zonas do firewalld.
+- [Firewall (Ubuntu Server documentation)](https://documentation.ubuntu.com/server/how-to/security/firewalls/): referência oficial do UFW.
+- [Conceitos do firewalld (documentação oficial)](https://firewalld.org/documentation/concepts.html): referência oficial do modelo de zonas do firewalld.

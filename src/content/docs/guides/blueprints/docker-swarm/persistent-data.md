@@ -6,11 +6,15 @@ sidebar:
 
 > **Para quem é:** operadores armazenando dados de aplicação em Swarm.
 
-Docker Swarm não oferece orquestração nativa de volumes entre hosts. Volumes são locais ao host do container — se o container é remarcado para outro host, o volume fica para trás.
+Docker Swarm não oferece orquestração nativa de volumes entre hosts. Um volume é local ao host em
+que o container roda; se o Swarm reagenda esse container para outro host (por falha, atualização
+ou rebalanceamento), o volume antigo fica para trás e o container reinicia com um volume vazio no
+novo host.
 
 ## Local volumes
 
-Padrão — cada host tem sua cópia local:
+Esse é o comportamento padrão: cada host mantém sua própria cópia local do volume, sem
+sincronização entre hosts.
 
 ```bash
 docker service create \
@@ -19,9 +23,11 @@ docker service create \
   <imagem>
 ```
 
-Adequado para **staging/dev** ou quando a aplicação replica dados (ex.: banco de dados distribuído, cache).
-
-**Inadequado** para um banco de dados centralizado ou dados únicos — perda do host = perda dos dados.
+Essa abordagem é adequada para ambientes de staging e desenvolvimento, ou para aplicações que já
+replicam seus próprios dados entre réplicas (um banco de dados distribuído, um cache com
+replicação própria). Ela é inadequada para um banco de dados centralizado ou qualquer dado que
+exista em uma única cópia: perder o host onde o volume vive significa perder os dados, já que não
+existe cópia em nenhum outro lugar.
 
 ## Volume driver externo
 
@@ -66,12 +72,14 @@ pg_dump | gzip > /backup/db.sql.gz
 
 ## Checklist
 
-```yaml
-☐ Se aplicação precisa persitência: usar volume driver externo ou constraints
-☐ Se múltiplas réplicas do app: são data-sharing aware? (ex.: raft, quorum)
-☐ Procedimento de backup documentado e testado
-☐ RTO/RPO definido (quanto tempo sem dados, quanto tempo para recuperar)
-```
+- [ ] Se a aplicação precisa de persistência real, um volume driver externo ou constraints de
+      placement foram escolhidos (não o volume local padrão).
+- [ ] Se a aplicação roda com múltiplas réplicas, elas coordenam o acesso aos dados entre si (via
+      raft, quorum ou outro mecanismo próprio), em vez de presumir um volume compartilhado que o
+      Swarm não oferece.
+- [ ] O procedimento de backup está documentado e já foi testado, não apenas escrito.
+- [ ] RTO e RPO estão definidos: quanto tempo o serviço pode ficar fora, e quantos dados a
+      organização aceita perder em uma recuperação.
 
 ## Referências
 

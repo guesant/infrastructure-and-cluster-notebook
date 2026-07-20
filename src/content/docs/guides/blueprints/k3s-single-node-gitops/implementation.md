@@ -4,7 +4,7 @@ sidebar:
   order: 5
 ---
 
-Esta página detalha a sequência de implantação resumida em [visão geral do blueprint](../k3s-single-node-gitops/), com o checkpoint de cada etapa. Não repete os comandos — cada linha aponta para o task guide canônico.
+Esta página detalha a sequência de implantação resumida em [visão geral do blueprint](../k3s-single-node-gitops/), com o checkpoint de cada etapa. Não repete os comandos; cada linha aponta para o task guide canônico.
 
 ## 1. Host
 
@@ -44,10 +44,10 @@ Siga [preparar um servidor Debian](../../../guides/tasks/host/prepare-debian-ser
 
 ## 7. Módulos opcionais
 
-Selecione entre os [templates copiáveis](../k3s-single-node-gitops/templates/) apenas os módulos necessários — armazenamento, observabilidade, segredos, banco de dados. Cada módulo é uma Application independente; habilitar um não obriga a habilitar os demais.
+Selecione entre os [templates copiáveis](../k3s-single-node-gitops/templates/) apenas os módulos necessários: armazenamento, observabilidade, segredos, banco de dados. Cada módulo é uma Application independente; habilitar um não obriga a habilitar os demais.
 
 **Checkpoint:** cada Application habilitada está `Synced`/`Healthy` e sua validação específica (na página do respectivo task guide) foi executada.
 
 ## Fontes e leitura adicional
 
-- [Quick-Start Guide — K3s](https://docs.k3s.io/quick-start): fluxo oficial de instalação usado como base desta sequência.
+- [K3s: Quick-Start Guide](https://docs.k3s.io/quick-start): fluxo oficial de instalação usado como base desta sequência.

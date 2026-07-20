@@ -1,5 +1,6 @@
 ---
 title: Hardening do SSH
+description: Como restringir o SSH a autenticação por chave pública, bloquear login direto de root e usuários fora do grupo autorizado, validando cada mudança antes de aplicá-la.
 sidebar:
   order: 7
 ---
@@ -31,7 +32,7 @@ Confirme, antes de alterar o servidor, que a conta entra usando uma chave e sem 
 
 > **Executar em:** estação administrativa com acesso SSH ao nó alvo.
 
-```yaml
+```bash
 read -r -p "Usuário SSH: " SSH_USER
 read -r -p "Host ou IP do servidor: " SSH_HOST
 ssh "${SSH_USER}@${SSH_HOST}"
@@ -94,7 +95,7 @@ O bloco anterior já valida a sintaxe antes de permitir o reload. Abra outro ter
 
 > **Executar em:** estação administrativa, em outro terminal.
 
-```yaml
+```bash
 read -r -p "Usuário SSH: " SSH_USER
 read -r -p "Host ou IP do servidor: " SSH_HOST
 ssh "${SSH_USER}@${SSH_HOST}"
@@ -104,7 +105,7 @@ Confirme também que senha e keyboard-interactive não são aceitos:
 
 > **Executar em:** estação administrativa.
 
-```yaml
+```bash
 read -r -p "Usuário SSH: " SSH_USER
 read -r -p "Host ou IP do servidor: " SSH_HOST
 
@@ -116,14 +117,18 @@ ssh \
 
 A tentativa deve terminar com uma mensagem semelhante a:
 
-```yaml
+```text
 Permission denied (publickey).
 ```
 
 Somente encerre a sessão SSH original depois que a nova conexão por chave funcionar.
 
+## Próximo passo
+
+[Fail2Ban](../configure-fail2ban/) para mitigar tentativas de força bruta contra o SSH.
+
 ## Fontes e leitura adicional
 
-- [`sshd_config(5)` — OpenSSH/OpenBSD manual pages](https://man.openbsd.org/sshd_config): referência primária das diretivas de autenticação, acesso, encaminhamento, auditoria e validação usadas no hardening.
-- [`sshd(8)` — OpenSSH/OpenBSD manual pages](https://man.openbsd.org/sshd): documenta o formato de `authorized_keys`, as permissões esperadas e o fluxo de autenticação do servidor.
-- [OpenSSH server — Ubuntu Server documentation](https://ubuntu.com/server/docs/openssh-server/): orientações oficiais do Ubuntu para snippets em `sshd_config.d`, autenticação por chaves, validação com `sshd -t` e diagnóstico pelo journal.
+- [OpenSSH/OpenBSD manual pages: `sshd_config(5)`](https://man.openbsd.org/sshd_config): referência primária das diretivas de autenticação, acesso, encaminhamento, auditoria e validação usadas no hardening.
+- [OpenSSH/OpenBSD manual pages: `sshd(8)`](https://man.openbsd.org/sshd): documenta o formato de `authorized_keys`, as permissões esperadas e o fluxo de autenticação do servidor.
+- [Ubuntu Server documentation: OpenSSH server](https://ubuntu.com/server/docs/openssh-server/): orientações oficiais do Ubuntu para snippets em `sshd_config.d`, autenticação por chaves, validação com `sshd -t` e diagnóstico pelo journal.

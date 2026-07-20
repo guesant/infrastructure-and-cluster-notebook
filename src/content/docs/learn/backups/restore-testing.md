@@ -7,7 +7,7 @@ sidebar:
 
 > **Para quem é:** quem tem backups configurados, nunca os restaurou, e presume que "estão funcionando" porque os Jobs terminam com sucesso.
 
-Um Job de backup marcado `Completed` prova que os dados foram lidos e enviados a algum lugar — não prova que o artefato resultante é íntegro, completo, ou realmente restaurável.
+Um Job de backup marcado `Completed` prova que os dados foram lidos e enviados a algum lugar; não prova que o artefato resultante é íntegro, completo, ou realmente restaurável.
 
 ## Como funciona
 
@@ -22,11 +22,11 @@ flowchart TB
     Existencia --> Funcional["A aplicação funciona corretamente com os dados restaurados"]
 ```
 
-A camada final — validação funcional — é a mais frequentemente pulada e a mais importante: um banco de dados restaurado que inicia sem erro pode ainda assim ter perdido índices, ter dados inconsistentes, ou não passar em uma consulta simples de verificação.
+A camada final, validação funcional, é a mais frequentemente pulada e a mais importante: um banco de dados restaurado que inicia sem erro pode ainda assim ter perdido índices, ter dados inconsistentes, ou não passar em uma consulta simples de verificação.
 
 ## Alternativas
 
-Para reduzir o custo de testes completos frequentes, um teste parcial (restaurar apenas metadados ou uma amostra) pode ser um meio-termo aceitável entre testes completos espaçados — mas não substitui um teste completo periódico.
+Para reduzir o custo de testes completos frequentes, um teste parcial (restaurar apenas metadados ou uma amostra) pode ser um meio-termo aceitável entre testes completos espaçados, mas não substitui um teste completo periódico.
 
 ## Quando testar
 
@@ -34,11 +34,11 @@ Depois de qualquer mudança relevante na estratégia de backup, e em um cronogra
 
 ## Quando um teste é insuficiente
 
-Quando ele só confirma que o processo de restauração "rodou sem erro", sem validar a camada funcional — isso mede menos do que parece medir.
+Quando ele só confirma que o processo de restauração "rodou sem erro", sem validar a camada funcional: isso mede menos do que parece medir.
 
 ## Decisões que isso implica
 
-Registre a duração real de cada teste (compare com o RTO definido) e a perda de dados observada (compare com o RPO definido) — veja [RPO e RTO](../rpo-and-rto/). Um teste sem essas métricas registradas não comprova os objetivos declarados.
+Registre a duração real de cada teste (compare com o RTO definido) e a perda de dados observada (compare com o RPO definido); veja [RPO e RTO](../rpo-and-rto/). Um teste sem essas métricas registradas não comprova os objetivos declarados.
 
 ## Páginas relacionadas
 
@@ -48,4 +48,4 @@ Registre a duração real de cada teste (compare com o RTO definido) e a perda d
 
 ## Referências
 
-- [K3s — Backup and Restore](https://docs.k3s.io/datastore/backup-restore): referência de restauração testável do datastore.
+- [K3s: Backup and Restore](https://docs.k3s.io/datastore/backup-restore): referência de restauração testável do datastore.

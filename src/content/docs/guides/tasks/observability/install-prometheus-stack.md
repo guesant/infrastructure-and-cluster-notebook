@@ -1,5 +1,6 @@
 ---
 title: Instalar o kube-prometheus-stack
+description: Como instalar Prometheus Operator, Prometheus, Alertmanager e Grafana via Helm com persistência e retenção configuradas, e acessar o Grafana pela primeira vez.
 sidebar:
   order: 1
 ---
@@ -31,7 +32,7 @@ helm upgrade --install kube-prometheus-stack kube-prometheus-stack \
   --set grafana.persistence.size="${GRAFANA_STORAGE_SIZE}"
 ```
 
-Sem persistência configurada, o Prometheus e o Grafana perdem dados/dashboards a cada reinício do Pod — não deixe os campos de storage nos valores padrão sem revisão.
+Sem persistência configurada, o Prometheus e o Grafana perdem dados/dashboards a cada reinício do Pod: não deixe os campos de storage nos valores padrão sem revisão.
 
 ## Definir retenção
 
@@ -91,7 +92,7 @@ helm --namespace monitoring uninstall kube-prometheus-stack
 ```
 
 :::danger
-A desinstalação não remove automaticamente os PVCs por padrão do Helm — confirme se isso é desejado antes de excluir os PersistentVolumeClaims manualmente.
+A desinstalação não remove automaticamente os PVCs por padrão do Helm: confirme se isso é desejado antes de excluir os PersistentVolumeClaims manualmente.
 :::
 
 ## Próximo passo
@@ -100,5 +101,5 @@ A desinstalação não remove automaticamente os PVCs por padrão do Helm — co
 
 ## Fontes e leitura adicional
 
-- [kube-prometheus-stack — Prometheus Community](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack): chart, valores e notas de versão.
-- [Prometheus Operator — documentação oficial](https://prometheus-operator.dev/): arquitetura e CRDs do operator.
+- [Prometheus Community: kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack): chart, valores e notas de versão.
+- [Prometheus Operator: documentação oficial](https://prometheus-operator.dev/): arquitetura e CRDs do operator.

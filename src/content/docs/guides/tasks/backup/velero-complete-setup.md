@@ -1,32 +1,30 @@
 ---
-title: Velero — Backup e Restore completo
+title: "Velero: cenários de backup e restore"
+description: Padrões de uso do Velero além da instalação básica, como localização adicional de backup via CRD, filtros de namespace, disaster recovery e o checklist de prontidão contínua.
 sidebar:
-  order: 1
+  order: 6
 ---
 
-> **Para quem é:** operadores que precisam backup/restore de aplicações e dados em Kubernetes.
+> **Para quem é:** operadores que já têm o Velero instalado e precisam aplicar padrões de backup e restore além do caminho básico.
+> **Pré-requisito:** [instalar Velero](../install-velero/).
 
-Velero é a ferramenta padrão para backup de clusters Kubernetes — snapshots de aplicações, volumes, configuração.
+Esta página não repete a instalação, coberta em [instalar Velero](../install-velero/). Ela cobre
+os padrões de uso que aparecem depois que o Velero já está rodando: como declarar um
+`BackupStorageLocation` ou `VolumeSnapshotLocation` adicional via CRD (em vez de `--set` no
+Helm), como filtrar backups e restaurações por namespace, e o checklist de prontidão contínua
+para disaster recovery.
 
-## Instalação base
+## Declarar um BackupStorageLocation adicional via CRD
 
-```bash
-helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-helm install velero vmware-tanzu/velero \
-  --namespace velero --create-namespace \
-  --set configuration.backupStorageLocation.bucket=my-backup-bucket \
-  --set configuration.backupStorageLocation.provider=aws \
-  --set configuration.volumeSnapshotLocation.provider=aws \
-  --set credentials.useSecret=true
-```
-
-## Configuração S3 (AWS)
+O Helm chart cria o `BackupStorageLocation` padrão a partir dos valores de instalação, mas um
+segundo local de backup (por exemplo, um bucket separado para um ambiente específico) é mais
+direto de declarar diretamente como um recurso Kubernetes:
 
 ```yaml
 apiVersion: velero.io/v1
 kind: BackupStorageLocation
 metadata:
-  name: default
+  name: secondary
   namespace: velero
 spec:
   provider: aws
@@ -37,13 +35,14 @@ spec:
     region: us-east-1
 ```
 
-## Volume snapshots (EBS)
+Um `VolumeSnapshotLocation` adicional segue o mesmo princípio, para um segundo backend de
+snapshot de volumes:
 
 ```yaml
 apiVersion: velero.io/v1
 kind: VolumeSnapshotLocation
 metadata:
-  name: aws-ebs
+  name: aws-ebs-secondary
   namespace: velero
 spec:
   provider: aws
@@ -51,75 +50,27 @@ spec:
     region: us-east-1
 ```
 
-## Criar primeiro backup
+Ao criar um backup, referencie o local desejado com `--storage-location secondary`; sem essa
+flag, o Velero usa o local marcado como padrão.
+
+## Filtrar backups por namespace
 
 ```bash
-velero backup create my-first-backup \
-  --wait
-# Verificar
-velero backup describe my-first-backup
-velero backup logs my-first-backup
-```
-
-## Backup automático (schedule)
-
-```bash
-velero schedule create daily-backup \
-  --schedule="0 2 * * *" \
-  --include-namespaces '*' \
-  --default-volumes-to-restic \
-  --wait
-```
-
-Roda backup diariamente às 02:00 UTC.
-
-## Restore de disaster
-
-```bash
-# Listar backups disponíveis
-velero backup get
-
-# Restaurar
-velero restore create --from-backup my-first-backup
-velero restore describe my-first-backup
-
-# Verificar progresso
-kubectl get pods -n velero
-```
-
-## Exclude/Include namespaces
-
-```bash
-# Backup só production
+# Backup só de um namespace específico
 velero backup create prod-only \
   --include-namespaces production
 
-# Backup tudo exceto kube-system
+# Backup de tudo, exceto os namespaces do próprio sistema
 velero backup create all-except-system \
   --exclude-namespaces kube-system,kube-node-lease
 ```
 
-## Restic (volume backup via tarball)
+Os dois filtros são mutuamente exclusivos por backup: use `--include-namespaces` quando o
+objetivo é isolar poucos namespaces, e `--exclude-namespaces` quando o objetivo é cobrir quase
+tudo, excluindo apenas o que não faz sentido versionar (namespaces do próprio Kubernetes, por
+exemplo).
 
-Para volumes que não suportam snapshots (hostPath, NFS):
-
-```bash
-velero backup create with-restic \
-  --default-volumes-to-restic
-```
-
-Velero usa restic para fazer backup dos volumes como tarball (mais lento, mas funciona em qualquer storage).
-
-## Disaster recovery checklist
-
-- [ ] Backups rodando diariamente (velero schedule)
-- [ ] Teste restore 1x/semana (ou mensal mínimo)
-- [ ] Retenção configurada (ex: 30 dias)
-- [ ] Alertas se backup falhar (Prometheus metric `velero_backup_failure`)
-- [ ] S3 bucket encrypted + versioning ligado
-- [ ] Credentials em Secret seguro (RBAC limitado)
-
-## Exemplo: Restore de 1 namespace só
+## Restaurar apenas um namespace
 
 ```bash
 velero restore create restore-api-only \
@@ -127,13 +78,23 @@ velero restore create restore-api-only \
   --include-namespaces api
 ```
 
-## Próximas seções
+Esse padrão é útil para recuperar um namespace específico sem sobrescrever o restante do
+cluster, por exemplo depois de uma alteração acidental isolada a uma aplicação.
 
-- [Monitorar Velero](../../../operations/backup-and-recovery/) — métricas e alertas.
+## Checklist de prontidão para disaster recovery
 
----
+- [ ] Backups agendados rodando diariamente (`velero schedule get` mostra o schedule esperado).
+- [ ] Teste de restauração executado ao menos semanalmente, mensal no mínimo, não apenas planejado.
+- [ ] Retenção configurada de forma explícita (por exemplo, 30 dias via `--ttl 720h`).
+- [ ] Alerta configurado para falha de backup, usando a métrica Prometheus `velero_backup_failure_total`.
+- [ ] Bucket S3 com criptografia e versionamento habilitados.
+- [ ] Credenciais do Velero em um Secret com acesso restrito por RBAC, não compartilhado com outras cargas.
+
+## Próximos passos
+
+- [Backup e recuperação](../../../../operations/backups/backup-and-recovery/): runbook geral de proteção e recuperação do cluster, do qual o Velero é uma das ferramentas.
 
 ## Referências
 
-- [Velero documentation](https://velero.io/docs/): guia oficial.
-- [Velero troubleshooting](https://velero.io/docs/latest/troubleshooting/): debug.
+- [Velero Documentation](https://velero.io/docs/): documentação oficial completa.
+- [Velero: Troubleshooting](https://velero.io/docs/main/troubleshooting/): guia oficial de investigação de falhas.

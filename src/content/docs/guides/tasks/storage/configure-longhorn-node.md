@@ -1,7 +1,8 @@
 ---
 title: Configurar um nó do Longhorn
+description: Como registrar um disco dedicado adicional em um nó do Longhorn e aplicar tags para direcionar volumes específicos a discos específicos.
 sidebar:
-  order: 3
+  order: 4
 ---
 
 > **Pré-requisitos:** [Longhorn instalado](../install-longhorn/), disco preparado e montado (veja [criar filesystem e montar](../create-filesystem-and-mount/)).
@@ -46,7 +47,7 @@ Confirme em `status.diskStatus` que o disco aparece com `schedulable: true` e a 
 
 ## Troubleshooting
 
-Se o disco não aparecer como agendável, confirme que o caminho montado tem permissões de escrita para o usuário usado pelo Longhorn e espaço livre suficiente — o Longhorn reserva uma porcentagem mínima configurável por disco.
+Se o disco não aparecer como agendável, confirme que o caminho montado tem permissões de escrita para o usuário usado pelo Longhorn e espaço livre suficiente: o Longhorn reserva uma porcentagem mínima configurável por disco.
 
 ## Rollback
 
@@ -55,7 +56,7 @@ kubectl --namespace longhorn-system patch nodes.longhorn.io "${NODE_NAME}" --typ
   --patch "{\"spec\":{\"disks\":{\"disk1\":{\"allowScheduling\":false}}}}"
 ```
 
-Desabilitar o agendamento não remove réplicas já existentes no disco — planeje a migração delas antes de remover o disco fisicamente.
+Desabilitar o agendamento não remove réplicas já existentes no disco; planeje a migração delas antes de remover o disco fisicamente.
 
 ## Próximo passo
 
@@ -63,5 +64,5 @@ Desabilitar o agendamento não remove réplicas já existentes no disco — plan
 
 ## Fontes e leitura adicional
 
-- [Longhorn — Multiple Disk Support](https://longhorn.io/docs/1.12.0/nodes-and-volumes/nodes/multidisk/): referência oficial de configuração de discos por nó.
-- [Longhorn — Storage Tags](https://longhorn.io/docs/1.12.0/nodes-and-volumes/nodes/storage-tags/): documenta o direcionamento de volumes por tags de disco e de nó.
+- [Longhorn: Multiple Disk Support](https://longhorn.io/docs/1.12.0/nodes-and-volumes/nodes/multidisk/): referência oficial de configuração de discos por nó.
+- [Longhorn: Storage Tags](https://longhorn.io/docs/1.12.0/nodes-and-volumes/nodes/storage-tags/): documenta o direcionamento de volumes por tags de disco e de nó.

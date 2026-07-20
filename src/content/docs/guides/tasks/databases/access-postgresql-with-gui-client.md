@@ -1,5 +1,6 @@
 ---
 title: Acessar o PostgreSQL com um cliente gráfico
+description: Como conectar clientes gráficos PostgreSQL (DBeaver, DataGrip, HeidiSQL, pgAdmin, Beekeeper Studio) ao cluster via port-forward, com ressalvas específicas de cada cliente.
 sidebar:
   order: 7
 ---
@@ -22,7 +23,7 @@ Com o port-forward de [expor o PostgreSQL para administração](../expose-postgr
 
 ## DBeaver, DataGrip, HeidiSQL, pgAdmin, Beekeeper Studio
 
-Todos aceitam os mesmos dados de conexão acima em um driver "PostgreSQL". Nenhuma configuração adicional é necessária além do host/porta apontarem para o `port-forward` ativo — mantenha o comando de port-forward rodando durante toda a sessão do cliente.
+Todos aceitam os mesmos dados de conexão acima em um driver "PostgreSQL". Nenhuma configuração adicional é necessária além do host/porta apontarem para o `port-forward` ativo; mantenha o comando de port-forward rodando durante toda a sessão do cliente.
 
 Ressalvas específicas:
 
@@ -40,9 +41,9 @@ SELECT version();
 
 ## Troubleshooting
 
-Se a conexão falhar com "connection refused", confirme que o comando de `port-forward` ainda está rodando em outro terminal — ele não persiste em background por padrão.
+Se a conexão falhar com "connection refused", confirme que o comando de `port-forward` ainda está rodando em outro terminal: ele não persiste em background por padrão.
 
 ## Fontes e leitura adicional
 
-- [CloudNativePG — Service management](https://cloudnative-pg.io/documentation/current/service_management/): referência dos Services usados para conexão.
-- [PostgreSQL — libpq connection strings](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING): documenta o formato de string de conexão usado por clientes compatíveis com libpq.
+- [CloudNativePG: Service management](https://cloudnative-pg.io/documentation/current/service_management/): referência dos Services usados para conexão.
+- [PostgreSQL: libpq connection strings](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING): documenta o formato de string de conexão usado por clientes compatíveis com libpq.

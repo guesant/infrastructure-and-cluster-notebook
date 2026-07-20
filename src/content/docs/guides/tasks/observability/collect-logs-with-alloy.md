@@ -1,5 +1,6 @@
 ---
 title: Coletar logs com o Grafana Alloy
+description: Como instalar o Grafana Alloy como DaemonSet para coletar logs de todos os Pods do nó e enviá-los ao Loki com os labels do Kubernetes já anexados.
 sidebar:
   order: 10
 ---
@@ -45,7 +46,7 @@ O DaemonSet deve ter um Pod por nó, todos `Running`. No Grafana (`Explore` → 
 
 ## Redigir dados sensíveis
 
-Antes de coletar logs de aplicações que podem conter dados sensíveis (tokens, e-mails, IDs pessoais), configure regras de processamento no Alloy para redigir esses campos antes do envio — não trate essa etapa como opcional em produção.
+Antes de coletar logs de aplicações que podem conter dados sensíveis (tokens, e-mails, IDs pessoais), configure regras de processamento no Alloy para redigir esses campos antes do envio: não trate essa etapa como opcional em produção.
 
 ## Troubleshooting
 
@@ -63,5 +64,5 @@ Defina retenção do Loki compatível com a decisão registrada em [retenção e
 
 ## Fontes e leitura adicional
 
-- [Grafana Alloy — documentação oficial](https://grafana.com/docs/alloy/latest/): arquitetura, componentes e configuração.
-- [Alloy — Collecting Kubernetes Pod logs](https://grafana.com/docs/alloy/latest/collect/logs-in-kubernetes/): referência oficial da coleta de logs de Pods.
+- [Grafana Alloy: documentação oficial](https://grafana.com/docs/alloy/latest/): arquitetura, componentes e configuração.
+- [Alloy: Collecting Kubernetes Pod logs](https://grafana.com/docs/alloy/latest/collect/logs-in-kubernetes/): referência oficial da coleta de logs de Pods.

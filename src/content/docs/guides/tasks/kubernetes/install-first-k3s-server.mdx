@@ -1,5 +1,6 @@
 ---
 title: Instalar o primeiro servidor K3s
+description: Como instalar o primeiro servidor K3s com um arquivo de configuração persistente, gerando o token do cluster e validando o resultado antes de adicionar mais nós.
 sidebar:
   order: 1
 ---
@@ -19,13 +20,13 @@ Esta etapa produz um cluster funcional de nó único. Em uma topologia multinó,
 ## Instalação com arquivo de configuração persistente
 
 Para o primeiro servidor, o roteiro recomendado por este guia grava as opções em
-`/etc/rancher/k3s/config.yaml` em vez de passá-las só na linha de comando — isso facilita
+`/etc/rancher/k3s/config.yaml` em vez de passá-las só na linha de comando: isso facilita
 reinstalações, auditoria e integração com backups do host.
 
 Execute em um host novo. Por padrão, cada valor é perguntado no terminal via `read`; o token do
 cluster já vem configurado para ser gerado ao executar (`openssl rand`), sem aparecer nesta
-página. Cada campo pode ter o modo trocado no menu "Personalizar" — embutido no script gerado,
-criptografado com `age`, ou perguntado como os demais — e o corpo do script pode ser editado antes
+página. Cada campo pode ter o modo trocado no menu "Personalizar" (embutido no script gerado,
+criptografado com `age`, ou perguntado como os demais) e o corpo do script pode ser editado antes
 de copiar.
 
 ### Preparar o host
@@ -40,7 +41,7 @@ de copiar.
 ### Criar o arquivo de configuração
 
 Use a aba **Conteúdo** para colar o arquivo manualmente com `vim`/`nvim`/`nano`, ou a aba
-**Script** para gerá-lo automaticamente — o token do cluster é gerado neste passo (modo "Gerar ao
+**Script** para gerá-lo automaticamente: o token do cluster é gerado neste passo (modo "Gerar ao
 executar"), guarde-o com um gerenciador de segredos antes de continuar.
 
 <FileWriter
@@ -75,7 +76,7 @@ executar"), guarde-o com um gerenciador de segredos antes de continuar.
 
 > **Executar em:** o mesmo host, como `root`.
 
-```yaml
+```bash
 systemctl status k3s
 k3s kubectl get nodes
 k3s kubectl get pods --all-namespaces
@@ -85,7 +86,7 @@ O serviço deve estar `active (running)`, o nó deve aparecer como `Ready` e os 
 
 ## Troubleshooting
 
-Se o nó não aparecer como `Ready`, verifique `journalctl -u k3s -n 100` — a causa mais comum é um `config.yaml` inválido (indentação YAML) ou uma porta já ocupada. Se os Pods de `kube-system` ficarem presos em `Pending`, confirme que os requisitos de [validar requisitos do host](../../host/validate-host-requirements/) foram atendidos, em especial cgroups e módulos de kernel.
+Se o nó não aparecer como `Ready`, verifique `journalctl -u k3s -n 100`: a causa mais comum é um `config.yaml` inválido (indentação YAML) ou uma porta já ocupada. Se os Pods de `kube-system` ficarem presos em `Pending`, confirme que os requisitos de [validar requisitos do host](../../host/validate-host-requirements/) foram atendidos, em especial cgroups e módulos de kernel.
 
 ## Rollback
 
@@ -97,9 +98,9 @@ Se o nó não aparecer como `Ready`, verifique `journalctl -u k3s -n 100` — a 
 
 ## Fontes e leitura adicional
 
-- [K3s — Quick-Start Guide](https://docs.k3s.io/quick-start) — Apresenta a instalação oficial por script e a validação inicial de um cluster de nó único.
-- [K3s — Configuration Options](https://docs.k3s.io/installation/configuration) — Explica o arquivo persistente `/etc/rancher/k3s/config.yaml` e a interação com o instalador.
-- [K3s — `k3s server`](https://docs.k3s.io/cli/server) — Referência das opções `cluster-init`, `tls-san`, `node-name`, `node-ip`, token e componentes desabilitados.
-- [K3s — High Availability Embedded etcd](https://docs.k3s.io/datastore/ha-embedded) — Documenta a inicialização do primeiro membro de um cluster HA com etcd embarcado.
-- [K3s — Secrets Encryption](https://docs.k3s.io/security/secrets-encryption) — Detalha a criptografia de Secrets em repouso habilitada por `secrets-encryption`.
-- [K3s — Token Management](https://docs.k3s.io/cli/token) — Explica por que o token do servidor concede acesso sensível e deve acompanhar os backups.
+- [K3s: Quick-Start Guide](https://docs.k3s.io/quick-start): apresenta a instalação oficial por script e a validação inicial de um cluster de nó único.
+- [K3s: Configuration Options](https://docs.k3s.io/installation/configuration): explica o arquivo persistente `/etc/rancher/k3s/config.yaml` e a interação com o instalador.
+- [K3s: `k3s server`](https://docs.k3s.io/cli/server): referência das opções `cluster-init`, `tls-san`, `node-name`, `node-ip`, token e componentes desabilitados.
+- [K3s: High Availability Embedded etcd](https://docs.k3s.io/datastore/ha-embedded): documenta a inicialização do primeiro membro de um cluster HA com etcd embarcado.
+- [K3s: Secrets Encryption](https://docs.k3s.io/security/secrets-encryption): detalha a criptografia de Secrets em repouso habilitada por `secrets-encryption`.
+- [K3s: Token Management](https://docs.k3s.io/cli/token): explica por que o token do servidor concede acesso sensível e deve acompanhar os backups.

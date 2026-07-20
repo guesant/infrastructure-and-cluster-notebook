@@ -1,5 +1,6 @@
 ---
 title: Conectar o repositório Git
+description: Como registrar uma chave SSH de leitura dedicada ao Argo CD para repositórios GitOps privados, sem reutilizar uma chave administrativa pessoal.
 sidebar:
   order: 5
 ---
@@ -10,7 +11,7 @@ import registerGitopsRepoScript from '../../../../../scripts/register-gitops-rep
 > **Pré-requisitos:** CLI do Argo CD autenticada (veja [acessar o Argo CD](../access-argocd/)), repositório GitOps [estruturado](../structure-gitops-repository/), repositório privado por SSH.
 > **Versões testadas:** Argo CD CLI 3.x.
 
-Um repositório público normalmente pode ser lido diretamente pela URL informada nas Applications, sem credencial cadastrada. Esta página é necessária apenas para repositórios privados. Registre uma chave de leitura dedicada ao Argo CD — não reutilize uma chave SSH administrativa pessoal, para poder revogar o acesso do Argo CD sem afetar outros usos da chave.
+Um repositório público normalmente pode ser lido diretamente pela URL informada nas Applications, sem credencial cadastrada. Esta página é necessária apenas para repositórios privados. Registre uma chave de leitura dedicada ao Argo CD; não reutilize uma chave SSH administrativa pessoal, para poder revogar o acesso do Argo CD sem afetar outros usos da chave.
 
 ## Registrar a credencial
 
@@ -24,7 +25,7 @@ Um repositório público normalmente pode ser lido diretamente pela URL informad
   ]}
 />
 
-A chave precisa ter permissão de leitura no repositório (deploy key, no GitHub) antes deste comando — cadastre-a na plataforma Git primeiro.
+A chave precisa ter permissão de leitura no repositório (deploy key, no GitHub) antes deste comando; cadastre-a na plataforma Git primeiro.
 
 ## Validação
 
@@ -53,4 +54,4 @@ argocd repo rm "${GITOPS_REPO_URL}"
 
 ## Fontes e leitura adicional
 
-- [Repositórios privados — Argo CD](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/): documenta credenciais HTTPS e SSH, chaves de deploy e verificação do servidor.
+- [Argo CD: Repositórios privados](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/): documenta credenciais HTTPS e SSH, chaves de deploy e verificação do servidor.

@@ -76,65 +76,79 @@ systemctl restart docker
 docker swarm join --token <MANAGER_TOKEN> <IP>:<PORT>
 ```
 
-## Recuperação: perda de quorum (CRÍTICO)
+## Recuperação: perda de quorum (crítico)
 
-Todos os managers ou quase todos caem. Restaurar de backup:
+Quando todos os managers, ou managers suficientes para impedir qualquer quorum, caem ao mesmo
+tempo, o cluster não consegue mais tomar decisões e precisa ser reconstruído a partir de um
+backup.
 
 ### Pré-requisito
 
-Ter backup do `/var/lib/docker/swarm/` de um manager que era funcional.
+Ter um backup do `/var/lib/docker/swarm/` de um manager que estava funcional antes da perda de
+quorum. Sem esse backup, não há como recuperar o estado anterior: será necessário recriar o
+cluster do zero, perdendo services, secrets e configs registrados nele.
 
 ### Procedimento
 
-1. **No manager a ser restaurado** (ou em qualquer máquina):
+1. **No manager a ser restaurado** (ou em qualquer máquina que assumirá esse papel):
 
    ```bash
-   # Parar Docker
    sudo systemctl stop docker
-
-   # Remover banco de dados antigo/corrompido
    sudo rm -rf /var/lib/docker/swarm
-
-   # Restaurar backup
    sudo tar -xzf /backup/swarm-20260718.tar.gz -C /
-
-   # Reiniciar Docker
    sudo systemctl start docker
    ```
 
-1. **Force o servidor em modo standalone** (se precisa recrear o Swarm):
+   **Atenção:** `rm -rf /var/lib/docker/swarm` apaga permanentemente o estado local do Swarm
+   nessa máquina, incluindo certificados TLS do manager. É irreversível sem o backup que os
+   comandos seguintes restauram; confirme que o arquivo de backup em `/backup/` é válido e
+   corresponde ao snapshot esperado antes de prosseguir.
+
+1. **Force o modo standalone para recriar o Swarm**, apenas se este for o primeiro manager
+   restaurado e não houver outro manager ainda ativo com o mesmo estado:
 
    ```bash
    sudo docker swarm init --force-new-cluster
    ```
 
-   Isso reinitializa o cluster com um novo Raft, usando o backup como base.
+   **Atenção:** este comando descarta o histórico de consenso Raft anterior e inicia um cluster
+   novo, usando o backup restaurado como ponto de partida único. Rodá-lo em mais de um manager
+   simultaneamente cria dois clusters independentes e divergentes a partir do mesmo backup; rode-o
+   uma única vez, no manager escolhido para liderar a recuperação.
 
-1. **Trazer de volta outros managers**:
+1. **Traga de volta os outros managers**, cada um se juntando ao cluster recém-recriado como se
+   fosse um manager novo:
 
    ```bash
    docker swarm join --token <MANAGER_TOKEN> <IP>:<PORT>
    ```
 
-1. **Verificar**:
+1. **Verifique o resultado**:
 
    ```bash
    docker node ls
-   docker service ls  # services foram restaurados?
+   docker service ls
    ```
+
+   O comando `docker node ls` deve listar o manager recuperado e cada manager que se juntou na
+   etapa anterior, todos com status `Reachable`. Em `docker service ls`, confira se os services
+   que existiam antes da perda de quorum aparecem com a contagem de réplicas esperada; um service
+   ausente ou com réplicas zeradas indica que o backup usado era anterior à criação desse service,
+   ou que o backup restaurado não era o mais recente disponível.
 
 ## Teste de restauração
 
-Antes de colocar em produção, testar o procedimento:
+Um procedimento de recuperação que nunca foi executado fora de uma emergência real é um
+procedimento não testado. Antes de confiar nele em produção, valide o caminho completo em um
+servidor descartável:
 
-```bash
-# Em um servidor de teste:
-1. Fazer backup de um manager
-1. Restaurar em nova máquina
-1. docker swarm init --force-new-cluster
-1. Verificar que services e configs estão lá
-1. Tentar deslocar um service
-```
+1. Faça backup de um manager de teste.
+2. Restaure esse backup em uma máquina nova, seguindo o procedimento acima.
+3. Rode `docker swarm init --force-new-cluster` nela.
+4. Verifique que os services e configs esperados aparecem, exatamente como na etapa de
+   verificação acima.
+5. Tente reagendar um service existente para confirmar que o cluster restaurado agenda tarefas
+   normalmente, não apenas que ele lista o estado antigo.
 
 ## Limitações
 

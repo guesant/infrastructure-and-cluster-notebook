@@ -7,7 +7,7 @@ sidebar:
 
 > **Para quem é:** quem já configurou snapshot do etcd e presume, incorretamente, que isso já cobre o backup do cluster inteiro.
 
-Um erro comum é tratar o snapshot do etcd como "o backup do cluster" — ele protege apenas um tipo de dado, entre vários que um cluster real acumula.
+Um erro comum é tratar o snapshot do etcd como "o backup do cluster": ele protege apenas um tipo de dado, entre vários que um cluster real acumula.
 
 ## Como funciona
 
@@ -28,19 +28,19 @@ Um cluster completo tem pelo menos quatro categorias de dado que precisam de est
 
 ## Alternativas
 
-Para um cluster sem volumes persistentes nem bancos de dados, o snapshot do etcd realmente cobre a maior parte do estado — mas essa é a exceção, não a regra, para qualquer cluster que executa aplicações reais.
+Para um cluster sem volumes persistentes nem bancos de dados, o snapshot do etcd realmente cobre a maior parte do estado, mas essa é a exceção, não a regra, para qualquer cluster que executa aplicações reais.
 
 ## Quando o snapshot do etcd é suficiente
 
-Apenas para clusters que não têm PVCs nem bancos de dados — um cenário raro além de laboratórios muito simples.
+Apenas para clusters que não têm PVCs nem bancos de dados: um cenário raro além de laboratórios muito simples.
 
 ## Quando não é suficiente
 
-Assim que qualquer workload usa armazenamento persistente ou um banco de dados — o que inclui a maioria dos cenários cobertos por este notebook a partir da Fase 4.
+Assim que qualquer workload usa armazenamento persistente ou um banco de dados, o que inclui a maioria dos cenários cobertos por este notebook a partir da Fase 4.
 
 ## Decisões que isso implica
 
-Cada categoria de dado precisa de sua própria linha na matriz de proteção (veja [backup e recuperação](../../../operations/backups/backup-and-recovery/#modelo-de-matriz-de-proteção)) — com RPO, RTO, frequência e teste de restauração próprios.
+Cada categoria de dado precisa de sua própria linha na matriz de proteção (veja [backup e recuperação](../../../operations/backups/backup-and-recovery/#modelo-de-matriz-de-proteção)), com RPO, RTO, frequência e teste de restauração próprios.
 
 ## Páginas relacionadas
 
@@ -51,4 +51,4 @@ Cada categoria de dado precisa de sua própria linha na matriz de proteção (ve
 
 ## Referências
 
-- [K3s — Backup and Restore](https://docs.k3s.io/datastore/backup-restore): confirma o escopo exato do snapshot do etcd.
+- [K3s: Backup and Restore](https://docs.k3s.io/datastore/backup-restore): confirma o escopo exato do snapshot do etcd.

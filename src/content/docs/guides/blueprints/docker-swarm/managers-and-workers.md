@@ -14,12 +14,10 @@ No primeiro nó (será o manager líder):
 docker swarm init --advertise-addr <IP_DO_MANAGER>
 ```
 
-Salve a saída — inclui o comando para adicionar workers e managers:
-
-```yaml
-docker swarm join --token <WORKER_TOKEN> <IP>:<PORT>
-docker swarm join-token manager  # para pegar token de manager depois
-```
+A saída desse comando inclui o token e o comando prontos para adicionar workers ao cluster;
+salve-a, porque o token não é reimpresso automaticamente depois. Se precisar dele mais tarde,
+recupere-o com `docker swarm join-token worker` (ou `manager`, para o token de manager) em
+qualquer manager já ativo.
 
 Verifique que Swarm foi iniciado:
 
@@ -62,49 +60,60 @@ docker node ls
 # Workers aparecem com role "worker"
 ```
 
-## Promover/Rebaixar um nó
-
-Promover worker para manager (cuidado: aumenta critério de quorum):
+## Promover ou rebaixar um nó
 
 ```bash
 docker node promote <node_id>
 ```
 
-Rebaixar manager para worker:
+Promover um worker para manager o inclui no consenso Raft, o que muda o número total de managers
+e, portanto, o critério de quorum do cluster: promover um segundo manager para um cluster que
+tinha apenas um, por exemplo, faz o cluster passar a exigir os dois managers ativos para continuar
+operando, já que dois é o total e nenhum deles sozinho forma maioria. Planeje promoções tendo em
+mente o número ímpar recomendado (3 ou 5), não promova nós isoladamente sem considerar o efeito
+no quorum resultante.
 
 ```bash
 docker node demote <node_id>
 ```
 
+Rebaixar um manager para worker tem o efeito oposto: ele sai do consenso Raft e passa a apenas
+executar tarefas.
+
 ## Remover um nó
 
-Do nó a ser removido:
+No nó a ser removido, saia do cluster:
 
 ```bash
 docker swarm leave
 ```
 
-Do manager, remover o nó:
+Em seguida, em um manager, remova o registro desse nó:
 
 ```bash
 docker node rm <node_id>
 ```
 
-Se o nó não responder (offline), force:
+Se o nó estiver offline e não puder executar `docker swarm leave` (hardware perdido, por
+exemplo), force a remoção a partir do manager:
 
 ```bash
 docker node rm --force <node_id>
 ```
 
+**Atenção:** `--force` remove o registro do nó sem confirmar que ele realmente saiu do cluster.
+Se o nó removido à força na verdade ainda estiver ativo na rede (por exemplo, após uma partição
+de rede temporária), ele pode continuar acreditando que faz parte do cluster e gerar um estado
+inconsistente. Use `--force` apenas quando tiver certeza de que o nó está definitivamente fora de
+operação, não apenas temporariamente inalcançável.
+
 ## Checklist de pós-instalação
 
-```yaml
-☐ Todos os managers passam em `docker node ls` com status reachable
-☐ Quorum alcançável (número ímpar de managers: 3 ou 5)
-☐ Workers conseguem se comunicar com overlay network
-☐ Firewall entre managers permite porta 2377 (consenso)
-☐ Firewall entre nós permite porta 7946 (gossip) e 4789 (overlay)
-```
+- [ ] Todos os managers passam em `docker node ls` com status `Reachable`.
+- [ ] O quorum é alcançável: número ímpar de managers (3 ou 5) ativos.
+- [ ] Os workers conseguem se comunicar pela rede overlay.
+- [ ] O firewall entre managers permite a porta 2377 (consenso).
+- [ ] O firewall entre todos os nós permite as portas 7946 (gossip) e 4789 (overlay).
 
 ## Referências
 

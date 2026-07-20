@@ -1,5 +1,6 @@
 ---
 title: Instalar o Loki
+description: Como instalar o Loki em modo SingleBinary via Helm e conectá-lo como datasource do Grafana, para armazenar logs indexados apenas por labels.
 sidebar:
   order: 9
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** kubeconfig com acesso administrativo à API, StorageClass disponível.
 > **Versões testadas:** Loki 3.x (modo `SingleBinary`).
 
-Loki é um backend de logs projetado para indexar apenas metadados (labels), não o conteúdo completo dos logs — isso o torna mais barato de operar que backends que indexam texto completo, ao custo de buscas por conteúdo livre serem mais lentas. Veja [métricas, logs e traces](../../../../learn/observability/metrics-logs-and-traces/) para o papel dos logs na observabilidade.
+Loki é um backend de logs projetado para indexar apenas metadados (labels), não o conteúdo completo dos logs: isso o torna mais barato de operar que backends que indexam texto completo, ao custo de buscas por conteúdo livre serem mais lentas. Veja [métricas, logs e traces](../../../../learn/observability/metrics-logs-and-traces/) para o papel dos logs na observabilidade.
 
 ## Instalar em modo SingleBinary
 
@@ -32,7 +33,7 @@ helm upgrade --install loki loki \
   --set loki.storage.type=filesystem
 ```
 
-`replication_factor: 1` é apropriado apenas para nó único — em multinó, revise essa configuração para tolerância a falha real do próprio Loki.
+`replication_factor: 1` é apropriado apenas para nó único; em multinó, revise essa configuração para tolerância a falha real do próprio Loki.
 
 ## Conectar o Grafana ao Loki
 
@@ -78,5 +79,5 @@ helm --namespace monitoring uninstall loki
 
 ## Fontes e leitura adicional
 
-- [Loki — documentação oficial](https://grafana.com/docs/loki/latest/): arquitetura, modos de implantação e configuração.
-- [Loki — Helm chart](https://github.com/grafana/loki/tree/main/production/helm/loki): referência do chart e valores.
+- [Loki: documentação oficial](https://grafana.com/docs/loki/latest/): arquitetura, modos de implantação e configuração.
+- [Loki: Helm chart](https://github.com/grafana/loki/tree/main/production/helm/loki): referência do chart e valores.

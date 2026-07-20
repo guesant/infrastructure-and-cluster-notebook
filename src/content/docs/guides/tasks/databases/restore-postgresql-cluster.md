@@ -1,5 +1,6 @@
 ---
 title: Restaurar um cluster PostgreSQL
+description: Como restaurar um cluster PostgreSQL do CloudNativePG a partir de um backup existente, criando um novo cluster sem afetar o original.
 sidebar:
   order: 6
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** [backup do PostgreSQL configurado](../configure-postgresql-backups/) e um backup existente no destino.
 > **Versões testadas:** CloudNativePG 1.30.
 
-O CloudNativePG restaura criando um **novo** cluster a partir do backup — não substitui o cluster existente no lugar. Isso permite validar a restauração sem afetar o cluster em produção, o mesmo princípio usado na [restauração de volumes Longhorn](../../storage/restore-volume-backup/).
+O CloudNativePG restaura criando um **novo** cluster a partir do backup; não substitui o cluster existente no lugar. Isso permite validar a restauração sem afetar o cluster em produção, o mesmo princípio usado na [restauração de volumes Longhorn](../../storage/restore-volume-backup/).
 
 ## Restaurar como um novo cluster
 
@@ -63,7 +64,7 @@ Sem `targetTime`, o CloudNativePG restaura até o ponto mais recente disponível
 kubectl --namespace "${PG_NAMESPACE}" get cluster "${PG_RESTORED_NAME}"
 ```
 
-Depois que o cluster restaurado ficar saudável, valide a integridade dos dados na camada da aplicação — confira schema, contagens conhecidas ou checksums, não apenas a existência do Pod:
+Depois que o cluster restaurado ficar saudável, valide a integridade dos dados na camada da aplicação: confira schema, contagens conhecidas ou checksums, não apenas a existência do Pod:
 
 ```bash
 kubectl --namespace "${PG_NAMESPACE}" exec -it "${PG_RESTORED_NAME}-1" -- psql -U postgres -c '\dt'
@@ -71,7 +72,7 @@ kubectl --namespace "${PG_NAMESPACE}" exec -it "${PG_RESTORED_NAME}-1" -- psql -
 
 ## Troubleshooting
 
-Se a restauração ficar presa em `Setting up primary` por muito tempo, confirme que a credencial do `externalClusters` tem permissão de leitura no destino original e que o `destinationPath` está correto — um caminho errado normalmente falha silenciosamente até o timeout.
+Se a restauração ficar presa em `Setting up primary` por muito tempo, confirme que a credencial do `externalClusters` tem permissão de leitura no destino original e que o `destinationPath` está correto: um caminho errado normalmente falha silenciosamente até o timeout.
 
 ## Rollback
 
@@ -81,8 +82,8 @@ kubectl --namespace "${PG_NAMESPACE}" delete cluster "${PG_RESTORED_NAME}"
 
 ## Próximo passo
 
-Depois de validar a integridade, decida se o cluster restaurado substitui o original (redirecione a aplicação para os novos Services) ou serve apenas como evidência de um restore drill — veja o [roteiro de restore drill](../../../../operations/backups/backup-and-recovery/#roteiro-de-restore-drill).
+Depois de validar a integridade, decida se o cluster restaurado substitui o original (redirecione a aplicação para os novos Services) ou serve apenas como evidência de um restore drill; veja o [roteiro de restore drill](../../../../operations/backups/backup-and-recovery/#roteiro-de-restore-drill).
 
 ## Fontes e leitura adicional
 
-- [CloudNativePG — Recovery](https://cloudnative-pg.io/documentation/current/recovery/): referência oficial de recuperação point-in-time e `externalClusters`.
+- [CloudNativePG: Recovery](https://cloudnative-pg.io/documentation/current/recovery/): referência oficial de recuperação point-in-time e `externalClusters`.

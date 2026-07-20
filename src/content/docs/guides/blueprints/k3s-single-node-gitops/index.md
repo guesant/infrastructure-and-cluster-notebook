@@ -10,9 +10,9 @@ sidebar:
 
 ## Objetivo e cenário atendido
 
-Este blueprint entrega um cluster Kubernetes funcional em uma única máquina — física ou virtual —, com publicação de serviços via Gateway API, certificados TLS emitidos e renovados automaticamente, e aplicações administradas declarativamente a partir de um repositório Git. É o caminho indicado para laboratórios pessoais, homelabs e ambientes de baixo custo que ainda assim querem operar próximo de um padrão usado em produção, com trade-offs explícitos.
+Este blueprint entrega um cluster Kubernetes funcional em uma única máquina (física ou virtual), com publicação de serviços via Gateway API, certificados TLS emitidos e renovados automaticamente, e aplicações administradas declarativamente a partir de um repositório Git. É o caminho indicado para laboratórios pessoais, homelabs e ambientes de baixo custo que ainda assim querem operar próximo de um padrão usado em produção, com trade-offs explícitos.
 
-Não é o blueprint indicado para quem precisa de alta disponibilidade do control plane ou tolerância à perda de um host físico — veja [limitações e pontos únicos de falha](../k3s-single-node-gitops/limitations/) antes de adotá-lo em um cenário que não tolera indisponibilidade.
+Não é o blueprint indicado para quem precisa de alta disponibilidade do control plane ou tolerância à perda de um host físico. Veja [limitações e pontos únicos de falha](../k3s-single-node-gitops/limitations/) antes de adotá-lo em um cenário que não tolera indisponibilidade.
 
 ## Arquitetura
 
@@ -44,7 +44,7 @@ flowchart TB
     Cliente["Cliente externo"] -->|"HTTPS"| Traefik
 ```
 
-O K3s roda com `cluster-init: true` mesmo em nó único, o que já deixa o control plane pronto para receber servidores adicionais no futuro sem reinstalação (veja [Fase 5 — multinó](../../../../../.todo/phase-5-multinode.md), fora do escopo deste blueprint). O mesmo host executa control plane, workloads, ingress e o próprio Argo CD — não há isolamento de papéis entre essas funções.
+O K3s roda com `cluster-init: true` mesmo em nó único, o que já deixa o control plane pronto para receber servidores adicionais no futuro sem reinstalação (veja [Fase 5: multinó](../../../../../.todo/phase-5-multinode.md), fora do escopo deste blueprint). O mesmo host executa control plane, workloads, ingress e o próprio Argo CD; não há isolamento de papéis entre essas funções.
 
 ## Decisões adotadas
 
@@ -53,13 +53,13 @@ O K3s roda com `cluster-init: true` mesmo em nó único, o que já deixa o contr
 - **CNI:** Flannel, empacotado com o K3s. Nenhuma decisão adicional de rede de Pods é necessária para nó único.
 - **Ingress e Gateway:** Gateway API com Traefik como controller, em vez do Ingress-NGINX ou do provider de Ingress clássico do Traefik. Motivo: a Gateway API separa claramente Gateway (infraestrutura) de HTTPRoute (aplicação) e é o caminho que a comunidade Kubernetes está consolidando para expor serviços.
 - **Certificados:** cert-manager com ACME e desafio DNS-01. Motivo: permite certificados wildcard e não exige que o serviço já esteja publicamente acessível durante a emissão.
-- **Armazenamento:** decisão explicitamente fora deste blueprint — `local-storage` é desabilitado na instalação do primeiro servidor. Se os workloads precisarem de volumes persistentes, o [Longhorn](../../../guides/tasks/storage/install-longhorn/) é a opção coberta pelo notebook, mas sua adoção é decidida por cluster, não imposta por este blueprint.
+- **Armazenamento:** decisão explicitamente fora deste blueprint. `local-storage` é desabilitado na instalação do primeiro servidor. Se os workloads precisarem de volumes persistentes, o [Longhorn](../../../guides/tasks/storage/install-longhorn/) é a opção coberta pelo notebook, mas sua adoção é decidida por cluster, não imposta por este blueprint.
 - **Entrega contínua:** Argo CD com padrão App-of-Apps, rodando no mesmo cluster que gerencia. Motivo: elimina a necessidade de um cluster de gerenciamento separado, ao custo de o Argo CD depender do cluster que ele mesmo reconcilia.
-- **Segredos:** o token do K3s e a chave privada ACME ficam armazenados no cluster; segredos de aplicação não são resolvidos por este blueprint mínimo — veja [Infisical](../../../guides/tasks/secrets/install-infisical/) como opção quando o caminho principal estiver validado.
+- **Segredos:** o token do K3s e a chave privada ACME ficam armazenados no cluster; segredos de aplicação não são resolvidos por este blueprint mínimo. Veja [Infisical](../../../guides/tasks/secrets/install-infisical/) como opção quando o caminho principal estiver validado.
 
 ## Limitações e pontos únicos de falha
 
-Resumo — veja a página completa em [limitações e pontos únicos de falha](../k3s-single-node-gitops/limitations/):
+Resumo; veja a página completa em [limitações e pontos únicos de falha](../k3s-single-node-gitops/limitations/):
 
 - O host é um ponto único de falha para control plane, workloads, ingress e o próprio Argo CD.
 - Uma falha de disco sem backup externo do snapshot do etcd e dos volumes é perda de dados irrecuperável.
@@ -87,7 +87,7 @@ Cada task guide referenciado na sequência de implantação tem sua própria se�
 
 ## Rollback
 
-Não há rollback único para o blueprint inteiro — cada task guide documenta o rollback do componente correspondente. Para desfazer o cluster completo, veja [desinstalar o K3s](../../../guides/tasks/kubernetes/uninstall-k3s/), executado por último, depois de remover os componentes de plataforma instalados sobre ele.
+Não há rollback único para o blueprint inteiro: cada task guide documenta o rollback do componente correspondente. Para desfazer o cluster completo, veja [desinstalar o K3s](../../../guides/tasks/kubernetes/uninstall-k3s/), executado por último, depois de remover os componentes de plataforma instalados sobre ele.
 
 ## Operação, backup e recuperação
 
@@ -99,6 +99,6 @@ Depois do cluster-base funcionando, revise o [guia de operação contínua](../.
 
 ## Fontes e leitura adicional
 
-- [K3s — Quick-Start Guide](https://docs.k3s.io/quick-start): instalação oficial do K3s usada como base deste blueprint.
-- [Cluster bootstrapping — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): padrão App-of-Apps adotado na etapa de GitOps.
+- [K3s: Quick-Start Guide](https://docs.k3s.io/quick-start): instalação oficial do K3s usada como base deste blueprint.
+- [Argo CD: Cluster bootstrapping](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): padrão App-of-Apps adotado na etapa de GitOps.
 - [Introdução à Gateway API](https://gateway-api.sigs.k8s.io/docs/introduction/): base da decisão de exposição de serviços deste blueprint.

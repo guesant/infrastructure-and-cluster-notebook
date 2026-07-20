@@ -1,5 +1,6 @@
 ---
 title: Acessar o Argo CD
+description: Como obter a senha inicial do Argo CD via port-forward, trocá-la pela CLI e remover o secret administrativo temporário antes de qualquer outro uso.
 sidebar:
   order: 3
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** [Argo CD instalado](../install-argocd/), `KUBECONFIG` válido.
 > **Versões testadas:** Argo CD (chart 10.1.3).
 
-O chart usado na instalação não expõe o Argo CD publicamente nem cria um Ingress — o primeiro acesso é sempre por `port-forward`, e a senha inicial precisa ser trocada antes de qualquer outro uso. Esta página cobre esse primeiro acesso; publicar o Argo CD por um `HTTPRoute` é uma decisão separada, tratada em [Gateway API e Traefik](../../networking/configure-traefik-gateway-api/).
+O chart usado na instalação não expõe o Argo CD publicamente nem cria um Ingress: o primeiro acesso é sempre por `port-forward`, e a senha inicial precisa ser trocada antes de qualquer outro uso. Esta página cobre esse primeiro acesso; publicar o Argo CD por um `HTTPRoute` é uma decisão separada, tratada em [Gateway API e Traefik](../../networking/configure-traefik-gateway-api/).
 
 ## Encaminhar o servidor localmente
 
@@ -69,7 +70,7 @@ Deve retornar o usuário `admin` autenticado com a nova senha. Se o login com a 
 
 ## Troubleshooting
 
-Um `argocd login` que falha com erro de certificado sem `--insecure` é esperado nesta etapa — o Argo CD ainda usa o certificado autoassinado padrão. Trate a emissão de um certificado confiável como parte da publicação pública (via cert-manager), não do primeiro acesso administrativo.
+Um `argocd login` que falha com erro de certificado sem `--insecure` é esperado nesta etapa: o Argo CD ainda usa o certificado autoassinado padrão. Trate a emissão de um certificado confiável como parte da publicação pública (via cert-manager), não do primeiro acesso administrativo.
 
 ## Rollback
 
@@ -81,5 +82,5 @@ Não aplicável. Se a senha for perdida, gere uma nova a partir de uma conta com
 
 ## Fontes e leitura adicional
 
-- [Getting Started — Argo CD](https://argo-cd.readthedocs.io/en/stable/getting_started/): fluxo oficial de instalação, acesso inicial e criação de uma aplicação.
-- [Gestão de usuários — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/): orienta sobre a conta `admin`, usuários locais e integração com provedores de identidade.
+- [Argo CD: Getting Started](https://argo-cd.readthedocs.io/en/stable/getting_started/): fluxo oficial de instalação, acesso inicial e criação de uma aplicação.
+- [Argo CD: Gestão de usuários](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/): orienta sobre a conta `admin`, usuários locais e integração com provedores de identidade.

@@ -1,5 +1,6 @@
 ---
 title: Quorum em clusters distribuídos
+description: Explica o que é quorum, por que ele exige um número ímpar de servidores, e o que acontece quando um cluster K3s perde a maioria dos servidores.
 sidebar:
   order: 5
 ---
@@ -14,10 +15,10 @@ Exemplos:
 
 | N | Quorum | Significado |
 | --- | --- | --- |
-| 1 | 1 | 1 servidor: qualquer falha = travado (sem HA) |
-| 2 | 2 | 2 servidores: perda de 1 = travado (não é HA) |
-| 3 | 2 | 3 servidores: perda de 1 = funciona ✅ |
-| 5 | 3 | 5 servidores: perda de 2 = funciona ✅ |
+| 1 | 1 | 1 servidor: qualquer falha trava o cluster (sem HA) |
+| 2 | 2 | 2 servidores: perder 1 trava o cluster (não é HA) |
+| 3 | 2 | 3 servidores: perder 1 ainda funciona |
+| 5 | 3 | 5 servidores: perder 2 ainda funciona |
 
 ## Por quê quorum?
 
@@ -54,40 +55,29 @@ flowchart LR
     L -.->|"notifica followers"| F2
 ```
 
-## Cenário: Perda de 1 servidor em 3
+## Cenário: perda de 1 servidor em 3
 
-```yaml
-Antes:
-  [Srv-0 (líder)]  [Srv-1 (seg)]  [Srv-2 (seg)]
-        3           3              3
-      
-Srv-1 cai:
-  [Srv-0]        ❌              [Srv-2]
-     2            X               2
-            quorum = 2 ✅
+```text
+Antes:       Srv-0 (líder)   Srv-1 (seguidor)   Srv-2 (seguidor)
+Srv-1 cai:   Srv-0 (vivo)    Srv-1 (caído)      Srv-2 (vivo)
 
-Novo líder eleito entre Srv-0 e Srv-2
-Continuam concordando
+Dois de três servidores continuam vivos: quorum de 2 mantido.
+Um novo líder é eleito entre Srv-0 e Srv-2; o cluster continua decidindo normalmente.
 ```
 
-Quorum de 2 (em 3 servidores) significava: máximo de 1 falha = cluster continua.
+Quorum de 2 (em 3 servidores) significa: o cluster tolera no máximo 1 falha antes de travar.
 
-## Cenário: Perda de quorum (2+ em 3)
+## Cenário: perda de quorum (2 ou mais em 3)
 
-```yaml
-Antes:
-  [Srv-0]  [Srv-1]  [Srv-2]
-     3       3        3
+```text
+Antes:              Srv-0   Srv-1   Srv-2
+Srv-1 e Srv-2 caem:  Srv-0 (vivo)   Srv-1 (caído)   Srv-2 (caído)
 
-Srv-1 E Srv-2 caem:
-  [Srv-0]  ❌       ❌
-     1      X        X
-  
-  Quorum = 2, mas só 1 vivo → TRAVADO
-  Nenhuma decisão pode ser tomada
+Apenas 1 de 3 servidores continua vivo; o quorum exigido é 2.
+Nenhuma decisão pode ser tomada: o cluster trava.
 ```
 
-Srv-0 fica sozinho. Mesmo que seja o líder anterior, não consegue convencer os outros (não consegue alcançá-los) de que uma mudança é válida. É bom que ele não decida sozinho — a decisão dele poderia estar errada enquanto os outros 2 concordam em algo diferente "lá fora".
+Srv-0 fica sozinho. Mesmo que seja o líder anterior, não consegue convencer os outros (não consegue alcançá-los) de que uma mudança é válida. É bom que ele não decida sozinho: a decisão dele poderia estar errada enquanto os outros 2 concordam em algo diferente "lá fora".
 
 Quando Srv-1 e Srv-2 voltarem, eles terão uma verdade diferente. Qual é certa? O sistema não arruma isso automaticamente.
 
@@ -95,14 +85,14 @@ Quando Srv-1 e Srv-2 voltarem, eles terão uma verdade diferente. Qual é certa?
 
 ## Números recomendados
 
-| Topologia | Servidores | Quorum | Tolerância | Recomendado? |
+| Topologia | Servidores | Quorum | Tolerância a falha | Recomendação |
 | --- | --- | --- | --- | --- |
-| Single-node | 1 | N/A | 0 (qualquer falha = total) | ❌ Dev/test |
-| 1 servidor + agentes | 1 | N/A | 0 | ⚠️ HA apenas em workloads |
-| 2 servidores | 2 | 2 | 0 (perda de 1 = travado) | ❌ **Nunca use 2** |
-| 3 servidores | 3 | 2 | 1 (pode perder 1) | ✅ **Recomendado** |
-| 5 servidores | 5 | 3 | 2 (pode perder 2) | ✅ Para escala maior |
-| 7 servidores | 7 | 4 | 3 (pode perder 3) | ✅ Raríssimo |
+| Nó único | 1 | Não aplicável | Nenhuma (qualquer falha derruba o cluster) | Apenas dev/teste |
+| 1 servidor + agents | 1 | Não aplicável | Nenhuma no control plane | HA só nos workloads, não no control plane |
+| 2 servidores | 2 | 2 | Nenhuma (perder 1 já trava) | Nunca use 2 servidores |
+| 3 servidores | 3 | 2 | 1 servidor | Recomendado como padrão |
+| 5 servidores | 5 | 3 | 2 servidores | Para escala maior |
+| 7 servidores | 7 | 4 | 3 servidores | Raramente necessário |
 
 **Regra de ouro:** sempre números ímpares (1, 3, 5, 7). Números pares não adicionam tolerância e gastam recurso.
 
@@ -110,32 +100,20 @@ Exemplo: 2 servidores tem quorum 2; perda de 1 = travado. 3 servidores tem quoru
 
 ## Datastore externo
 
-Se você está usando Postgres ou etcd externo (não etcd embarcado), o quorum é gerenciado pelo **datastore externo**, não pelos servidores K3s.
+Com PostgreSQL ou etcd externo em vez de etcd embarcado (veja [etcd embarcado versus datastore externo](../embedded-vs-external-datastore/)), o quorum passa a ser gerenciado pelo datastore externo, não pelos servidores K3s. Isso libera o número de servidores K3s de qualquer restrição de paridade: um único servidor K3s não precisa de quorum próprio, e dez servidores podem apontar para o mesmo banco sem problema. O quorum passa a existir só no datastore: se ele cair, todos os servidores K3s caem com ele, mesmo que estejam saudáveis individualmente. É um desacoplamento real (o K3s deixa de cuidar de consenso), pago com uma camada de operação a mais para manter.
 
-Você pode ter:
-- 1 servidor K3s (não precisa de quorum K3s)
-- 10 servidores K3s (todos apontam para o mesmo Postgres)
+## Quando evitar HA
 
-O quorum está no Postgres. Se Postgres cair, todos os servidores K3s caem.
-
-Trade-off: desacoplamento (K3s não cuida de consenso), mas mais uma camada operacional.
-
-## Quando evitar HA (quorum)
-
-- **Labs e desenvolvimento:** 1 servidor é mais simples
-- **Quando a perda é aceitável:** ex., um ambiente CI que você pode desligar e reconstruir
-- **Quando não há orçamento:** HA exige múltiplas máquinas
-
-Mas se seu aplicativo precisa rodar 24/7 sem downtime, quorum é não-negociável.
+Um único servidor é a escolha certa para laboratórios e desenvolvimento, onde a simplicidade importa mais do que a tolerância a falha, para ambientes onde a perda é aceitável (um ambiente de CI que pode ser desligado e reconstruído a qualquer momento), ou quando o orçamento não comporta as múltiplas máquinas que HA exige. Fora desses casos, se a aplicação precisa rodar de forma contínua sem janelas de indisponibilidade, quorum deixa de ser opcional.
 
 ## Tópicos relacionados
 
-- [Topologias recomendadas](../../guides/blueprints/k3s-multinode/topologies/): escolher número de servidores
-- [Arquitetura de quorum e etcd](../../guides/blueprints/k3s-multinode/architecture/): detalhamento técnico
-- [Embedded vs. External Datastore](./embedded-vs-external-datastore/): trade-offs de armazenamento de estado
+- [Topologias recomendadas](../../../guides/blueprints/k3s-multinode/topologies/): escolher número de servidores.
+- [Arquitetura de quorum e etcd](../../../guides/blueprints/k3s-multinode/architecture/): detalhamento técnico.
+- [etcd embarcado versus datastore externo](../embedded-vs-external-datastore/): trade-offs de armazenamento de estado.
 
 ## Fontes e leitura adicional
 
-- [etcd — Consensus using Raft](https://etcd.io/docs/v3.5/learning/design-client/): especificação de Raft.
-- [K3s — High Availability Setup](https://docs.k3s.io/datastore/ha-embedded): configuração de HA em K3s.
-- [Distributed Systems — Consensus](https://en.wikipedia.org/wiki/Consensus_(computer_science)): fundamentos de consenso.
+- [etcd: Consensus using Raft](https://etcd.io/docs/v3.5/learning/design-client/): especificação de Raft.
+- [K3s: High Availability Setup](https://docs.k3s.io/datastore/ha-embedded): configuração de HA em K3s.
+- [Wikipedia: Consensus (computer science)](https://en.wikipedia.org/wiki/Consensus_(computer_science)): fundamentos de consenso.

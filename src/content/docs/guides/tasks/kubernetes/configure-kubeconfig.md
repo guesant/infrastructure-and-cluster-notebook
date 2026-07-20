@@ -1,5 +1,6 @@
 ---
 title: Acesso remoto
+description: Como copiar o kubeconfig administrativo do K3s para uma estação administrativa, ajustar o endpoint da API e protegê-lo antes de criar credenciais menos privilegiadas.
 sidebar:
   order: 4
 ---

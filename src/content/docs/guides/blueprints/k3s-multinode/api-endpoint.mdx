@@ -1,5 +1,6 @@
 ---
 title: Balancear e expor a API Kubernetes
+description: Opções para dar a um cluster K3s multinode um endpoint único e estável para a API (DNS round-robin, load balancer dedicado ou Traefik), com certificados TLS cobrindo todos os nomes.
 sidebar:
   order: 7
 ---
@@ -11,9 +12,10 @@ Em um cluster com 3 servidores K3s, cada servidor tem a API rodando na porta 644
 
 ## Opção 1: DNS round-robin (simples)
 
-Crie um registro DNS apontando para **todos os IPs dos servidores**:
+Crie um registro DNS apontando para todos os IPs dos servidores, um registro `A` por servidor sob
+o mesmo nome:
 
-```yaml
+```text
 api.seu-cluster.local.  A   10.0.0.10  ; servidor-0
 api.seu-cluster.local.  A   10.0.0.11  ; servidor-1
 api.seu-cluster.local.  A   10.0.0.12  ; servidor-2
@@ -60,7 +62,7 @@ graph TD
 
 Em um host dedicado (ou em um dos servidores, se suportar):
 
-```yaml
+```text
 # /etc/haproxy/haproxy.cfg
 
 global
@@ -86,9 +88,9 @@ backend servers
     server server2 10.0.0.12:6443 check
 ```
 
-Depois, restart HAProxy:
+Depois, reinicie o HAProxy para aplicar a configuração:
 
-```yaml
+```bash
 sudo systemctl restart haproxy
 ```
 
@@ -96,7 +98,7 @@ Clientes agora apontam para `10.0.0.5:6443` (ou DNS alias `api.seu-cluster.local
 
 ### Exemplo: Nginx simples
 
-```yaml
+```text
 # /etc/nginx/sites-available/k3s-api
 
 upstream k3s_servers {
@@ -124,7 +126,7 @@ server {
 Se você já tem Traefik como ingress controller no cluster, pode usá-lo para balancear a API:
 
 ```yaml
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: k3s-api
@@ -141,13 +143,19 @@ spec:
           scheme: https
 ```
 
-**Cuidado:** Traefik precisa estar **fora do etcd** para evitar deadlock (ex.: em um agente dedicado).
+**Atenção:** o Traefik usado como balanceador da própria API precisa rodar fora do control plane
+(por exemplo, em um agente dedicado), nunca em um servidor cujo Traefik dependa dessa mesma API
+para inicializar. Se o pod do Traefik só conseguir subir depois que a API responder, e a API só
+ficar acessível através desse mesmo Traefik, o cluster fica em deadlock: nenhum dos dois consegue
+iniciar primeiro.
 
 ## Certificados TLS
 
-A API K3s vem com certificados auto-assinados para `localhost` e o nome do nó. Para múltiplos nós, você precisa de certificados que cubram:
+A API do K3s vem com certificados auto-assinados cobrindo apenas `localhost` e o nome de cada nó
+individualmente. Em um cluster multinode com endpoint compartilhado, o certificado da API precisa
+cobrir todos os nomes pelos quais ela é alcançada:
 
-```yaml
+```text
 api.seu-cluster.local
 10.0.0.5  (IP do LB)
 10.0.0.10, 10.0.0.11, 10.0.0.12  (IPs dos servidores)
@@ -172,9 +180,9 @@ spec:
 
 ### Opção B: Auto-assinado
 
-Para labs/teste, gerar um certificado auto-assinado que cubra todos os IPs:
+Para laboratório ou testes, gere um certificado auto-assinado que cubra todos os IPs:
 
-```yaml
+```bash
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout api-key.key -out api-cert.crt \
   -subj "/CN=api.seu-cluster.local" \
@@ -184,7 +192,8 @@ sudo cp api-cert.crt /etc/ssl/certs/
 sudo cp api-key.key /etc/ssl/private/
 ```
 
-Depois copiar o certificado para os clientes que acessam a API.
+Depois, distribua o certificado para os clientes que acessam a API diretamente por IP ou nome,
+já que um certificado auto-assinado não é validado automaticamente por eles.
 
 ## Configurar clientes para usar o novo endpoint
 
@@ -212,29 +221,29 @@ users:
 
 ## Verificação
 
-Testar que o LB funciona:
+Confirme que o balanceamento funciona antes de apontar clientes de produção para o novo endpoint:
 
-```yaml
+```bash
 # Do cliente
 curl -k https://api.seu-cluster.local:6443/healthz
-
 # Esperado: "ok"
 ```
 
-Testar que kubectl funciona:
-
-```yaml
+```bash
 kubectl cluster-info
-
-# Esperado: "Kubernetes master is running at https://api.seu-cluster.local:6443"
+# Esperado: "Kubernetes control plane is running at https://api.seu-cluster.local:6443"
 ```
+
+Se `curl` retornar `ok` mas `kubectl cluster-info` falhar, o problema geralmente está no
+kubeconfig (certificado ou token incorretos), não no balanceamento em si, já que o `healthz`
+confirma que a camada de rede e TLS já está funcionando.
 
 ## Próximo passo
 
-- [Validar o cluster](../validation/) — checklist pós-implantação.
-- [Operação nó a nó](../node-maintenance/) — manutenção sem downtime.
+- [Validar o cluster](../validation/): checklist pós-implantação.
+- [Operação nó a nó](../node-maintenance/): manutenção sem downtime.
 
 ## Fontes e leitura adicional
 
-- [K3s — API Configuration](https://docs.k3s.io/cli/server): configuração de endpoint na instalação.
+- [K3s: API Configuration](https://docs.k3s.io/cli/server): configuração de endpoint na instalação.
 - [HAProxy Documentation](http://www.haproxy.org/): referência completa de HAProxy.

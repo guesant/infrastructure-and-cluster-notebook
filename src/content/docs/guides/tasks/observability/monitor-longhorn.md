@@ -1,5 +1,6 @@
 ---
 title: Monitorar o Longhorn
+description: Como criar o ServiceMonitor para o Longhorn manager e quais consultas PromQL acompanham capacidade, volumes degradados e snapshots.
 sidebar:
   order: 6
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** [Prometheus stack instalado](../install-prometheus-stack/), [Longhorn instalado](../../storage/install-longhorn/).
 > **Versões testadas:** Longhorn 1.12.0.
 
-O Longhorn expõe métricas Prometheus nativamente pelo manager, mas nenhum `ServiceMonitor` é criado automaticamente — esta página cria a instrumentação e destaca as métricas essenciais.
+O Longhorn expõe métricas Prometheus nativamente pelo manager, mas nenhum `ServiceMonitor` é criado automaticamente: esta página cria a instrumentação e destaca as métricas essenciais.
 
 ## Criar o ServiceMonitor
 
@@ -45,7 +46,7 @@ EOF
 | Capacidade livre por disco | `longhorn_disk_capacity_bytes - longhorn_disk_usage_bytes` |
 | Snapshots por volume | `longhorn_volume_snapshot_size_bytes` |
 
-Um volume `degraded` significa que ao menos uma réplica está indisponível — não é uma indisponibilidade do volume em si (ainda há réplicas saudáveis), mas reduz a tolerância a falha adicional e merece investigação antes que uma segunda réplica também falhe.
+Um volume `degraded` significa que ao menos uma réplica está indisponível. Não é uma indisponibilidade do volume em si (ainda há réplicas saudáveis), mas reduz a tolerância a falha adicional e merece investigação antes que uma segunda réplica também falhe.
 
 ## Validação
 
@@ -59,12 +60,12 @@ Confirme nos targets do Prometheus que o target `longhorn` está `UP` e que as c
 
 ## Troubleshooting
 
-Se nenhuma métrica aparecer, confirme o label exato do Service do Longhorn manager (`kubectl --namespace longhorn-system get service --show-labels`) — o valor usado no `selector` acima é o padrão da instalação via Helm, mas pode variar conforme a versão do chart.
+Se nenhuma métrica aparecer, confirme o label exato do Service do Longhorn manager (`kubectl --namespace longhorn-system get service --show-labels`): o valor usado no `selector` acima é o padrão da instalação via Helm, mas pode variar conforme a versão do chart.
 
 ## Próximo passo
 
-Configure alertas para volumes degradados e capacidade de disco baixa — veja [revisão de capacidade de disco](../../../../operations/maintenance/disk-capacity-review/) para os limiares operacionais já definidos.
+Configure alertas para volumes degradados e capacidade de disco baixa; veja [revisão de capacidade de disco](../../../../operations/maintenance/disk-capacity-review/) para os limiares operacionais já definidos.
 
 ## Fontes e leitura adicional
 
-- [Longhorn — Monitoring](https://longhorn.io/docs/1.12.0/monitoring/): referência oficial de métricas expostas e integração com Prometheus.
+- [Longhorn: Monitoring](https://longhorn.io/docs/1.12.0/monitoring/): referência oficial de métricas expostas e integração com Prometheus.

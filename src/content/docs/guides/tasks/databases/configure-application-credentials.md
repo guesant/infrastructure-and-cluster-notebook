@@ -1,5 +1,6 @@
 ---
 title: Configurar credenciais de aplicação para PostgreSQL
+description: Como criar um banco de dados e um usuário dedicados por aplicação no CloudNativePG, em vez de reutilizar a credencial administrativa do superusuário.
 sidebar:
   order: 3
 ---
@@ -61,7 +62,7 @@ kubectl --namespace "${PG_NAMESPACE}" get database "${APP_DATABASE_NAME}"
 kubectl --namespace "${PG_NAMESPACE}" get secret "${APP_DATABASE_USER}-credentials"
 ```
 
-O banco e o Secret devem existir. Não imprima o conteúdo do Secret no terminal para validação — referencie-o diretamente no manifesto da aplicação via `envFrom` ou `secretKeyRef`.
+O banco e o Secret devem existir. Não imprima o conteúdo do Secret no terminal para validação; referencie-o diretamente no manifesto da aplicação via `envFrom` ou `secretKeyRef`.
 
 ## Troubleshooting
 
@@ -81,5 +82,5 @@ Remover o `Database` não reverte a criação do role automaticamente; remova-o 
 
 ## Fontes e leitura adicional
 
-- [CloudNativePG — Declarative database management](https://cloudnative-pg.io/documentation/current/declarative_database_management/): referência oficial do recurso `Database`.
-- [CloudNativePG — Managed roles](https://cloudnative-pg.io/documentation/current/declarative_role_management/): documenta a criação declarativa de roles e credenciais.
+- [CloudNativePG: Declarative database management](https://cloudnative-pg.io/documentation/current/declarative_database_management/): referência oficial do recurso `Database`.
+- [CloudNativePG: Managed roles](https://cloudnative-pg.io/documentation/current/declarative_role_management/): documenta a criação declarativa de roles e credenciais.

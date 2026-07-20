@@ -1,8 +1,12 @@
 ---
 title: Fail2Ban
+description: Como instalar e configurar o Fail2Ban para bloquear temporariamente origens que repetem falhas de autenticação SSH, como complemento ao firewall e ao hardening do SSH.
 sidebar:
   order: 8
 ---
+
+> **Pré-requisitos:** acesso root ao host, firewall já configurado (veja [Firewall com UFW](../configure-ufw/) ou [Firewall com firewalld](../configure-firewalld/)).
+> **Versões testadas:** Debian 12 (bookworm), Fail2Ban 1.0.
 
 O Fail2Ban observa os logs de autenticação, identifica endereços que repetem falhas dentro de uma janela e solicita ao firewall um bloqueio temporário. Ele complementa o firewall e o hardening do SSH, mas não torna uma senha fraca segura e não deve ser a única proteção de um serviço exposto.
 
@@ -120,9 +124,13 @@ journalctl --unit ssh --follow
 journalctl --unit fail2ban --since "1 hour ago" | grep -E 'Ban|Unban'
 ```
 
+## Próximo passo
+
+[Configurar journal persistente](../configure-persistent-journal/).
+
 ## Fontes e leitura adicional
 
-- [Fail2Ban — projeto oficial](https://github.com/fail2ban/fail2ban): apresenta o funcionamento, a estrutura de configuração e os canais oficiais do projeto.
-- [`jail.conf(5)` — Debian Manpages](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html): documenta jails, filtros, ações, precedência dos arquivos `.conf` e `.local`, além de opções como `bantime`, `findtime` e `maxretry`.
-- [`fail2ban-client(1)` — Debian Manpages](https://manpages.debian.org/testing/fail2ban/fail2ban-client.1.en.html): referência dos comandos de validação, estado e controle usados para operar o serviço e suas jails.
-- [Filtro `sshd` — repositório oficial do Fail2Ban](https://github.com/fail2ban/fail2ban/blob/master/config/filter.d/sshd.conf): fonte dos modos e padrões utilizados para reconhecer falhas de autenticação do OpenSSH.
+- [Fail2Ban: projeto oficial](https://github.com/fail2ban/fail2ban): apresenta o funcionamento, a estrutura de configuração e os canais oficiais do projeto.
+- [Debian Manpages: `jail.conf(5)`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html): documenta jails, filtros, ações, precedência dos arquivos `.conf` e `.local`, além de opções como `bantime`, `findtime` e `maxretry`.
+- [Debian Manpages: `fail2ban-client(1)`](https://manpages.debian.org/testing/fail2ban/fail2ban-client.1.en.html): referência dos comandos de validação, estado e controle usados para operar o serviço e suas jails.
+- [Fail2Ban: filtro `sshd` (repositório oficial)](https://github.com/fail2ban/fail2ban/blob/master/config/filter.d/sshd.conf): fonte dos modos e padrões utilizados para reconhecer falhas de autenticação do OpenSSH.

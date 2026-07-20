@@ -1,7 +1,8 @@
 ---
 title: Criar filesystem e montar um disco
+description: Como formatar uma partição preparada, montá-la e persistir a montagem em /etc/fstab antes de registrá-la como disco do Longhorn.
 sidebar:
-  order: 2
+  order: 3
 ---
 
 > **Pré-requisitos:** disco ou partição preparado (veja [preparar um disco para o Longhorn](../prepare-host-disk/)).
@@ -30,7 +31,7 @@ mount "${TARGET_PARTITION}" "${MOUNT_POINT}"
 
 ## Persistir o mount em `/etc/fstab`
 
-Sem uma entrada em `/etc/fstab`, o disco não será remontado automaticamente após um reboot — o Longhorn passaria a reportar o disco como ausente até a remontagem manual:
+Sem uma entrada em `/etc/fstab`, o disco não será remontado automaticamente após um reboot: o Longhorn passaria a reportar o disco como ausente até a remontagem manual.
 
 ```bash
 DISK_UUID="$(blkid --match-tag UUID --output value "${TARGET_PARTITION}")"
@@ -49,7 +50,7 @@ O último comando testa que a entrada em `/etc/fstab` está correta, remontando 
 
 ## Troubleshooting
 
-Se `mount --all` falhar após editar `/etc/fstab`, revise a sintaxe da linha adicionada antes de reiniciar o host — um `/etc/fstab` inválido pode impedir o boot normal em alguns sistemas.
+Se `mount --all` falhar após editar `/etc/fstab`, revise a sintaxe da linha adicionada antes de reiniciar o host: um `/etc/fstab` inválido pode impedir o boot normal em alguns sistemas.
 
 ## Rollback
 
@@ -64,4 +65,4 @@ sed -i "\|${MOUNT_POINT}|d" /etc/fstab
 
 ## Fontes e leitura adicional
 
-- [`fstab(5)` — man7.org](https://man7.org/linux/man-pages/man5/fstab.5.html): referência da sintaxe do arquivo de montagens persistentes.
+- [man7.org: `fstab(5)`](https://man7.org/linux/man-pages/man5/fstab.5.html): referência da sintaxe do arquivo de montagens persistentes.

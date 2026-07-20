@@ -1,5 +1,6 @@
 ---
 title: Configurar o Alertmanager
+description: Como criar um receptor real (Slack) e uma regra de roteamento no Alertmanager via AlertmanagerConfig, validando a entrega com um alerta de teste.
 sidebar:
   order: 8
 ---
@@ -104,9 +105,9 @@ kubectl --namespace monitoring delete secret alertmanager-slack-webhook
 
 ## Próximo passo
 
-Configure um *dead-man switch* — veja o procedimento em [observabilidade e alertas](../../../../operations/observability/observability-and-alerting/#teste-ponta-a-ponta-e-metamonitoramento) para o conceito completo.
+Configure um *dead-man switch*; veja o procedimento em [observabilidade e alertas](../../../../operations/observability/observability-and-alerting/#teste-ponta-a-ponta-e-metamonitoramento) para o conceito completo.
 
 ## Fontes e leitura adicional
 
-- [Alertmanager — Prometheus](https://prometheus.io/docs/alerting/latest/alertmanager/): referência oficial de agrupamento, roteamento e silêncios.
-- [AlertmanagerConfig — Prometheus Operator](https://prometheus-operator.dev/docs/user-guides/alerting/): documenta a configuração declarativa de roteamento via CRD.
+- [Prometheus: Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/): referência oficial de agrupamento, roteamento e silêncios.
+- [Prometheus Operator: AlertmanagerConfig](https://prometheus-operator.dev/docs/user-guides/alerting/): documenta a configuração declarativa de roteamento via CRD.

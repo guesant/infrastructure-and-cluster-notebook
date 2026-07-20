@@ -1,12 +1,15 @@
 ---
 title: Requisitos de rede e portas
+description: Quais portas um cluster K3s multinode exige entre servidores e agentes (etcd, API, flannel), em qual direção, e como configurá-las no firewall antes da implantação.
 sidebar:
   order: 3
 ---
 
 > **Para quem é:** quem está configurando firewall ou rede entre múltiplos nós K3s antes de começar a implantação.
 
-Um cluster K3s multinode exige comunicação entre nós em portas específicas — servidores se coordenam via etcd, agentes conectam à API, e todos precisam falar com flannel (rede overlay). Este guia documenta quais portas abrir, em qual direção e entre quem.
+Um cluster K3s multinode exige comunicação entre nós em portas específicas: servidores se
+coordenam via etcd, agentes conectam à API, e todos precisam falar com flannel, a rede overlay
+padrão do K3s. Este guia documenta quais portas abrir, em qual direção e entre quem.
 
 ## Quadro de referência
 
@@ -61,7 +64,7 @@ graph TB
 
 Em cada nó (servidor e agente), permitir tráfego dos nós do cluster:
 
-```yaml
+```bash
 # Exemplo: nós em 10.0.0.0/24
 
 # API Kubernetes (requer acesso ao servidor)
@@ -80,7 +83,7 @@ sudo ufw allow from 10.0.0.0/24 to any port 2380 proto tcp
 
 Se seu firewall usa `firewalld`, a sintaxe é similar:
 
-```yaml
+```bash
 # firewalld: adicionar zona trusted para subnet do cluster
 sudo firewall-cmd --permanent --zone=trusted --add-source=10.0.0.0/24
 sudo firewall-cmd --permanent --zone=trusted --add-port=6443/tcp
@@ -93,10 +96,12 @@ sudo firewall-cmd --reload
 
 ### 2. Firewall entre redes (se nós estão em subnets diferentes)
 
-Se seus servidores estão em uma rede (ex.: `10.0.0.0/24`) e agentes em outra (ex.: `10.1.0.0/24`), você precisa encaminhar tráfego entre elas. Faça isso **no seu roteador/gateway**, não no UFW de cada nó:
+Se seus servidores estão em uma rede (ex.: `10.0.0.0/24`) e agentes em outra (ex.:
+`10.1.0.0/24`), você precisa encaminhar tráfego entre elas. Faça isso no roteador ou gateway,
+não no UFW de cada nó:
 
-- Rota: `10.0.0.0/24` ↔ `10.1.0.0/24` nas portas 6443, 10250, 8472
-- Se o roteador tiver firewall, adicione as regras lá
+- Rota entre `10.0.0.0/24` e `10.1.0.0/24` nas portas 6443, 10250 e 8472.
+- Se o roteador tiver firewall próprio, adicione as regras lá também.
 
 ### 3. Balanceamento da API (se está usando load balancer)
 
@@ -109,9 +114,9 @@ Veja [Balancear a API](../api-endpoint/) para mais.
 
 ### 4. Validação
 
-Depois de configurar firewall, testar conectividade entre nós:
+Depois de configurar o firewall, teste a conectividade entre nós:
 
-```yaml
+```bash
 # Em um agente, testar conexão à API do servidor
 telnet <ip-do-servidor> 6443
 
@@ -119,27 +124,34 @@ telnet <ip-do-servidor> 6443
 nc -zv <ip-do-servidor> 6443
 ```
 
-Se conectar, firewall está ok.
+Uma conexão bem-sucedida confirma que o firewall permite o tráfego nessa porta específica; repita
+para cada porta da tabela de referência que for relevante à sua topologia, já que uma porta aberta
+não garante que as demais também estejam.
 
 ## Considerações adicionais
 
 ### Subredes IPv6
 
-Se está usando IPv6, adicione as mesmas portas para IPv6. UFW aceita:
+Se está usando IPv6, adicione as mesmas portas para IPv6. O UFW aceita a mesma sintaxe com um
+prefixo IPv6:
 
-```yaml
+```bash
 sudo ufw allow from <ipv6-prefix>/64 to any port 6443 proto tcp
 ```
 
 ### NAT e redes privadas
 
-Se nós estão atrás de NAT (ex.: numa nuvem privada), a rede interna (`10.0.0.0/24`) ainda funciona — apenas certifique-se que o firewall internal permite o tráfego. A NAT é **transparente** para Kubernetes contanto que os nós possam se alcançar internamente.
+Se os nós estão atrás de NAT (por exemplo, em uma nuvem privada), a rede interna (`10.0.0.0/24`)
+ainda funciona normalmente; a única exigência é que o firewall interno permita o tráfego. A NAT em
+si é transparente para o Kubernetes, desde que os nós consigam se alcançar internamente pelos
+endereços privados.
 
 ### BGP (se Flannel estiver em modo BGP)
 
-BGP usa a porta **179 TCP** entre nós. Se estiver usando mode BGP em lugar de VXLAN (raro), adicione também:
+BGP usa a porta 179 TCP entre nós. Esse modo é raro nesta infraestrutura (o padrão é VXLAN), mas
+se estiver em uso, adicione também:
 
-```yaml
+```bash
 sudo ufw allow from 10.0.0.0/24 to any port 179 proto tcp
 ```
 
@@ -151,5 +163,5 @@ sudo ufw allow from 10.0.0.0/24 to any port 179 proto tcp
 
 ## Fontes e leitura adicional
 
-- [K3s — Networking](https://docs.k3s.io/networking): especificação completa de portas K3s.
-- [Flannel — Network Model](https://github.com/flannel-io/flannel#how-it-works): como flannel gerencia o overlay network.
+- [K3s: Networking](https://docs.k3s.io/networking): especificação completa de portas K3s.
+- [Flannel: Network Model](https://github.com/flannel-io/flannel#how-it-works): como flannel gerencia o overlay network.

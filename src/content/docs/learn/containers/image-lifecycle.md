@@ -1,5 +1,6 @@
 ---
 title: Ciclo de vida de imagens
+description: Fluxo prático de avaliação, atualização, implantação e rollback de imagens de container, cobrindo tags versus digests, evidência de cadeia de suprimentos e critérios objetivos de sucesso ou interrupção.
 sidebar:
   order: 1
 ---

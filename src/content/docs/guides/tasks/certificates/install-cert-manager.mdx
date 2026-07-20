@@ -1,5 +1,6 @@
 ---
 title: cert-manager
+description: Como instalar o cert-manager, validar a instalação, diagnosticar uma emissão de certificado ACME e forçar uma reemissão manual controlada.
 sidebar:
   order: 1
 ---
@@ -34,7 +35,7 @@ Valide a instalação:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 kubectl --namespace cert-manager rollout status deployment/cert-manager --timeout=180s
 kubectl --namespace cert-manager get pods
 kubectl get crd certificates.cert-manager.io clusterissuers.cert-manager.io
@@ -45,7 +46,7 @@ Quando o `cmctl` estiver disponível, confirme também que os CRDs e o webhook a
 
 > **Executar em:** estação administrativa com `cmctl`, `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 cmctl version
 cmctl check api --wait=2m
 ```
@@ -56,7 +57,7 @@ Se os CRDs da Gateway API tiverem sido instalados depois do cert-manager:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso administrativo à API.
 
-```yaml
+```bash
 kubectl --namespace cert-manager rollout restart deployment/cert-manager
 kubectl --namespace cert-manager rollout status deployment/cert-manager --timeout=180s
 ```
@@ -67,7 +68,7 @@ Comece pelo `Certificate` nominal e pelo namespace correto. O comando abaixo re�
 
 > **Executar em:** estação administrativa com `cmctl`, `KUBECONFIG` e acesso de leitura aos recursos envolvidos.
 
-```yaml
+```bash
 read -r -p "Namespace do Certificate: " CERTIFICATE_NAMESPACE
 read -r -p "Nome do Certificate: " CERTIFICATE_NAME
 
@@ -78,7 +79,7 @@ cmctl status certificate \
 
 Se o estado agregado não for suficiente, inspecione os recursos e eventos sem imprimir o conteúdo do Secret TLS:
 
-```yaml
+```bash
 kubectl --namespace "${CERTIFICATE_NAMESPACE}" \
   get certificates,certificaterequests,orders.acme.cert-manager.io,challenges.acme.cert-manager.io
 
@@ -94,7 +95,7 @@ O cert-manager renova certificados automaticamente. Use a reemissão manual some
 
 > **Executar em:** estação administrativa com `cmctl`, `KUBECONFIG` e permissão para alterar o `Certificate` nominal.
 
-```yaml
+```bash
 read -r -p "Namespace do Certificate: " CERTIFICATE_NAMESPACE
 read -r -p "Nome do Certificate: " CERTIFICATE_NAME
 

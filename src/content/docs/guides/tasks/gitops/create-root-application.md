@@ -1,5 +1,6 @@
 ---
 title: Criar a Application raiz
+description: Como aplicar a Application root do padrão App-of-Apps, o único passo manual do bootstrap GitOps, e validar que o Argo CD descobre e reconcilia as demais Applications a partir dela.
 sidebar:
   order: 6
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** repositório GitOps [estruturado](../structure-gitops-repository/) e enviado ao Git; se privado, [conectado](../connect-git-repository/).
 > **Versões testadas:** Argo CD (chart 10.1.3).
 
-Aplicar a Application `root` é o único passo manual do bootstrap. A partir dela, o Argo CD descobre e reconcilia automaticamente as demais Applications listadas em `gitops/applications/` — nenhuma delas precisa ser aplicada individualmente.
+Aplicar a Application `root` é o único passo manual do bootstrap. A partir dela, o Argo CD descobre e reconcilia automaticamente as demais Applications listadas em `gitops/applications/`; nenhuma delas precisa ser aplicada individualmente.
 
 ## Aplicar a Application raiz
 
@@ -53,5 +54,5 @@ Escolha os [templates copiáveis](../../../blueprints/k3s-single-node-gitops/tem
 
 ## Fontes e leitura adicional
 
-- [Cluster bootstrapping — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): apresenta o padrão App-of-Apps e o papel da Application raiz.
-- [Sincronização automatizada — Argo CD](https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/): explica `selfHeal`, `prune` e os efeitos da reconciliação automática.
+- [Argo CD: Cluster bootstrapping](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): apresenta o padrão App-of-Apps e o papel da Application raiz.
+- [Argo CD: Sincronização automatizada](https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/): explica `selfHeal`, `prune` e os efeitos da reconciliação automática.

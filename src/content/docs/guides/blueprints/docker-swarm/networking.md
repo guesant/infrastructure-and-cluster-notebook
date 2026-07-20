@@ -6,9 +6,10 @@ sidebar:
 
 > **Para quem é:** operadores entendendo como containers comunicam em um cluster Swarm.
 
-## Rede Overlay
+## Rede overlay
 
-A rede overlay conecta containers entre hosts:
+A rede overlay conecta containers entre hosts diferentes como se estivessem na mesma rede local,
+encapsulando o tráfego real em VXLAN (UDP 4789) para atravessar a rede física:
 
 ```bash
 # Criar rede overlay
@@ -18,30 +19,28 @@ docker network create --driver overlay <nome>
 docker service create --network <nome> --name <service> <imagem>
 ```
 
-Características:
+Dentro dessa rede, o nome do service funciona como um hostname resolvível: containers no mesmo
+service convertem esse nome em um VIP (Virtual IP) por meio do DNS interno do Swarm, e cada
+container enxerga os demais chamando diretamente `curl http://service-name`, sem precisar saber
+em qual host físico cada réplica está rodando.
 
-- Containers no mesmo service convertem nomes em load balancing de DNS (VIP — Virtual IP).
-- Cada container vê os demais pelo hostname do service (`curl http://service-name`).
-- VXLAN encapsula tráfego entre hosts (UDP 4789).
+## Ingress routing mesh
 
-## Ingress Routing Mesh
-
-Publica ports direto:
+O ingress routing mesh publica portas diretamente nos hosts:
 
 ```bash
 docker service create --publish 80:8080 --name web nginx
 ```
 
-Efeito:
+Com essa publicação, qualquer host do cluster (não só os que executam o container `web`) responde
+na porta 80 e roteia a requisição internamente até um container que a atenda. Isso simplifica a
+configuração de um load balancer externo, que pode apontar para qualquer host do cluster
+indistintamente, mas tem uma desvantagem: não há como controlar exatamente qual host expõe a
+porta, já que todos expõem por padrão.
 
-- Qualquer host responde na porta 80.
-- Tráfego é roteado ao container (em qualquer host).
+## Host mode (bypass mesh)
 
-Desvantagem: não há forma de controlar exatamente qual host expõe a porta.
-
-## Host Mode (bypass mesh)
-
-Para operações que precisam de controle fino de rede:
+Quando esse controle fino é necessário, o modo host contorna o ingress routing mesh:
 
 ```bash
 docker service create \
@@ -49,22 +48,26 @@ docker service create \
   --name <service> <imagem>
 ```
 
-Apenas hosts rodando o container expõem a porta. Útil para componentes que não escalam bem atrás de LB.
+Nesse modo, apenas os hosts que efetivamente executam o container expõem a porta; os demais não
+respondem nela. É útil para componentes que não escalam bem atrás de um balanceamento
+transparente, como serviços com estado que precisam de afinidade de conexão a um host específico.
 
 ## DNS interno
 
-Nomes de services são resolvidos automaticamente:
+Os nomes de service são resolvidos automaticamente dentro da rede overlay:
 
 ```bash
 # Dentro de um container:
 ping <service_name>
-# Retorna o VIP (IP virtual), não um IP específico
+# Retorna o VIP (IP virtual), não um IP de container específico
 
 curl http://outro_service:8000
-# DNS resolve para VIP, balanceamento acontece automaticamente
+# DNS resolve para o VIP; o balanceamento entre réplicas acontece nesse ponto
 ```
 
-Services fora de uma rede overlay não comunicam diretamente — use a rede overlay.
+Essa resolução só funciona para services conectados à mesma rede overlay; um service fora dela
+não é alcançável por nome, e a rede overlay é o único mecanismo de descoberta disponível nesse
+caso.
 
 ## Troubleshooting
 

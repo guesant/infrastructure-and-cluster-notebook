@@ -1,5 +1,6 @@
 ---
 title: Configurar TLS SAN
+description: Como adicionar um novo nome ou IP à lista tls-san do certificado da API do K3s e forçar a reemissão do certificado depois da instalação.
 sidebar:
   order: 6
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** acesso root a todos os nós manager, K3s instalado.
 > **Versões testadas:** K3s v1.36.1+k3s1.
 
-O certificado da API do K3s inclui uma lista fixa de nomes e IPs válidos (`tls-san`), definida na inicialização do primeiro servidor. Acessar a API por um endereço que não está nessa lista — um novo load balancer, um DNS adicional, um IP público somado depois — falha na validação TLS do cliente, mesmo que a conectividade de rede funcione normalmente.
+O certificado da API do K3s inclui uma lista fixa de nomes e IPs válidos (`tls-san`), definida na inicialização do primeiro servidor. Acessar a API por um endereço que não está nessa lista (um novo load balancer, um DNS adicional, um IP público somado depois) falha na validação TLS do cliente, mesmo que a conectividade de rede funcione normalmente.
 
 Adicionar um `tls-san` depois da instalação não altera um certificado já emitido: o K3s só reemite o certificado do servidor quando ele está próximo do vencimento ou quando forçado manualmente. Planeje todos os endereços de acesso à API antes do primeiro servidor sempre que possível; esta página cobre o caminho para quando isso não foi possível.
 
@@ -51,7 +52,7 @@ mv /var/lib/rancher/k3s/server/tls/dynamic-cert.json /var/lib/rancher/k3s/server
 systemctl restart k3s
 ```
 
-Em uma topologia HA, aguarde o nó voltar a `Ready` antes de repetir o procedimento no próximo manager — os certificados são independentes por nó, mas os clientes precisam encontrar pelo menos um manager saudável durante o processo.
+Em uma topologia HA, aguarde o nó voltar a `Ready` antes de repetir o procedimento no próximo manager: os certificados são independentes por nó, mas os clientes precisam encontrar pelo menos um manager saudável durante o processo.
 
 ## Validação
 
@@ -66,7 +67,7 @@ O SAN adicionado deve aparecer na lista `Subject Alternative Name` e `kubectl` d
 
 ## Troubleshooting
 
-Se o certificado continuar sem o novo SAN após o restart, confirme que `dynamic-cert.json.bak` foi realmente removido do caminho original em todos os managers — um único manager com o certificado antigo pode continuar respondendo a requisições, mascarando o resultado do teste.
+Se o certificado continuar sem o novo SAN após o restart, confirme que `dynamic-cert.json.bak` foi realmente removido do caminho original em todos os managers: um único manager com o certificado antigo pode continuar respondendo a requisições, mascarando o resultado do teste.
 
 ## Rollback
 
@@ -83,5 +84,5 @@ Remover um SAN já em uso por clientes ativos quebra o acesso deles; comunique a
 
 ## Fontes e leitura adicional
 
-- [K3s — Server Configuration Reference](https://docs.k3s.io/cli/server): documenta o campo `tls-san` e seu efeito no certificado do servidor.
-- [K3s — Certificate Rotation](https://docs.k3s.io/cli/certificate): explica o ciclo de vida e a rotação dos certificados internos do K3s.
+- [K3s: Server Configuration Reference](https://docs.k3s.io/cli/server): documenta o campo `tls-san` e seu efeito no certificado do servidor.
+- [K3s: Certificate Rotation](https://docs.k3s.io/cli/certificate): explica o ciclo de vida e a rotação dos certificados internos do K3s.

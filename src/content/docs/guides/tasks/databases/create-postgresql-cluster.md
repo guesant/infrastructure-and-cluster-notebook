@@ -1,5 +1,6 @@
 ---
 title: Criar um cluster PostgreSQL
+description: Como declarar um recurso Cluster do CloudNativePG, com instâncias, armazenamento e as limitações de HA em um cluster de nó único.
 sidebar:
   order: 2
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** [operator CloudNativePG instalado](../install-cloudnative-pg-operator/), StorageClass disponível (veja [criar uma StorageClass](../../storage/create-storage-class/)).
 > **Versões testadas:** CloudNativePG 1.30, PostgreSQL 17.
 
-Um recurso `Cluster` do CloudNativePG declara quantas instâncias PostgreSQL rodam, qual armazenamento usam e como se comunicam entre si — o operator provisiona os Pods, configura replicação em streaming entre elas e promove uma réplica automaticamente se a primária falhar.
+Um recurso `Cluster` do CloudNativePG declara quantas instâncias PostgreSQL rodam, qual armazenamento usam e como se comunicam entre si. O operator provisiona os Pods, configura replicação em streaming entre elas e promove uma réplica automaticamente se a primária falhar.
 
 ## Criar o cluster
 
@@ -39,7 +40,7 @@ spec:
 EOF
 ```
 
-Em um cluster de nó único, `instances: 1` é a única opção realista — múltiplas instâncias não protegem contra a perda do único host físico, apenas do processo PostgreSQL isoladamente. Veja [decisões do blueprint](../../../../guides/blueprints/k3s-single-node-gitops/#decisões-adotadas) para o contexto dessa limitação.
+Em um cluster de nó único, `instances: 1` é a única opção realista: múltiplas instâncias não protegem contra a perda do único host físico, apenas do processo PostgreSQL isoladamente. Veja [decisões do blueprint](../../../../guides/blueprints/k3s-single-node-gitops/#decisões-adotadas) para o contexto dessa limitação.
 
 ## Validação
 
@@ -72,5 +73,5 @@ Excluir o `Cluster` remove os Pods e, conforme a política de retenção do volu
 
 ## Fontes e leitura adicional
 
-- [CloudNativePG — Quickstart](https://cloudnative-pg.io/documentation/current/quickstart/): fluxo oficial de criação de um primeiro cluster.
-- [CloudNativePG — API Reference](https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/): referência completa do campo `spec` do recurso `Cluster`.
+- [CloudNativePG: Quickstart](https://cloudnative-pg.io/documentation/current/quickstart/): fluxo oficial de criação de um primeiro cluster.
+- [CloudNativePG: API Reference](https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/): referência completa do campo `spec` do recurso `Cluster`.

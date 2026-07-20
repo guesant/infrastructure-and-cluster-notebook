@@ -1,5 +1,6 @@
 ---
 title: Configurar sincronização de horário
+description: Como confirmar e ajustar a sincronização de horário via systemd-timesyncd antes de instalar o K3s, evitando falhas de eleição no etcd e recusa de certificados válidos.
 sidebar:
   order: 4
 ---
@@ -9,7 +10,7 @@ sidebar:
 
 O etcd embarcado do K3s rejeita escritas quando o relógio de um membro diverge o suficiente dos demais, e certificados TLS (inclusive os emitidos pelo cert-manager) são validados por período de validade absoluto. Um host com relógio desalinhado pode causar falhas de eleição no etcd ou recusa de certificados válidos. Sincronize o horário antes de instalar o K3s, não depois de investigar um sintoma difícil de reproduzir.
 
-Debian habilita `systemd-timesyncd` por padrão, suficiente para a maioria dos clusters. Use `chrony` apenas se o ambiente já o exigir por outro motivo (ex.: servidor NTP de referência para outros hosts).
+Debian habilita `systemd-timesyncd` por padrão, suficiente para a maioria dos clusters. Use `chrony` apenas se o ambiente já o exigir por outro motivo, por exemplo quando o host precisar atuar como servidor NTP de referência para outros hosts.
 
 ## Confirmar e ajustar o serviço
 
@@ -56,7 +57,7 @@ timedatectl timesync-status
 
 ## Troubleshooting
 
-Se `NTP service` permanecer `inactive` mesmo após `set-ntp true`, verifique se outro serviço de tempo (`chrony`, `ntpd`) está instalado e conflitando pela porta 123 — apenas um serviço de sincronização deve rodar por vez.
+Se `NTP service` permanecer `inactive` mesmo após `set-ntp true`, verifique se outro serviço de tempo (`chrony`, `ntpd`) está instalado e conflitando pela porta 123: apenas um serviço de sincronização deve rodar por vez.
 
 ## Próximo passo
 
@@ -64,5 +65,5 @@ Em cluster multinó, repita esta página em cada nó antes de prosseguir; um ún
 
 ## Fontes e leitura adicional
 
-- [`timedatectl(1)` — systemd](https://www.freedesktop.org/software/systemd/man/latest/timedatectl.html): referência dos subcomandos de fuso horário e sincronização.
-- [K3s — Requirements](https://docs.k3s.io/installation/requirements): lista a sincronização de horário entre nós como pré-requisito para o datastore.
+- [systemd: `timedatectl(1)`](https://www.freedesktop.org/software/systemd/man/latest/timedatectl.html): referência dos subcomandos de fuso horário e sincronização.
+- [K3s: Requirements](https://docs.k3s.io/installation/requirements): lista a sincronização de horário entre nós como pré-requisito para o datastore.

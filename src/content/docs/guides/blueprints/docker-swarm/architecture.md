@@ -6,62 +6,67 @@ sidebar:
 
 > **Para quem é:** quem quer entender como Swarm coordena managers e workers antes de instalá-lo.
 
-Docker Swarm usa um modelo de consenso distribuído (Raft) para manter consistência entre managers. Diferente do Kubernetes, há apenas um tipo de worker — os managers opcionalmente também executam containers.
+Docker Swarm usa um modelo de consenso distribuído (Raft) para manter consistência entre
+managers. Diferente do Kubernetes, existe apenas um tipo de nó de trabalho: os managers,
+opcionalmente, também executam containers, além de suas responsabilidades de consenso.
 
 ## Componentes
 
 ### Manager
 
-Um manager:
+Um manager participa do consenso Raft com os demais managers, mantém o estado do cluster
+(serviços, tarefas, configs, secrets) e agenda as tarefas que os workers vão executar. É também
+pela API que um manager expõe (`docker service`, `docker config` e as demais subcomandos) que
+todo o cluster é operado, mesmo quando a tarefa em si roda em um worker.
 
-- Participa do consensus Raft.
-- Mantém o estado do cluster (serviços, tarefas, configs, secrets).
-- Agenda tarefas para workers.
-- Expõe a API do Swarm (`docker service`, `docker config`, etc.).
-
-Um cluster Swarm requer **quorum de managers**. Com 3 managers, tolera falha de 1. Com 5, tolera falha de 2.
+Um cluster Swarm depende de quorum de managers para continuar tomando decisões: com 3 managers,
+tolera a falha de 1; com 5, tolera a falha de 2. Perder mais managers do que isso trava o cluster
+até que o quorum seja restaurado, cenário tratado em detalhe em
+[Backup e recuperação](../backup-and-recovery/).
 
 ### Worker
 
-Um worker:
+Um worker recebe tarefas diretamente do manager, executa e monitora os containers
+correspondentes e reporta o status de volta. Diferente de um manager, um worker nunca participa
+do consenso Raft, o que o torna descartável e substituível sem risco para a disponibilidade do
+control plane do cluster.
 
-- Recebe tarefas do manager (diretos).
-- Executa e monitora containers.
-- Reporta status das tarefas.
-- Não participa de consenso.
+### Rede overlay
 
-### Rede Overlay
+A rede overlay conecta todos os containers de um mesmo service entre múltiplos hosts,
+encapsulando o tráfego em VXLAN (UDP porta 4789) para que cada container enxergue os demais como
+se estivessem na mesma rede Ethernet virtual, independentemente do host físico em que rodam. O
+balanceamento de carga entre réplicas de um service acontece dentro dessa rede, via IPVS,
+transparente para o container.
 
-Conecta todos os containers de um service entre múltiplos hosts:
+### Ingress routing mesh
 
-- Encapsulamento VXLAN (UDP porta 4789).
-- Cada container vê os demais em uma rede Ethernet virtual.
-- Balanceamento de carga interno (IPVS).
+O ingress routing mesh publica portas diretamente nos hosts: qualquer manager ou worker do
+cluster, mesmo um que não esteja executando o container de destino, aceita requisições na porta
+publicada e as roteia automaticamente para um container que a atenda em algum lugar do cluster.
+Isso oferece um balanceamento básico de saída, mas não substitui um load balancer externo quando
+o requisito é controlar exatamente qual host recebe o tráfego (ver
+[Host mode](../networking/#host-mode-bypass-mesh) em Rede e discovery).
 
-### Ingress Routing Mesh
+## Limites do Swarm
 
-Publica ports direto na porta do host:
+A simplicidade do Swarm vem de recursos que ele deliberadamente não implementa:
 
-- Qualquer manager ou worker pode receber requisições na porta publicada.
-- Tráfego é roteado automaticamente para o container certo.
-- Oferece balanceamento básico.
+- **Sem persistência nativa**: volumes são locais ao host; replicação entre hosts é
+  responsabilidade da aplicação, não do orquestrador.
+- **Sem autoscaling**: não há HPA automático; escalar é sempre uma decisão manual via
+  `docker service scale`.
+- **Sem RBAC fino**: todo manager tem acesso administrativo total ao cluster, sem papéis
+  diferenciados.
+- **Sem multi-tenancy real**: não há namespaces isolando cargas de trabalho entre si, então uma
+  falha de isolamento em um service pode afetar o cluster inteiro.
+- **Limite documentado de aproximadamente 1000 nós** para o algoritmo Raft continuar operando
+  com desempenho previsível.
+- **Sem service mesh nativo**: não há mTLS automático entre services nem circuit breakers.
 
-## Limite de Swarm
-
-Swarm é simples, mas tem limites:
-
-- **Sem persistência nativa**: volumes são locais ao host; replicação é responsabilidade da aplicação.
-- **Sem autoscaling**: não há HPA automático; escala manual com `docker service scale`.
-- **Sem RBAC fino**: todos os managers têm acesso total.
-- **Sem multi-tenancy**: não há namespaces, uma falha de isolamento pode afetar todo o cluster.
-- **Máximo ~1000 nós** (limite documentado do Raft).
-- **Sem service mesh**: não há mTLS nativo, circuit breakers, etc.
-
-Para cenários que exigem esses recursos, Kubernetes é mais indicado.
-
-## Decisão entre Swarm e Kubernetes
-
-Ver [Docker Swarm vs. Kubernetes](../../learn/clusters/docker-swarm-vs-kubernetes/).
+Para cenários que exigem esses recursos, Kubernetes é a opção mais indicada; veja
+[Docker Swarm vs. Kubernetes](../../../../learn/clusters/docker-swarm-vs-kubernetes/) para os
+critérios de decisão entre as duas.
 
 ## Referências
 

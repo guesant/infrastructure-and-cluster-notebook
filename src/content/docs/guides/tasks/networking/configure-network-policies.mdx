@@ -1,5 +1,6 @@
 ---
 title: NetworkPolicy
+description: Como gerar e auditar um baseline de NetworkPolicy (deny-all, DNS, fluxo entre workloads, ingress do Traefik) usando o template GitOps do notebook, sem aplicar nada diretamente no cluster.
 sidebar:
   order: 2
 ---
@@ -46,7 +47,7 @@ Copie o template GitOps, entre no diretório e execute o gerador interativo:
 
 > **Executar em:** estação administrativa, no repositório GitOps de destino.
 
-```yaml
+```bash
 read -r -p "Diretório do template GitOps [gitops]: " GITOPS_DIRECTORY
 GITOPS_DIRECTORY="${GITOPS_DIRECTORY:-gitops}"
 
@@ -62,7 +63,7 @@ Audite os namespaces já endurecidos. O script usa apenas operações de leitura
 
 > **Executar em:** qualquer máquina com `KUBECONFIG`, `kubectl`, Python 3 e acesso de leitura à API, no diretório `gitops/apps/security/network-policies`.
 
-```yaml
+```bash
 read -r -p "Namespace que será auditado: " NETWORK_POLICY_NAMESPACE
 ./audit.sh "${NETWORK_POLICY_NAMESPACE}"
 ```

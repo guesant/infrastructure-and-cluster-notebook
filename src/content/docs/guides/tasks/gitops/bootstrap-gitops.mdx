@@ -1,10 +1,11 @@
 ---
 title: Bootstrap GitOps
+description: Roteiro consolidado para colocar o Argo CD gerenciando o cluster a partir do Git, na ordem em que as páginas de instalação, acesso e estruturação do repositório devem ser seguidas.
 sidebar:
   order: 7
 ---
 
-Esta página funciona como roteiro para colocar o Argo CD gerenciando o cluster a partir do Git. Ela não repete os comandos das páginas específicas — segue cada uma na ordem abaixo.
+Esta página funciona como roteiro para colocar o Argo CD gerenciando o cluster a partir do Git. Ela não repete os comandos das páginas específicas: segue cada uma na ordem abaixo.
 
 O modelo usa o padrão App-of-Apps: uma `Application` chamada `root` observa um diretório do repositório, e cada aplicação encontrada nele passa a ser reconciliada automaticamente pelo Argo CD. Veja o diagrama completo e a explicação em [estruturar o repositório GitOps](../structure-gitops-repository/).
 
@@ -22,5 +23,5 @@ A Application `root` e as Applications escolhidas aparecem `Synced`/`Healthy` em
 
 ## Fontes e leitura adicional
 
-- [Cluster bootstrapping — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): apresenta o padrão App-of-Apps, suas alternativas e cuidados de administração.
+- [Argo CD: Cluster bootstrapping](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/): apresenta o padrão App-of-Apps, suas alternativas e cuidados de administração.
 - [Princípios do OpenGitOps](https://opengitops.dev/): descreve os princípios declarativo, versionado, aplicado automaticamente e continuamente reconciliado.

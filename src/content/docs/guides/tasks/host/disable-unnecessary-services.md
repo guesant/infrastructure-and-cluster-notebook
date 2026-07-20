@@ -1,5 +1,6 @@
 ---
 title: Desabilitar serviços desnecessários
+description: Como listar serviços ativos, decidir caso a caso quais desabilitar e reduzir a superfície de ataque e o consumo de recursos de um nó de cluster.
 sidebar:
   order: 10
 ---
@@ -9,7 +10,7 @@ sidebar:
 
 Uma instalação mínima do Debian já vem enxuta, mas imagens de provedores de nuvem e instalações com a opção "Desktop environment" costumam trazer serviços que um nó de cluster não usa: Bluetooth, impressão (CUPS), descoberta de rede local (Avahi), interfaces gráficas. Cada serviço ativo é superfície de ataque adicional e consumo de CPU/memória que compete com o K3s.
 
-Não desabilite serviços às cegas. Liste o que está ativo, decida caso a caso e documente a decisão — um serviço aparentemente inútil pode ser exigido por hardware específico (ex.: agente de gerenciamento do provedor de nuvem).
+Não desabilite serviços às cegas. Liste o que está ativo, decida caso a caso e documente a decisão: um serviço aparentemente inútil pode ser exigido por hardware específico (ex.: agente de gerenciamento do provedor de nuvem).
 
 ## Listar serviços ativos
 
@@ -56,4 +57,4 @@ systemctl enable --now "${SERVICE_NAME}"
 
 ## Fontes e leitura adicional
 
-- [`systemctl(1)` — systemd](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html): referência de `disable`, `enable`, `is-enabled` e do estado de unidades.
+- [systemd: `systemctl(1)`](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html): referência de `disable`, `enable`, `is-enabled` e do estado de unidades.

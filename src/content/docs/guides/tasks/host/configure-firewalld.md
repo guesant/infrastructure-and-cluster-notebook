@@ -1,5 +1,6 @@
 ---
 title: Firewall com firewalld
+description: Como configurar zonas, liberar portas e validar regras persistentes com firewalld, para hosts que usam esse firewall em vez de UFW.
 sidebar:
   order: 6
 ---
@@ -9,7 +10,7 @@ sidebar:
 
 O firewalld organiza regras por zona em vez de uma única lista linear como o UFW. Cada interface de rede pertence a uma zona, e cada zona define o nível de confiança e os serviços/portas liberados nela. Use esta página em hosts que já usam firewalld por convenção da distribuição ou da equipe; para os demais, [Firewall com UFW](../configure-ufw/) cobre o mesmo objetivo com um modelo mais simples.
 
-Não rode UFW e firewalld no mesmo host — os dois manipulam as mesmas regras nftables por baixo e um pode desfazer as alterações do outro sem aviso.
+Não rode UFW e firewalld no mesmo host: os dois manipulam as mesmas regras nftables por baixo e um pode desfazer as alterações do outro sem aviso.
 
 ## Identificar a zona ativa
 
@@ -20,7 +21,7 @@ firewall-cmd --get-active-zones
 firewall-cmd --get-default-zone
 ```
 
-Confirme qual zona está associada à interface usada pelo cluster antes de adicionar regras — uma regra aplicada à zona errada não tem efeito na interface real.
+Confirme qual zona está associada à interface usada pelo cluster antes de adicionar regras: uma regra aplicada à zona errada não tem efeito na interface real.
 
 ## Liberar o SSH antes de aplicar a política
 
@@ -51,7 +52,7 @@ firewall-cmd --reload
 firewall-cmd --zone="${FIREWALLD_ZONE:-$(firewall-cmd --get-default-zone)}" --list-all
 ```
 
-A saída mostra serviços, portas, interfaces e regras ricas (`rich rules`) associadas à zona — confirme que apenas o necessário está liberado antes de considerar o host pronto.
+A saída mostra serviços, portas, interfaces e regras ricas (`rich rules`) associadas à zona; confirme que apenas o necessário está liberado antes de considerar o host pronto.
 
 ## Validação
 
@@ -62,7 +63,7 @@ firewall-cmd --state
 firewall-cmd --zone="${FIREWALLD_ZONE:-$(firewall-cmd --get-default-zone)}" --list-ports
 ```
 
-`--state` deve retornar `running`. Teste uma nova conexão SSH antes de encerrar a sessão original — o mesmo cuidado vale aqui como em qualquer mudança de firewall remota.
+`--state` deve retornar `running`. Teste uma nova conexão SSH antes de encerrar a sessão original: o mesmo cuidado vale aqui como em qualquer mudança de firewall remota.
 
 ## Troubleshooting
 
@@ -83,6 +84,6 @@ Remova regras específicas em vez de parar o serviço inteiro (`systemctl stop f
 
 ## Fontes e leitura adicional
 
-- [Conceitos do firewalld — documentação oficial](https://firewalld.org/documentation/concepts.html): descreve o modelo de zonas, níveis de confiança e políticas entre zonas.
-- [`firewall-cmd(1)` — documentação oficial do firewalld](https://firewalld.org/documentation/man-pages/firewall-cmd.html): referência das configurações de runtime e permanentes e dos comandos de consulta e alteração de regras.
-- [Zones — firewalld](https://firewalld.org/documentation/zone/): detalha a associação entre interfaces, origens e zonas.
+- [firewalld: Conceitos (documentação oficial)](https://firewalld.org/documentation/concepts.html): descreve o modelo de zonas, níveis de confiança e políticas entre zonas.
+- [firewalld: `firewall-cmd(1)` (documentação oficial)](https://firewalld.org/documentation/man-pages/firewall-cmd.html): referência das configurações de runtime e permanentes e dos comandos de consulta e alteração de regras.
+- [firewalld: Zones](https://firewalld.org/documentation/zone/): detalha a associação entre interfaces, origens e zonas.

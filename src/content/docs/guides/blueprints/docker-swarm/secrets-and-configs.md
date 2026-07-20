@@ -73,11 +73,15 @@ Containers antigos usam secret antigo até serem redeployados.
 
 ## Limitações
 
-- Secrets criptografados apenas em repouso no manager; em trânsito entre manager e worker e dentro do container, não há camada adicional.
-- Um container pode ler todos os secrets do service — não há RBAC fino por secret.
-- Sem log de auditoria nativo — quem acessou qual secret quando?
+- Secrets são criptografados apenas em repouso, no armazenamento Raft do manager; entre manager e
+  worker e dentro do container, não há camada de proteção adicional além do TLS mútuo já usado
+  pela comunicação interna do Swarm.
+- Um container tem acesso a todos os secrets atribuídos ao service, sem RBAC fino por secret
+  individual.
+- Não há log de auditoria nativo: o Swarm não registra quem acessou qual secret nem quando.
 
-Para operações mais rigorosas (auditoria, rotação automática, RBAC), considere um [secret store externo](../../../learn/secrets-management/).
+Para operações que exigem auditoria, rotação automática ou RBAC granular, considere um
+[secret store externo](../../../../learn/secrets-management/overview/).
 
 ## Referências
 

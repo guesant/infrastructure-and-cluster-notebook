@@ -1,5 +1,6 @@
 ---
 title: Configurar atualizações automáticas de segurança
+description: Como instalar e configurar o unattended-upgrades no Debian para aplicar patches de segurança automaticamente, incluindo o controle explícito de reinícios automáticos.
 sidebar:
   order: 11
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** acesso root ao host, saída de rede para os repositórios Debian.
 > **Versões testadas:** Debian 12 (bookworm), `unattended-upgrades` 2.9.
 
-O pacote `unattended-upgrades` aplica atualizações de segurança do repositório `bookworm-security` automaticamente, sem depender de uma rotina manual de patching. Isso reduz a janela de exposição a vulnerabilidades conhecidas do sistema operacional, mas não substitui o acompanhamento de mudanças de versão do próprio K3s — atualizações automáticas do SO não devem reiniciar o host sem revisão em um nó de produção sem antes confirmar o comportamento de reinício configurado abaixo.
+O pacote `unattended-upgrades` aplica atualizações de segurança do repositório `bookworm-security` automaticamente, sem depender de uma rotina manual de patching. Isso reduz a janela de exposição a vulnerabilidades conhecidas do sistema operacional, mas não substitui o acompanhamento de mudanças de versão do próprio K3s: atualizações automáticas do SO não devem reiniciar o host sem revisão em um nó de produção sem antes confirmar o comportamento de reinício configurado abaixo.
 
 ## Instalar e habilitar
 
@@ -33,7 +34,7 @@ grep -A2 '^Unattended-Upgrade::Origins-Pattern' /etc/apt/apt.conf.d/50unattended
 grep '^Unattended-Upgrade::Automatic-Reboot' /etc/apt/apt.conf.d/50unattended-upgrades
 ```
 
-Em um nó de cluster, `Automatic-Reboot` como `"false"` (o padrão comentado) exige intervenção manual para aplicar atualizações que pedem reinício — planeje essa janela junto com o [runbook de manutenção](../../../operations/maintenance/maintenance-runbook/). Habilitar reinício automático (`"true"`) simplifica a operação, mas pode derrubar um nó manager sem coordenação com os demais componentes do cluster.
+Em um nó de cluster, `Automatic-Reboot` como `"false"` (o padrão comentado) exige intervenção manual para aplicar atualizações que pedem reinício: planeje essa janela junto com o [runbook de manutenção](../../../operations/maintenance/maintenance-runbook/). Habilitar reinício automático (`"true"`) simplifica a operação, mas pode derrubar um nó manager sem coordenação com os demais componentes do cluster.
 
 ## Validação
 
@@ -48,7 +49,7 @@ unattended-upgrade --dry-run --debug
 
 ## Troubleshooting
 
-Se `--dry-run` não listar nenhum pacote mesmo com atualizações de segurança pendentes (confirme com `apt list --upgradable`), revise o `Origins-Pattern` — uma origem digitada incorretamente faz o filtro não corresponder a nenhum pacote.
+Se `--dry-run` não listar nenhum pacote mesmo com atualizações de segurança pendentes (confirme com `apt list --upgradable`), revise o `Origins-Pattern`: uma origem digitada incorretamente faz o filtro não corresponder a nenhum pacote.
 
 ## Rollback
 
@@ -62,5 +63,5 @@ systemctl disable --now apt-daily-upgrade.timer apt-daily.timer
 
 ## Fontes e leitura adicional
 
-- [Debian Wiki — UnattendedUpgrades](https://wiki.debian.org/UnattendedUpgrades): guia oficial de instalação, configuração e comportamento padrão do pacote.
+- [Debian Wiki: UnattendedUpgrades](https://wiki.debian.org/UnattendedUpgrades): guia oficial de instalação, configuração e comportamento padrão do pacote.
 - [`unattended-upgrades(8)`](https://manpages.debian.org/bookworm/unattended-upgrades/unattended-upgrade.8.en.html): referência de `--dry-run`, `--debug` e demais opções.

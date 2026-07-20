@@ -1,49 +1,40 @@
 ---
 title: Configurar CoreDNS para resolução interna
+description: Como declarar uma zona DNS administrativa no CoreDNS do K3s, separada da zona real do cluster, para resolver domínios internos usados por operadores.
 sidebar:
   order: 4
 ---
 
-> **Para quem é:** operadores que querem resolver domínios `.cluster.local` internamente.
-> **Pré-requisito:** K3s multinode (Fase 5) ou cluster com CoreDNS disponível.
+> **Pré-requisitos:** kubeconfig administrativo, CoreDNS disponível no cluster (padrão em qualquer instalação K3s).
+> **Versões testadas:** K3s v1.36.1+k3s1, CoreDNS 1.11 (empacotado pelo K3s).
 
-CoreDNS já vem instalado no K3s. Este guia configura-o para responder a queries de `.cluster.local` com IPs internos.
+O CoreDNS do K3s já resolve os nomes reais do cluster (Services e Pods) sob a zona `cluster.local`, através do plugin `kubernetes` configurado no Corefile padrão. Esta página adiciona uma **zona separada**, não relacionada a `cluster.local`, para nomes administrativos como `grafana.internal`, que o [reverse proxy local](../setup-reverse-proxy-localhost/) resolve depois para rotear tráfego de operadores até os serviços internos.
 
-## Passo 1: Verificar CoreDNS
+Não reaproveite `cluster.local` para esses nomes administrativos. Declarar uma zona adicional exatamente para `cluster.local` no mesmo Corefile entra em conflito com o plugin `kubernetes` que já é autoritativo para essa zona; dependendo de como o bloco é declarado, a nova zona pode ter prioridade sobre o plugin `kubernetes` e quebrar a resolução real de Services e Pods do cluster inteiro. Este guia usa o sufixo `.internal`, reservado pela IANA especificamente para nomes internos de organizações ([RFC 9476](https://www.rfc-editor.org/rfc/rfc9476)), o que evita tanto essa colisão quanto o sufixo `.local`, reservado para mDNS ([RFC 6762](https://www.rfc-editor.org/rfc/rfc6762)) e que pode ser interceptado por Avahi ou Bonjour em algumas estações administrativas.
 
-CoreDNS em K3s roda como deployment em `kube-system`:
+## Confirmar o CoreDNS
 
-```yaml
-kubectl get deployment -n kube-system coredns
+> **Executar em:** estação administrativa com `KUBECONFIG` e acesso à API.
 
-# Esperado:
-# NAME      READY   UP-TO-DATE   AVAILABLE   AGE
-# coredns   1/1     1            1           10d
+```bash
+kubectl --namespace kube-system get deployment coredns
+kubectl --namespace kube-system get service coredns
 ```
 
-## Passo 2: Obter IP do serviço CoreDNS
+O Deployment deve estar `1/1` pronto. Anote o `CLUSTER-IP` do Service `coredns`: ele é o endereço que uma estação fora do cluster precisa alcançar para consultar essa zona, o que exige rede roteável até o cluster (VPN, rede do bastion) ou expor o Service por `NodePort`, conforme discutido na validação abaixo.
 
-```yaml
-kubectl get svc -n kube-system coredns
+## Adicionar a zona `internal`
 
-# Esperado:
-# NAME      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)     AGE
-# coredns   ClusterIP   10.43.0.10      <none>        53/UDP,53/TCP  10d
+O CoreDNS lê sua configuração do `ConfigMap` `coredns`, no campo `Corefile`. Uma zona nova precisa ser um **bloco de servidor irmão** do bloco `.:53` existente, nunca aninhado dentro dele: o Corefile não aceita blocos de zona aninhados, e um `local:53 { ... }` escrito dentro das chaves do bloco `.:53` é um erro de sintaxe que impede o CoreDNS de iniciar.
 
-# Guardar CLUSTER-IP: 10.43.0.10
-```
+Para um punhado de nomes administrativos, o plugin [`hosts`](https://coredns.io/plugins/hosts/) resolve diretamente a partir de entradas escritas no próprio Corefile, sem exigir um arquivo de zona externo montado no Pod (a abordagem com o plugin `file`, que lê um arquivo separado, exige montar esse arquivo como volume no Deployment do CoreDNS, o que a maioria dos ambientes K3s não tem preparado por padrão).
 
-## Passo 3: Editar ConfigMap de CoreDNS
+Reaplique o `ConfigMap` preservando o bloco `.:53` original e acrescentando o bloco `internal:53` ao final:
 
-CoreDNS lê configuração de um ConfigMap. Editar:
+> **Executar em:** estação administrativa com `KUBECONFIG` e acesso administrativo à API.
 
-```yaml
-kubectl edit configmap coredns -n kube-system
-```
-
-Procurar pela seção `Corefile`. Ela deve estar assim:
-
-```yaml
+```bash
+kubectl apply -f - <<'EOF'
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -70,13 +61,63 @@ data:
         reload
         loadbalance
     }
+    internal:53 {
+        errors
+        hosts {
+            127.0.0.1 grafana.internal
+            127.0.0.1 prometheus.internal
+            127.0.0.1 argocd.internal
+            fallthrough
+        }
+    }
+EOF
 ```
 
-## Passo 4: Adicionar zona local
+O primeiro bloco é o padrão de fábrica do K3s; confirme que ele corresponde ao Corefile atual do cluster antes de sobrescrever (`kubectl --namespace kube-system get configmap coredns -o jsonpath='{.data.Corefile}'`), porque instalações com componentes desabilitados ou versões diferentes de K3s podem ter variações. O segundo bloco é a zona nova: cada linha do `hosts` mapeia um nome ao IP do reverse proxy que vai atendê-lo, que é `127.0.0.1` na topologia recomendada (o proxy roda no mesmo bastion ou laptop que faz a consulta DNS). Acrescente uma linha por serviço interno que o [reverse proxy](../setup-reverse-proxy-localhost/) publicar.
 
-Adicionar um bloco para `.local`:
+Recarregue o CoreDNS para aplicar a mudança:
 
-```yaml
+```bash
+kubectl --namespace kube-system rollout restart deployment coredns
+kubectl --namespace kube-system rollout status deployment coredns --timeout=120s
+```
+
+## Validação
+
+Teste a resolução de dentro do cluster primeiro, isolando problemas de rede externa:
+
+> **Executar em:** estação administrativa com `KUBECONFIG` e acesso à API.
+
+```bash
+kubectl run dns-test --rm -it --restart=Never --image=busybox:1.36 -- nslookup grafana.internal
+```
+
+Deve retornar `127.0.0.1`. Se esse teste falhar, o problema está no Corefile ou no CoreDNS, antes mesmo de considerar o acesso externo.
+
+Para consultar a partir de uma estação fora do cluster (o cenário real de uso), aponte a consulta diretamente para o `CLUSTER-IP` anotado antes:
+
+```bash
+dig @<CLUSTER-IP-do-coredns> grafana.internal
+```
+
+Se essa consulta expirar sem resposta, o `CLUSTER-IP` provavelmente não é roteável a partir da estação administrativa: ClusterIPs geralmente só são alcançáveis de dentro da rede de Pods, a menos que o CNI use roteamento nativo ou a estação seja ela mesma um nó do cluster. Nesse caso, exponha o CoreDNS por um `Service` do tipo `NodePort` (`kubectl --namespace kube-system patch service coredns --type=merge --patch '{"spec":{"type":"NodePort"}}'`) e consulte pelo IP de um nó na porta atribuída, em vez do `CLUSTER-IP`.
+
+## Troubleshooting
+
+Comece pela verificação mais barata antes de suspeitar de rede: os logs do próprio CoreDNS.
+
+```bash
+kubectl --namespace kube-system logs deployment/coredns --tail=50
+```
+
+Um erro de parsing do Corefile aparece aqui imediatamente após o `rollout restart`, geralmente com a linha exata do problema; a causa mais comum é reintroduzir um bloco aninhado ou uma chave incorreta ao editar manualmente em vez de reaplicar o manifesto acima. Se os logs estiverem limpos mas a consulta ainda retornar `NXDOMAIN`, confirme que o nome consultado está exatamente entre as entradas do bloco `hosts` (o plugin não faz correspondência parcial) e que o `rollout restart` realmente terminou antes do teste.
+
+## Rollback
+
+Reaplique o Corefile original, com apenas o bloco `.:53` de fábrica:
+
+```bash
+kubectl apply -f - <<'EOF'
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -94,13 +135,6 @@ data:
            pods insecure
            fallthrough in-addr.arpa ip6.arpa
         }
-        
-        # Adicionado: zona local
-        local:53 {
-          file /etc/coredns/local.db local
-          reload 6s
-        }
-        
         prometheus :9153
         forward . /etc/resolv.conf {
            max_concurrent 1000
@@ -110,153 +144,18 @@ data:
         reload
         loadbalance
     }
-```
-
-Salvar (`ESC` + `:wq` no vi).
-
-## Passo 5: Criar arquivo de zona local
-
-Criar ConfigMap com zona DNS:
-
-```yaml
-cat > /tmp/local-zone.yaml <<'EOF'
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: coredns-local
-  namespace: kube-system
-data:
-  local.db: |
-    $ORIGIN local.
-    $TTL 60
-    ; Domínios internos apontam para localhost (127.0.0.1)
-    ; ou para IP do reverse proxy (se em bastion)
-    
-    @           IN  SOA ns1.local. admin.local. (
-                    2024011801  ; serial
-                    3600        ; refresh
-                    1800        ; retry
-                    604800      ; expire
-                    60)         ; minimum
-    
-    @           IN  NS  ns1.local.
-    ns1         IN  A   10.0.0.1     ; IP do CoreDNS ou bastion
-    
-    ; Serviços internos (adaptar a seu cluster)
-    grafana     IN  A   127.0.0.1
-    prometheus  IN  A   127.0.0.1
-    argocd      IN  A   127.0.0.1
-    api         IN  A   10.0.0.10    ; IP do API server K3s (se público)
 EOF
-
-kubectl apply -f /tmp/local-zone.yaml
-```
-
-## Passo 6: Recarregar CoreDNS
-
-Forçar recarregamento do deployment:
-
-```yaml
-kubectl rollout restart deployment coredns -n kube-system
-
-# Aguardar ~10 segundos
-kubectl rollout status deployment coredns -n kube-system
-```
-
-## Passo 7: Testar resolução
-
-De dentro de um pod:
-
-```yaml
-# Criar pod teste
-kubectl run -it --rm testdns --image=alpine --restart=Never -- sh
-
-# Dentro do pod:
-nslookup grafana.local
-
-# Esperado:
-# Name:      grafana.local
-# Address:   127.0.0.1
-
-# Ou com dig (mais verboso)
-dig grafana.local
-
-# Sair
-exit
-```
-
-De fora (bastion/laptop):
-
-```yaml
-# Se pode alcançar CoreDNS (10.43.0.10)
-nslookup grafana.local 10.43.0.10
-
-# Esperado: 127.0.0.1
-```
-
-## Passo 8: Configurar cliente para usar CoreDNS
-
-Se o reverse proxy está fora do cluster (bastion/laptop), configurar para usar CoreDNS:
-
-### Em Linux/Mac:
-
-```yaml
-# Adicionar CoreDNS ao /etc/resolv.conf
-sudo bash -c 'echo "nameserver 10.0.0.X  # IP do CoreDNS" >> /etc/resolv.conf'
-
-# Ou via systemd-resolved
-sudo tee /etc/systemd/resolved.conf.d/cluster-local.conf <<'EOF'
-[Resolve]
-DNS=10.0.0.X
-Domains=~local
-EOF
-
-sudo systemctl restart systemd-resolved
-```
-
-### Em Kubernetes (pods automaticamente usam CoreDNS):
-
-```yaml
-# Já resolvem .local automaticamente
-# (CoreDNS é o resolver padrão de K3s)
-```
-
-## Problemas comuns
-
-### "NXDOMAIN" (domínio não encontrado)
-
-**Causa:** zona não está carregada ou arquivo tem erro de sintaxe.
-
-**Solução:**
-```yaml
-# Verificar logs de CoreDNS
-kubectl logs -n kube-system -l k8s-app=kube-dns | grep -i error
-
-# Se há erro de sintaxe, revisar arquivo de zona (Passo 5)
-# Validar arquivo com named-checkzone (se tiver)
-named-checkzone local /tmp/local-zone.yaml
-```
-
-### "Connection refused"
-
-**Causa:** CoreDNS não está respondendo na porta 53.
-
-**Solução:**
-```yaml
-# Verificar que CoreDNS está rodando
-kubectl get pods -n kube-system -l k8s-app=kube-dns
-
-# Testar conectividade ao pod
-kubectl port-forward -n kube-system svc/coredns 53:53 &
-nslookup test.local localhost
+kubectl --namespace kube-system rollout restart deployment coredns
 ```
 
 ## Próximo passo
 
-- [Setup reverse proxy localhost](../setup-reverse-proxy-localhost/) — rotear requests aos serviços.
+[Configurar reverse proxy em localhost](../setup-reverse-proxy-localhost/) para rotear as conexões que chegam nesses nomes até os serviços internos correspondentes.
 
 ## Fontes e leitura adicional
 
-- [CoreDNS — File Plugin](https://coredns.io/plugins/file/): documentação de zona file.
-- [DNS Zone File Format](https://en.wikipedia.org/wiki/Zone_file): especificação de zona.
-- [K3s — CoreDNS](https://docs.k3s.io/networking#coredns): integração com K3s.
+- [CoreDNS: plugin `hosts`](https://coredns.io/plugins/hosts/): referência do plugin usado para as entradas administrativas, incluindo o comportamento de `fallthrough`.
+- [CoreDNS: sintaxe do Corefile](https://coredns.io/manual/toc/#configuration): documenta blocos de servidor, zonas e por que blocos não podem ser aninhados.
+- [K3s: CoreDNS](https://docs.k3s.io/networking/networking-services#coredns): descreve como o K3s empacota e configura o CoreDNS por padrão.
+- [RFC 9476](https://www.rfc-editor.org/rfc/rfc9476): reserva o sufixo `.internal` para nomes de uso interno de organizações.
+- [RFC 6762](https://www.rfc-editor.org/rfc/rfc6762): reserva o sufixo `.local` para multicast DNS, evitado neste guia por esse motivo.

@@ -1,12 +1,16 @@
 ---
 title: Topologias recomendadas
+description: Árvore de decisão entre as três topologias de cluster K3s multinode, com trade-offs de HA, complexidade operacional e requisitos de infraestrutura.
 sidebar:
   order: 1
 ---
 
 > **Para quem é:** quem está entre single-node e multinode e precisa escolher qual topologia usar.
 
-A escolha de topologia define quantos servidores (control plane), agentes (workers) e quorum você terá. Não existe uma única resposta "correta" — cada topologia torna-se ideal em um contexto específico.
+A escolha de topologia define quantos servidores (control plane), agentes (workers) e quorum você
+terá. Não existe uma única resposta correta: cada topologia se torna ideal em um contexto
+específico, dependendo de quanto valor a HA do control plane tem para o ambiente e de quanta
+complexidade operacional adicional é aceitável em troca dela.
 
 ```mermaid
 flowchart TD
@@ -34,9 +38,9 @@ flowchart TD
 | **Agentes** | 1+ (workloads ficam distribuídos se houver múltiplos) |
 | **Quorum** | N/A (sem quorum, pois só 1 servidor) |
 | **Datastore** | etcd embarcado no servidor |
-| **HA do control plane** | ❌ Não — perda do servidor = perda total |
+| **HA do control plane** | ❌ Não: perda do servidor é perda total |
 | **HA de workloads** | ✅ Sim, se houver múltiplos agentes |
-| **Complexidade operacional** | Baixa — é essencialmente o single-node com agentes |
+| **Complexidade operacional** | Baixa: é essencialmente o single-node com agentes |
 | **Requisitos de rede** | Comunicação entre nós; firewall TCP 6443 (API), 10250 (kubelet), UDP 8472 (flannel) |
 
 **Quando evitar:** se HA do control plane for requisito.
@@ -49,11 +53,11 @@ flowchart TD
 | --- | --- |
 | **Servidores** | 3 (control plane + etcd embarcado; quorum = 2) |
 | **Agentes** | 0+ (servidores podem correr workloads, ou dedicar para control plane) |
-| **Quorum** | Sim — 3 servidores, quorum = 2 (perda de 1 = cluster funciona; perda de 2 = travado) |
+| **Quorum** | Sim: 3 servidores, quorum = 2 (perda de 1 = cluster funciona; perda de 2 = travado) |
 | **Datastore** | etcd embarcado e replicado entre servidores |
-| **HA do control plane** | ✅ Sim — perda de 1 servidor, cluster continua |
+| **HA do control plane** | ✅ Sim: perda de 1 servidor, cluster continua |
 | **HA de workloads** | ✅ Sim, se Longhorn replicar volumes |
-| **Complexidade operacional** | Média — coordenação de etcd, rolling updates, backup de etcd |
+| **Complexidade operacional** | Média: coordenação de etcd, rolling updates, backup de etcd |
 | **Requisitos de rede** | TCP 2379-2380 (etcd peer); TCP 6443, 10250; UDP 8472 |
 
 **Quando evitar:** se preferir total desacoplamento entre control plane e datastore.
@@ -68,9 +72,9 @@ flowchart TD
 | **Agentes** | 0+ (servidores podem correr workloads) |
 | **Quorum** | No datastore externo (geralmente gerenciado por terceiro) |
 | **Datastore** | PostgreSQL ou etcd externo (não embarcado no K3s) |
-| **HA do control plane** | ✅ Sim — múltiplos servidores apontam para o mesmo datastore |
+| **HA do control plane** | ✅ Sim: múltiplos servidores apontam para o mesmo datastore |
 | **HA de workloads** | ✅ Sim, se Longhorn replicar volumes |
-| **Complexidade operacional** | Alta — gestão do datastore externo é responsabilidade sua |
+| **Complexidade operacional** | Alta: gestão do datastore externo é responsabilidade sua |
 | **Requisitos de rede** | TCP 6443; 10250; 5432 ou 2379 para o datastore externo |
 
 **Quando evitar:** se não tiver infraestrutura de datastore externo ou preferir evitar outra camada operacional.
@@ -92,5 +96,5 @@ Escolheu a topologia? Vá para [requisitos de rede e portas](../network-requirem
 
 ## Fontes e leitura adicional
 
-- [K3s — High Availability Etcd](https://docs.k3s.io/datastore/ha-embedded): guia oficial de HA com etcd embarcado.
-- [K3s — External Datastore](https://docs.k3s.io/datastore/external-datastore): integração com Postgres e etcd externos.
+- [K3s: High Availability Etcd](https://docs.k3s.io/datastore/ha-embedded): guia oficial de HA com etcd embarcado.
+- [K3s: External Datastore](https://docs.k3s.io/datastore/external-datastore): integração com Postgres e etcd externos.

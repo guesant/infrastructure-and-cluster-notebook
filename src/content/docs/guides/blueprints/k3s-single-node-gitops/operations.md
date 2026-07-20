@@ -4,7 +4,7 @@ sidebar:
   order: 8
 ---
 
-Este blueprint não define seus próprios procedimentos de operação — ele adota os runbooks gerais de `operations/`, com as observações específicas de nó único abaixo.
+Este blueprint não define seus próprios procedimentos de operação: ele adota os runbooks gerais de `operations/`, com as observações específicas de nó único abaixo.
 
 ## Rotinas recomendadas
 
@@ -17,10 +17,10 @@ Este blueprint não define seus próprios procedimentos de operação — ele ad
 
 ## Particularidades do nó único
 
-Qualquer operação que exija reiniciar o serviço K3s ou o host — atualização de versão, mudança de `config.yaml`, atualização de kernel — interrompe o cluster inteiro durante a operação, incluindo o próprio Argo CD. Não há um segundo manager para atender requisições enquanto o único nó está indisponível.
+Qualquer operação que exija reiniciar o serviço K3s ou o host (atualização de versão, mudança de `config.yaml`, atualização de kernel) interrompe o cluster inteiro durante a operação, incluindo o próprio Argo CD. Não há um segundo manager para atender requisições enquanto o único nó está indisponível.
 
-Planeje manutenções em uma janela comunicada, mesmo em ambiente pessoal, e confirme que o snapshot mais recente do etcd é anterior à mudança antes de iniciar qualquer atualização — veja [backup e recuperação](../k3s-single-node-gitops/backup-and-recovery/).
+Planeje manutenções em uma janela comunicada, mesmo em ambiente pessoal, e confirme que o snapshot mais recente do etcd é anterior à mudança antes de iniciar qualquer atualização. Veja [backup e recuperação](../k3s-single-node-gitops/backup-and-recovery/).
 
 ## Fontes e leitura adicional
 
-- [K3s — Cluster Datastore](https://docs.k3s.io/datastore): comportamento do datastore relevante para janelas de manutenção em nó único.
+- [K3s: Cluster Datastore](https://docs.k3s.io/datastore): comportamento do datastore relevante para janelas de manutenção em nó único.

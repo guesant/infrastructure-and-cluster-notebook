@@ -1,5 +1,6 @@
 ---
 title: Remover um nó do K3s
+description: Como esvaziar (cordon e drain) um nó K3s antes de remover seu registro da API, evitando derrubar Pods sem controle.
 sidebar:
   order: 9
 ---
@@ -27,7 +28,7 @@ Remover um nó do cluster tem dois momentos distintos: esvaziar os workloads que
 
 `--ignore-daemonsets` permite que Pods de DaemonSet continuem rodando durante o drain (eles são removidos automaticamente quando o nó sai do cluster). `--delete-emptydir-data` autoriza remover Pods com volumes `emptyDir`, cujo conteúdo não sobrevive à remoção de qualquer forma.
 
-Se o `drain` travar aguardando um PodDisruptionBudget, revise a aplicação afetada antes de forçar a remoção — um PDB bloqueando o drain normalmente está protegendo a disponibilidade mínima configurada, não travando por engano.
+Se o `drain` travar aguardando um PodDisruptionBudget, revise a aplicação afetada antes de forçar a remoção: um PDB bloqueando o drain normalmente está protegendo a disponibilidade mínima configurada, não travando por engano.
 
 ## Remover o registro do nó
 
@@ -41,7 +42,7 @@ Depois que o `drain` terminar sem Pods restantes:
   ]}
 />
 
-`kubectl delete node` remove apenas o registro na API — não desinstala o K3s do host removido. Se a máquina continuar ligada e o serviço K3s ativo, siga com [desinstalar o K3s](../uninstall-k3s/) nela, ou ela tentará se re-registrar automaticamente.
+`kubectl delete node` remove apenas o registro na API; não desinstala o K3s do host removido. Se a máquina continuar ligada e o serviço K3s ativo, siga com [desinstalar o K3s](../uninstall-k3s/) nela, ou ela tentará se re-registrar automaticamente.
 
 ## Validação
 
@@ -59,7 +60,7 @@ Se o nó reaparecer sozinho pouco depois da remoção, o serviço K3s ainda est�
 
 ## Rollback
 
-Remover um nó não é reversível de forma automática — para reintroduzi-lo, siga [adicionar um servidor](../join-k3s-server/) ou [adicionar um agente](../join-k3s-agent/) novamente, como se fosse um nó novo.
+Remover um nó não é reversível de forma automática: para reintroduzi-lo, siga [adicionar um servidor](../join-k3s-server/) ou [adicionar um agente](../join-k3s-agent/) novamente, como se fosse um nó novo.
 
 ## Próximo passo
 
@@ -67,5 +68,5 @@ Se o nó removido não vai mais participar do cluster, siga [desinstalar o K3s](
 
 ## Fontes e leitura adicional
 
-- [Kubernetes — Safely Drain a Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/): referência oficial de `cordon`, `drain` e PodDisruptionBudgets.
-- [K3s — Remove a Node](https://docs.k3s.io/cluster-access#remove-a-node-from-the-cluster): confirma o comportamento de `kubectl delete node` em clusters K3s.
+- [Kubernetes: Safely Drain a Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/): referência oficial de `cordon`, `drain` e PodDisruptionBudgets.
+- [K3s: Remove a Node](https://docs.k3s.io/cluster-access#remove-a-node-from-the-cluster): confirma o comportamento de `kubectl delete node` em clusters K3s.

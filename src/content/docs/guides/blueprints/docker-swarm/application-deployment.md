@@ -6,7 +6,9 @@ sidebar:
 
 > **Para quem é:** operadores deployando serviços em Swarm.
 
-Um **service** é o primitivo de orquestração em Swarm — descreve quantas réplicas rodar e em quais hosts.
+Um **service** é o primitivo de orquestração em Swarm: a declaração de quantas réplicas de uma
+imagem rodar e em quais condições, que o Swarm mantém satisfeita reagendando tarefas sempre que a
+realidade diverge dela.
 
 ## Criar um service
 
@@ -86,30 +88,24 @@ Swarm atualiza as réplicas uma por uma (ou conforme `update-parallelism`).
 
 ## Rollback
 
-Se a atualização falhar:
-
 ```bash
 docker service rollback web
 ```
 
-Ou configure rollback automático:
-
-```bash
-docker service create \
-  --rollback-parallelism 2 \
-  --rollback-delay 5s \
-  --name web \
-  nginx:latest
-```
+Esse comando reverte o service para a configuração anterior à última atualização, incluindo a
+imagem. O processo completo de rolling update, monitoramento e rollback (manual ou automático via
+`--rollback-parallelism`) está descrito em
+[Atualizações e rollbacks](../updates-and-rollbacks/).
 
 ## Escala manual
 
 ```bash
 docker service scale web=5
-# Aumentar para 5 réplicas
 ```
 
-Não há autoscaling nativo em Swarm.
+Esse comando ajusta o número de réplicas para 5, criando ou removendo tasks conforme necessário
+para chegar nesse total. Não há autoscaling nativo em Swarm: qualquer mudança na contagem de
+réplicas é uma decisão manual do operador ou de uma automação externa que chame este comando.
 
 ## Remover um service
 
@@ -117,7 +113,11 @@ Não há autoscaling nativo em Swarm.
 docker service remove web
 ```
 
-Mata todas as tasks do serviço.
+**Atenção:** este comando é destrutivo e imediato. Ele encerra todas as tasks (containers) do
+service sem período de espera nem confirmação, e a definição do service (réplicas, constraints,
+secrets associados) é perdida junto, não apenas os containers em execução. Volumes locais
+associados às tasks removidas não são apagados automaticamente pelo Docker, mas os dados deixam
+de estar acessíveis por meio do service.
 
 ## Referências
 

@@ -1,5 +1,6 @@
 ---
 title: Validar requisitos do host
+description: Como confirmar CPU, memória, disco, kernel, cgroups, módulos, swap e parâmetros de rede antes de instalar o K3s, evitando falhas difíceis de diagnosticar durante o bootstrap.
 sidebar:
   order: 12
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** as etapas anteriores de [preparar um servidor Debian](../prepare-debian-server/) concluídas.
 > **Versões testadas:** Debian 12 (bookworm), kernel 6.1.
 
-Esta página confirma que o host atende aos requisitos mínimos do K3s antes da instalação. Rodar a instalação em um host que não atende aos requisitos costuma falhar de forma pouco óbvia — um control plane que não estabiliza, um kubelet que não registra o nó — em vez de um erro claro logo no início.
+Esta página confirma que o host atende aos requisitos mínimos do K3s antes da instalação. Rodar a instalação em um host que não atende aos requisitos costuma falhar de forma pouco óbvia (um control plane que não estabiliza, um kubelet que não registra o nó) em vez de um erro claro logo no início.
 
 ## CPU, memória e disco
 
@@ -84,7 +85,7 @@ cat /sys/fs/cgroup/cgroup.controllers
 
 ## Troubleshooting
 
-Se `cat /sys/fs/cgroup/cgroup.controllers` retornar "arquivo não encontrado", o host está em cgroups v1 — verifique se o kernel e a distribuição estão nas versões testadas; distribuições mais antigas exigem habilitar cgroups v2 explicitamente na linha de comando do kernel (`systemd.unified_cgroup_hierarchy=1`), fora do escopo desta página.
+Se `cat /sys/fs/cgroup/cgroup.controllers` retornar "arquivo não encontrado", o host está em cgroups v1: verifique se o kernel e a distribuição estão nas versões testadas; distribuições mais antigas exigem habilitar cgroups v2 explicitamente na linha de comando do kernel (`systemd.unified_cgroup_hierarchy=1`), fora do escopo desta página.
 
 ## Próximo passo
 
@@ -92,5 +93,5 @@ O host está pronto para [instalar o primeiro servidor](../../kubernetes/install
 
 ## Fontes e leitura adicional
 
-- [K3s — Requirements](https://docs.k3s.io/installation/requirements): referência oficial de CPU, memória, kernel, cgroups e módulos.
-- [Kubernetes — Swap Memory Management](https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory): explica o comportamento padrão do kubelet em relação a swap.
+- [K3s: Requirements](https://docs.k3s.io/installation/requirements): referência oficial de CPU, memória, kernel, cgroups e módulos.
+- [Kubernetes: Swap Memory Management](https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory): explica o comportamento padrão do kubelet em relação a swap.

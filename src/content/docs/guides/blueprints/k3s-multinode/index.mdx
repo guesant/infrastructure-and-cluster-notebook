@@ -1,5 +1,6 @@
 ---
 title: K3s multinode com alta disponibilidade
+description: Blueprint de um cluster K3s distribuído em múltiplos nós com quorum de etcd, balanceamento da API, manutenção sem downtime e runbooks de recuperação de falha.
 sidebar:
   order: 2
 ---
@@ -7,26 +8,31 @@ sidebar:
 > **Público-alvo:** quem tem experiência com o [blueprint single-node](../k3s-single-node-gitops/) e quer escalar para múltiplos nós com alta disponibilidade.
 > **Versões testadas:** K3s 1.36, Debian 12, topologia 3 servidores + N agentes.
 
-Este blueprint estende o caminho single-node (Fase 2) para clusters K3s distribuídos em múltiplos nós. Os conceitos fundamentais — Gateway API, cert-manager, Argo CD, Longhorn — permanecem; o que muda é a topologia do control plane, a coordenação entre nós e os runbooks de operação/recuperação.
+Este blueprint estende o caminho single-node (Fase 2) para clusters K3s distribuídos em múltiplos
+nós. Os conceitos fundamentais (Gateway API, cert-manager, Argo CD, Longhorn) permanecem os
+mesmos; o que muda é a topologia do control plane, a coordenação entre nós via consenso Raft e os
+runbooks de operação e recuperação.
 
 ## O que está aqui
 
-- [Topologias recomendadas](topologies/) — escolher entre 1 servidor + agentes, 3 servidores HA, ou datastore externo.
-- [Arquitetura de quorum](architecture/) — como o etcd coordena servidores, o que é um quorum e os riscos de falha.
-- [Requisitos de rede e portAS](network-requirements/) — comunicação entre nós, balanceamento da API, certificados TLS multi-SAN.
-- [Inicializar e adicionar nós](first-server/) — bootstrap do primeiro servidor e registro de servidores/agentes adicionais.
-- [Balancear a API](api-endpoint/) — endpoint estável para acesso administrativo e cliente.
-- [Validar o cluster](validation/) — checklist pós-implantação.
-- [Operação nó a nó](node-maintenance/) — manutenção e atualização sem downtime.
-- [Falha e recuperação](failure-and-recovery/) — cenários: perda de servidor, perda de agente, perda de quorum.
+- [Topologias recomendadas](topologies/): escolher entre 1 servidor + agentes, 3 servidores HA ou datastore externo.
+- [Arquitetura de quorum](architecture/): como o etcd coordena servidores, o que é um quorum e os riscos de falha.
+- [Requisitos de rede e portas](network-requirements/): comunicação entre nós, balanceamento da API, certificados TLS multi-SAN.
+- [Inicializar e adicionar nós](first-server/): bootstrap do primeiro servidor e registro de servidores/agentes adicionais.
+- [Balancear a API](api-endpoint/): endpoint estável para acesso administrativo e cliente.
+- [Validar o cluster](validation/): checklist pós-implantação.
+- [Operação nó a nó](node-maintenance/): manutenção e atualização sem downtime.
+- [Falha e recuperação](failure-and-recovery/): cenários de perda de servidor, perda de agente e perda de quorum.
 
 ## Reaproveitamento da Fase 2
 
-A maioria das páginas de task guides da Fase 2 é reutilizada — host, firewall, K3s, rede, certificados. Este blueprint aponta para elas e descreve as adaptações específicas de multinode:
+A maioria das páginas de task guides da Fase 2 é reutilizada (host, firewall, K3s, rede,
+certificados). Este blueprint aponta para elas e descreve apenas as adaptações específicas de
+multinode:
 
-- [Instalar o K3s — adaptações multinode](../../../tasks/kubernetes/join-k3s-server/) (primeira parte é igual, depois diverge)
-- [Configurar firewall entre nós](../../../tasks/kubernetes/configure-k3s-firewall-rules/)
-- [Configurar cert-manager com SANs](../../../tasks/certificates/install-cert-manager/) (TLS em múltiplos nomes)
+- [Adicionar um servidor K3s](../../tasks/kubernetes/join-k3s-server/): a primeira parte da instalação é igual à do single-node; diverge a partir do momento em que o novo servidor precisa se juntar ao quorum existente.
+- [Configurar firewall entre nós](../../tasks/kubernetes/configure-k3s-firewall-rules/): as regras específicas de comunicação entre servidores estão detalhadas em [Requisitos de rede e portas](network-requirements/).
+- [Configurar cert-manager com SANs](../../tasks/certificates/install-cert-manager/): necessário para que o certificado da API cubra múltiplos nomes, não apenas `localhost`.
 
 ## Próximo passo
 
@@ -46,6 +52,6 @@ Comece por [topologias recomendadas](topologies/) para escolher sua topologia, d
 
 ## Fontes e leitura adicional
 
-- [K3s — Architecture](https://docs.k3s.io/architecture): referência oficial de servidores, agentes e topologias.
-- [K3s — High Availability Etcd](https://docs.k3s.io/datastore/ha-embedded): explicação de quorum e recuperação de etcd embarcado.
-- [K3s — External Datastore](https://docs.k3s.io/datastore/external-datastore): alternativas a etcd embarcado.
+- [K3s: Architecture](https://docs.k3s.io/architecture): referência oficial de servidores, agentes e topologias.
+- [K3s: High Availability Etcd](https://docs.k3s.io/datastore/ha-embedded): explicação de quorum e recuperação de etcd embarcado.
+- [K3s: External Datastore](https://docs.k3s.io/datastore/external-datastore): alternativas a etcd embarcado.

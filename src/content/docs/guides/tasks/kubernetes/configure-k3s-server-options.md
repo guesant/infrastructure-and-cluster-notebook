@@ -1,5 +1,6 @@
 ---
 title: Configurar opções do servidor K3s
+description: Como alterar opções persistentes do servidor K3s via /etc/rancher/k3s/config.yaml, com backup e validação antes de reiniciar o serviço.
 sidebar:
   order: 5
 ---
@@ -7,9 +8,9 @@ sidebar:
 > **Pré-requisitos:** acesso root ao nó manager, K3s instalado conforme [instalar o primeiro servidor](../install-first-k3s-server/).
 > **Versões testadas:** K3s v1.36.1+k3s1.
 
-O K3s lê `/etc/rancher/k3s/config.yaml` na inicialização do serviço. Alterar esse arquivo é a forma recomendada de mudar opções do servidor de forma persistente e auditável — evite passar flags diretamente no `ExecStart` do systemd, que fica fora do controle de versão do host e é sobrescrito em atualizações do pacote.
+O K3s lê `/etc/rancher/k3s/config.yaml` na inicialização do serviço. Alterar esse arquivo é a forma recomendada de mudar opções do servidor de forma persistente e auditável: evite passar flags diretamente no `ExecStart` do systemd, que fica fora do controle de versão do host e é sobrescrito em atualizações do pacote.
 
-Esta página cobre como adicionar ou alterar uma opção existente. Para o campo específico `tls-san`, veja [Configurar TLS SAN](../configure-tls-san/) — ele tem um procedimento próprio porque exige atenção ao comportamento de recriação de certificados.
+Esta página cobre como adicionar ou alterar uma opção existente. Para o campo específico `tls-san`, veja [Configurar TLS SAN](../configure-tls-san/): ele tem um procedimento próprio porque exige atenção ao comportamento de recriação de certificados.
 
 ## Alterar uma opção
 
@@ -20,7 +21,7 @@ cp /etc/rancher/k3s/config.yaml /etc/rancher/k3s/config.yaml.bak
 ${EDITOR:-vi} /etc/rancher/k3s/config.yaml
 ```
 
-Mantenha o arquivo em YAML válido — uma chave duplicada ou indentação incorreta impede o K3s de iniciar. Depois de editar:
+Mantenha o arquivo em YAML válido: uma chave duplicada ou indentação incorreta impede o K3s de iniciar. Depois de editar:
 
 ```bash
 systemctl restart k3s
@@ -37,7 +38,7 @@ Reiniciar o serviço em um manager único derruba a API por alguns segundos; em 
 | `kube-apiserver-arg` / `kubelet-arg` | Repassa flags adicionais para os componentes internos correspondentes. |
 | `secrets-encryption` | Habilita criptografia de Secrets em repouso (já usada no primeiro servidor deste guia). |
 
-Consulte a referência completa antes de adicionar uma opção não documentada aqui — algumas exigem reinstalação em vez de apenas reinício para terem efeito.
+Consulte a referência completa antes de adicionar uma opção não documentada aqui: algumas exigem reinstalação em vez de apenas reinício para terem efeito.
 
 ## Validação
 
@@ -68,5 +69,5 @@ systemctl restart k3s
 
 ## Fontes e leitura adicional
 
-- [K3s — Configuration Options](https://docs.k3s.io/installation/configuration): explica a leitura do `config.yaml` e a precedência entre arquivo, variáveis de ambiente e flags.
-- [K3s — Server Configuration Reference](https://docs.k3s.io/cli/server): lista todas as opções aceitas pelo servidor.
+- [K3s: Configuration Options](https://docs.k3s.io/installation/configuration): explica a leitura do `config.yaml` e a precedência entre arquivo, variáveis de ambiente e flags.
+- [K3s: Server Configuration Reference](https://docs.k3s.io/cli/server): lista todas as opções aceitas pelo servidor.

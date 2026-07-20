@@ -1,5 +1,6 @@
 ---
 title: Gateway API e Traefik
+description: Como instalar os CRDs da Gateway API e habilitar o provider kubernetesGateway no Traefik empacotado pelo K3s, para servir de base a Gateways e HTTPRoutes.
 sidebar:
   order: 1
 ---
@@ -55,7 +56,7 @@ Valide os CRDs principais:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 kubectl get crd \
   gatewayclasses.gateway.networking.k8s.io \
   gateways.gateway.networking.k8s.io \
@@ -66,7 +67,7 @@ Configure o Traefik empacotado pelo K3s:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso administrativo à API.
 
-```yaml
+```bash
 kubectl apply -f - <<'EOF'
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
@@ -101,7 +102,7 @@ Espere a reconciliação e confira os logs:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 kubectl --namespace kube-system rollout status deployment/traefik --timeout=180s
 kubectl --namespace kube-system get pods -l app.kubernetes.io/name=traefik
 kubectl --namespace kube-system logs deployment/traefik --tail=100

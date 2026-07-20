@@ -1,5 +1,6 @@
 ---
 title: Argo CD
+description: Como instalar o Argo CD via Helm com uma versão fixa do chart, validar o rollout e entender o modelo de reconciliação GitOps antes do primeiro acesso.
 sidebar:
   order: 2
 ---
@@ -35,7 +36,7 @@ Valide a instalação:
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` e acesso à API.
 
-```yaml
+```bash
 kubectl --namespace argocd rollout status deployment/argocd-server --timeout=180s
 kubectl --namespace argocd get pods
 helm --namespace argocd status argocd
@@ -43,11 +44,11 @@ helm --namespace argocd status argocd
 
 ## Troubleshooting
 
-Se `rollout status` expirar, verifique `kubectl --namespace argocd describe pod` no Pod do `argocd-server` — a causa mais comum é limite de recursos insuficiente para os valores de CPU/memória informados no formulário.
+Se `rollout status` expirar, verifique `kubectl --namespace argocd describe pod` no Pod do `argocd-server`: a causa mais comum é limite de recursos insuficiente para os valores de CPU/memória informados no formulário.
 
 ## Rollback
 
-```yaml
+```bash
 helm --namespace argocd uninstall argocd
 kubectl delete namespace argocd
 ```
@@ -58,7 +59,7 @@ kubectl delete namespace argocd
 
 ## Fontes e leitura adicional
 
-- [Getting Started — Argo CD](https://argo-cd.readthedocs.io/en/stable/getting_started/): fluxo oficial de instalação, acesso inicial e criação de uma aplicação.
+- [Argo CD: Getting Started](https://argo-cd.readthedocs.io/en/stable/getting_started/): fluxo oficial de instalação, acesso inicial e criação de uma aplicação.
 - [Helm chart do Argo CD](https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd): valores, templates e notas de versão do chart usado nesta página.
-- [Gestão de usuários — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/): orienta sobre a conta `admin`, usuários locais e integração com provedores de identidade.
-- [Práticas de segurança — Argo CD](https://argo-cd.readthedocs.io/en/stable/operator-manual/security/): reúne o modelo de segurança, divulgações e recomendações operacionais do projeto.
+- [Argo CD: Gestão de usuários](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/): orienta sobre a conta `admin`, usuários locais e integração com provedores de identidade.
+- [Argo CD: Práticas de segurança](https://argo-cd.readthedocs.io/en/stable/operator-manual/security/): reúne o modelo de segurança, divulgações e recomendações operacionais do projeto.

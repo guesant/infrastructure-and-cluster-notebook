@@ -1,5 +1,6 @@
 ---
 title: Identidade e RBAC
+description: Como criar identidades individuais com certificados X.509 de cliente, conceder acesso via RBAC (cluster-admin, papéis por namespace ou Roles personalizados) e revogar bindings.
 sidebar:
   order: 8
 ---
@@ -40,7 +41,7 @@ Ele não cria nenhum binding. Uma identidade recém-emitida autentica como membr
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` administrativo, `kubectl`, OpenSSL, acesso à API e permissão de escrita para o arquivo de saída.
 
-```yaml
+```bash
 curl -sfL \
   https://raw.githubusercontent.com/guesant/infrastructure-and-cluster-notebook/refs/heads/main/scripts/kubernetes/create-client-kubeconfig.sh \
   | bash -
@@ -112,7 +113,7 @@ Para retirar o acesso administrativo total, exclua o ClusterRoleBinding criado p
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` administrativo e acesso à API.
 
-```yaml
+```bash
 read -r -p "Nome do ClusterRoleBinding que será removido: " BINDING_NAME
 kubectl delete clusterrolebinding "${BINDING_NAME}"
 ```
@@ -121,7 +122,7 @@ Para retirar um acesso limitado, exclua o RoleBinding no namespace correspondent
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` administrativo e acesso à API.
 
-```yaml
+```bash
 read -r -p "Namespace do binding: " NAMESPACE
 read -r -p "Nome do RoleBinding que será removido: " BINDING_NAME
 kubectl --namespace "${NAMESPACE}" delete rolebinding "${BINDING_NAME}"
@@ -131,7 +132,7 @@ Confirme a autorização simulada pelo usuário e teste também usando o kubecon
 
 > **Executar em:** qualquer máquina com `KUBECONFIG` administrativo e acesso à API.
 
-```yaml
+```bash
 read -r -p "Nome da identidade que será verificada: " USERNAME
 read -r -p "Namespace que será verificado: " NAMESPACE
 
@@ -142,7 +143,7 @@ kubectl auth can-i --list \
 
 > **Executar em:** máquina que possui o kubeconfig individual e conectividade com a API.
 
-```yaml
+```bash
 read -r -p "Caminho do kubeconfig individual: " USER_KUBECONFIG
 read -r -p "Namespace que será verificado: " NAMESPACE
 

@@ -1,5 +1,6 @@
 ---
 title: Firewall com UFW
+description: Como definir a política padrão do UFW, liberar o SSH com segurança antes de habilitá-lo remotamente e validar as regras aplicadas.
 sidebar:
   order: 5
 ---
@@ -9,7 +10,7 @@ import firewallSshSetupScript from '../../../../../scripts/firewall-ssh-setup.sh
 
 O firewall do host controla quais conexões de rede podem chegar aos serviços da máquina. Ele é a primeira barreira contra portas expostas desnecessariamente, mas não substitui autenticação, atualização dos serviços nem políticas de acesso dentro do Kubernetes. Por padrão, bloqueie conexões de entrada e permita apenas o que for necessário.
 
-Esta página cobre o UFW. Em hosts que já usam firewalld (comum em distribuições baseadas em RHEL), siga [Firewall com firewalld](../configure-firewalld/) — as duas páginas cobrem o mesmo objetivo e não devem ser combinadas no mesmo host. As liberações específicas do cluster ficam em [Firewall dos nós K3s](../../kubernetes/configure-k3s-firewall-rules/). Se o host executar Docker, revise também [Portas publicadas pelo Docker](../../../../learn/networking/firewalls/docker-published-ports/).
+Esta página cobre o UFW. Em hosts que já usam firewalld (comum em distribuições baseadas em RHEL), siga [Firewall com firewalld](../configure-firewalld/): as duas páginas cobrem o mesmo objetivo e não devem ser combinadas no mesmo host. As liberações específicas do cluster ficam em [Firewall dos nós K3s](../../kubernetes/configure-k3s-firewall-rules/). Se o host executar Docker, revise também [Portas publicadas pelo Docker](../../../../learn/networking/firewalls/docker-published-ports/).
 
 ## Política padrão
 
@@ -17,7 +18,7 @@ Defina as políticas padrão:
 
 > **Executar em:** nó alvo, como `root`.
 
-```yaml
+```bash
 ufw default deny incoming
 ufw default allow outgoing
 ```
@@ -39,7 +40,7 @@ Confira as regras antes de habilitar o firewall:
 
 > **Executar em:** nó alvo, como `root`.
 
-```yaml
+```bash
 ufw show added
 ```
 
@@ -47,7 +48,7 @@ Habilite ou recarregue as regras:
 
 > **Executar em:** nó alvo, como `root`.
 
-```yaml
+```bash
 read -r -p "O UFW já está ativo? [s/N]: " UFW_ALREADY_ACTIVE
 
 if [[ "${UFW_ALREADY_ACTIVE,,}" == "s" ]]; then
@@ -61,17 +62,17 @@ Valide o estado efetivo e teste uma nova conexão SSH antes de encerrar a sessã
 
 > **Executar em:** nó alvo, como `root`.
 
-```yaml
+```bash
 ufw status verbose
 ```
 
 ## Troubleshooting
 
-Se a sessão SSH cair ao habilitar o UFW, o console da máquina (fora do SSH) é o único caminho de recuperação confiável — mantenha-o acessível antes de rodar `ufw enable`. Uma regra `allow` adicionada depois que o firewall já está ativo tem efeito imediato; não é necessário `ufw reload` para regras novas, apenas para mudanças na política padrão.
+Se a sessão SSH cair ao habilitar o UFW, o console da máquina (fora do SSH) é o único caminho de recuperação confiável: mantenha-o acessível antes de rodar `ufw enable`. Uma regra `allow` adicionada depois que o firewall já está ativo tem efeito imediato; não é necessário `ufw reload` para regras novas, apenas para mudanças na política padrão.
 
 ## Rollback
 
-```yaml
+```bash
 ufw disable
 ```
 
@@ -83,5 +84,5 @@ Desabilitar o UFW remove a barreira de entrada imediatamente; use somente quando
 
 ## Fontes e leitura adicional
 
-- [Firewall — Ubuntu Server documentation](https://documentation.ubuntu.com/server/how-to/security/firewalls/): guia oficial para políticas, regras, estado e integração de aplicações com UFW.
-- [`ufw(8)` — Ubuntu Manpages](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html): referência da sintaxe completa, administração remota, relatórios e comportamento das políticas do UFW.
+- [Ubuntu Server documentation: Firewall](https://documentation.ubuntu.com/server/how-to/security/firewalls/): guia oficial para políticas, regras, estado e integração de aplicações com UFW.
+- [Ubuntu Manpages: `ufw(8)`](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html): referência da sintaxe completa, administração remota, relatórios e comportamento das políticas do UFW.

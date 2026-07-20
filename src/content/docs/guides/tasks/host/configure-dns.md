@@ -1,5 +1,6 @@
 ---
 title: Configurar DNS
+description: Como identificar se /etc/resolv.conf é gerado automaticamente ou estático e configurar os resolvers DNS que o host usa para resolução externa e, quando aplicável, interna.
 sidebar:
   order: 3
 ---
@@ -9,7 +10,7 @@ sidebar:
 
 O host precisa resolver nomes externos para baixar pacotes, imagens de container e o instalador do K3s, e pode precisar resolver nomes internos quando o cluster usar DNS-01 para certificados ou depender de serviços nomeados fora do Kubernetes. Esta página cobre apenas a resolução do host; a resolução interna de Pods e Services é responsabilidade do CoreDNS do próprio cluster e não é afetada por esta configuração.
 
-Debian não habilita `systemd-resolved` por padrão — a resolução normalmente é feita por `/etc/resolv.conf` estático ou gerado pelo cliente DHCP. Identifique qual dos dois casos se aplica antes de editar qualquer arquivo.
+Debian não habilita `systemd-resolved` por padrão: a resolução normalmente é feita por `/etc/resolv.conf` estático ou gerado pelo cliente DHCP. Identifique qual dos dois casos se aplica antes de editar qualquer arquivo.
 
 ## Identificar o gerenciador de resolução
 
@@ -56,7 +57,7 @@ getent hosts docs.k3s.io
 
 ## Troubleshooting
 
-Resolução lenta ou intermitente costuma indicar um resolver inalcançável listado antes de um resolver funcional — `/etc/resolv.conf` é consultado na ordem em que os `nameserver` aparecem, com timeout completo antes de tentar o próximo.
+Resolução lenta ou intermitente costuma indicar um resolver inalcançável listado antes de um resolver funcional: `/etc/resolv.conf` é consultado na ordem em que os `nameserver` aparecem, com timeout completo antes de tentar o próximo.
 
 ## Rollback
 
@@ -68,5 +69,5 @@ Restaure o `/etc/resolv.conf` anterior ou reverta a configuração da interface.
 
 ## Fontes e leitura adicional
 
-- [`resolv.conf(5)` — man7.org](https://man7.org/linux/man-pages/man5/resolv.conf.5.html): referência da sintaxe e da ordem de resolução dos resolvers.
-- [Debian Wiki — Network Configuration](https://wiki.debian.org/NetworkConfiguration): explica a interação entre `ifupdown`, NetworkManager e `/etc/resolv.conf` no Debian.
+- [man7.org: `resolv.conf(5)`](https://man7.org/linux/man-pages/man5/resolv.conf.5.html): referência da sintaxe e da ordem de resolução dos resolvers.
+- [Debian Wiki: Network Configuration](https://wiki.debian.org/NetworkConfiguration): explica a interação entre `ifupdown`, NetworkManager e `/etc/resolv.conf` no Debian.

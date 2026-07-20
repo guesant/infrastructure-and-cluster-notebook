@@ -1,5 +1,6 @@
 ---
 title: Expor métricas do Traefik
+description: Como habilitar o endpoint Prometheus do Traefik empacotado pelo K3s via HelmChartConfig e criar o ServiceMonitor correspondente.
 sidebar:
   order: 4
 ---
@@ -30,7 +31,7 @@ spec:
 '
 ```
 
-Combine este patch com os valores já existentes de `providers.kubernetesGateway` e `ports.web`/`ports.websecure` — não sobrescreva a configuração inteira, apenas adicione a seção `metrics`.
+Combine este patch com os valores já existentes de `providers.kubernetesGateway` e `ports.web`/`ports.websecure`: não sobrescreva a configuração inteira, apenas adicione a seção `metrics`.
 
 ```bash
 kubectl --namespace kube-system rollout status deployment/traefik --timeout=180s
@@ -88,5 +89,5 @@ Use as métricas do Traefik para os quatro sinais de serviço (latência, tráfe
 
 ## Fontes e leitura adicional
 
-- [Traefik — Metrics](https://doc.traefik.io/traefik/observability/metrics/overview/): referência oficial de métricas e formatos suportados.
-- [Traefik — Prometheus](https://doc.traefik.io/traefik/observability/metrics/prometheus/): configuração específica do backend Prometheus.
+- [Traefik: Metrics](https://doc.traefik.io/traefik/observability/metrics/overview/): referência oficial de métricas e formatos suportados.
+- [Traefik: Prometheus](https://doc.traefik.io/traefik/observability/metrics/prometheus/): configuração específica do backend Prometheus.

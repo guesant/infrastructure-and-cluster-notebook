@@ -56,7 +56,10 @@ docker service rollback app
 
 ## Rollback automático com detecção de falha
 
-Infelizmente, Swarm não oferece rollback automático real — um container que falha não volta à versão anterior por si. Você precisa monitorar e decidir.
+Swarm não oferece rollback automático real: mesmo com `--update-failure-action pause`, um
+container que falha faz o deploy pausar, mas não volta à versão anterior por conta própria. A
+decisão de continuar ou reverter continua sendo do operador, que precisa monitorar o resultado
+antes de agir.
 
 Padrão recomendado:
 
@@ -76,7 +79,7 @@ Padrão recomendado:
 
 ## Blue-green deployment
 
-Alternativa ao rolling update — manter duas versões rodando lado a lado:
+Uma alternativa ao rolling update é manter duas versões completas rodando lado a lado:
 
 ```bash
 # Versão antiga
@@ -135,4 +138,4 @@ Antes de fazer rollout:
 ## Referências
 
 - [Service update reference](https://docs.docker.com/engine/reference/commandline/service_update/): opções de atualização.
-- [Swarm mode tutorial — rolling update](https://docs.docker.com/engine/swarm/swarm-tutorial/rolling-update/): exemplo passo a passo.
+- [Swarm mode tutorial: rolling update](https://docs.docker.com/engine/swarm/swarm-tutorial/rolling-update/): exemplo passo a passo.

@@ -7,7 +7,7 @@ sidebar:
 
 > **Para quem é:** quem está começando a planejar backup de um cluster e precisa do vocabulário básico antes de configurar qualquer ferramenta.
 
-Um backup é, por definição, uma cópia isolada no tempo e no espaço da escrita corrente — só essa cópia permite voltar a um estado anterior a um erro, seja ele físico (disco perdido) ou lógico (exclusão acidental, corrupção, ataque).
+Um backup é, por definição, uma cópia isolada no tempo e no espaço da escrita corrente: só essa cópia permite voltar a um estado anterior a um erro, seja ele físico (disco perdido) ou lógico (exclusão acidental, corrupção, ataque).
 
 ## Como funciona
 
@@ -26,11 +26,11 @@ flowchart LR
     Snapshot --> Backup["Backup<br/>(isolado, outro destino)"]
 ```
 
-Cada camada adiciona proteção contra um tipo diferente de falha — nenhuma substitui as demais. Veja [replicação não é backup](../../storage/replication-is-not-backup/) para o detalhamento com exemplos práticos.
+Cada camada adiciona proteção contra um tipo diferente de falha; nenhuma substitui as demais. Veja [replicação não é backup](../../storage/replication-is-not-backup/) para o detalhamento com exemplos práticos.
 
 ## Alternativas
 
-Para dados totalmente reconstruíveis a partir de outra fonte confiável (um cache, um índice derivado), nenhuma das três camadas é estritamente necessária — a "fonte" já cumpre esse papel.
+Para dados totalmente reconstruíveis a partir de outra fonte confiável (um cache, um índice derivado), nenhuma das três camadas é estritamente necessária: a "fonte" já cumpre esse papel.
 
 ## Quando cada camada é suficiente
 
@@ -38,7 +38,7 @@ Réplica sozinha é suficiente apenas para tolerância a falha física, nunca pa
 
 ## Quando backup é obrigatório
 
-Sempre que o dado não pode ser recriado a partir de outra fonte — bancos de dados, estado de configuração não versionado, credenciais.
+Sempre que o dado não pode ser recriado a partir de outra fonte: bancos de dados, estado de configuração não versionado, credenciais.
 
 ## Páginas relacionadas
 
@@ -48,4 +48,4 @@ Sempre que o dado não pode ser recriado a partir de outra fonte — bancos de d
 
 ## Referências
 
-- [Kubernetes — Volume Snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/): documenta o mecanismo de snapshot via CSI.
+- [Kubernetes: Volume Snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/): documenta o mecanismo de snapshot via CSI.

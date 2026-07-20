@@ -1,5 +1,6 @@
 ---
 title: Validar o cluster K3s
+description: Como confirmar nós, componentes do sistema, etcd, DNS interno e agendamento de Pods depois de instalar, expandir ou reconfigurar um cluster K3s.
 sidebar:
   order: 11
 ---
@@ -28,7 +29,7 @@ kubectl get pods --all-namespaces
 kubectl get componentstatuses 2>/dev/null || true
 ```
 
-Todos os Pods em `kube-system` devem estar `Running` ou `Completed`. `componentstatuses` está obsoleto em versões recentes do Kubernetes e pode não retornar nada — não é um sinal de erro.
+Todos os Pods em `kube-system` devem estar `Running` ou `Completed`. `componentstatuses` está obsoleto em versões recentes do Kubernetes e pode não retornar nada; não é um sinal de erro.
 
 ## Etcd (topologia HA ou single-node com `cluster-init`)
 
@@ -79,5 +80,5 @@ Com o cluster validado, siga para os módulos de plataforma: [Gateway API e Trae
 
 ## Fontes e leitura adicional
 
-- [Kubernetes — Debug a Cluster](https://kubernetes.io/docs/tasks/debug/debug-cluster/): referência oficial de diagnóstico de componentes do cluster.
-- [K3s — Backup and Restore](https://docs.k3s.io/datastore/backup-restore): documenta `etcd-snapshot` e o estado esperado do datastore.
+- [Kubernetes: Debug a Cluster](https://kubernetes.io/docs/tasks/debug/debug-cluster/): referência oficial de diagnóstico de componentes do cluster.
+- [K3s: Backup and Restore](https://docs.k3s.io/datastore/backup-restore): documenta `etcd-snapshot` e o estado esperado do datastore.

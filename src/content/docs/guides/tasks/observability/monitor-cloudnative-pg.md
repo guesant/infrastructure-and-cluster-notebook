@@ -1,5 +1,6 @@
 ---
 title: Monitorar clusters CloudNativePG
+description: Como criar o PodMonitor para um cluster CloudNativePG e quais consultas PromQL acompanham replicação, conexões e saúde do banco.
 sidebar:
   order: 7
 ---
@@ -47,7 +48,7 @@ EOF
 | Atraso de replicação (segundos) | `cnpg_pg_replication_lag` |
 | Cluster em estado não saudável | `cnpg_collector_up == 0` |
 
-Um atraso de replicação crescente costuma preceder um failover ou indicar sobrecarga na réplica — trate como alerta de `warning` antes que vire indisponibilidade.
+Um atraso de replicação crescente costuma preceder um failover ou indicar sobrecarga na réplica: trate como alerta de `warning` antes que vire indisponibilidade.
 
 ## Validação
 
@@ -69,4 +70,4 @@ Configure alertas para atraso de replicação e conexões próximas do limite co
 
 ## Fontes e leitura adicional
 
-- [CloudNativePG — Monitoring](https://cloudnative-pg.io/documentation/current/monitoring/): referência oficial de métricas expostas e dashboards prontos do Grafana.
+- [CloudNativePG: Monitoring](https://cloudnative-pg.io/documentation/current/monitoring/): referência oficial de métricas expostas e dashboards prontos do Grafana.

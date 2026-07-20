@@ -1,5 +1,6 @@
 ---
 title: Manutenção nó a nó sem downtime
+description: Como usar drain e uncordon para atualizar K3s, aplicar patches ou substituir hardware em um nó por vez, sem interromper as aplicações do cluster.
 sidebar:
   order: 9
 ---
@@ -31,7 +32,7 @@ flowchart TD
 
 Escolha um nó (ex.: agente-1) e draine-o:
 
-```yaml
+```bash
 kubectl drain agente-1 \
   --ignore-daemonsets \
   --delete-emptydir-data \
@@ -39,13 +40,13 @@ kubectl drain agente-1 \
 ```
 
 **Flags:**
-- `--ignore-daemonsets`: DaemonSets (ex.: Flannel, Longhorn agent) não são drenáveis — ignore-os
-- `--delete-emptydir-data`: pods que usam emptyDir (dados temporários) são deletados sem aviso
-- `--grace-period=30`: aguarda 30 segundos para pods terminarem gracefully antes de forcibly kill
+- `--ignore-daemonsets`: DaemonSets (Flannel, Longhorn agent etc.) não são drenáveis; a flag diz ao `drain` para ignorá-los em vez de falhar.
+- `--delete-emptydir-data`: pods que usam `emptyDir` (dados temporários) são deletados sem aviso, já que esse tipo de volume não sobrevive à saída do pod de qualquer forma.
+- `--grace-period=30`: aguarda 30 segundos para os pods terminarem graciosamente antes de forçar o encerramento.
 
 **Saída esperada:**
 
-```yaml
+```text
 node/agente-1 already cordoned
 pod/nginx-abc123 evicted
 pod/my-app-def456 evicted
@@ -56,11 +57,12 @@ Se `drain` falhar, veja a seção "Problemas comuns" abaixo.
 
 ## Passo 2: Executar manutenção
 
-Agora o nó está `CordonSchedulingDisabled` — nenhum novo pod é agendado nele. Você pode:
+Agora o nó está `CordonSchedulingDisabled`, o que significa que nenhum novo pod é agendado nele.
+A partir daqui você pode:
 
 ### Atualizar K3s
 
-```yaml
+```bash
 # SSH para o nó
 ssh admin@agente-1
 
@@ -76,7 +78,7 @@ sudo systemctl status k3s-agent
 
 Ou, se estiver usando um servidor:
 
-```yaml
+```bash
 sudo systemctl stop k3s
 
 curl -sfL https://get.k3s.io | INSTALL_K3S_SKIP_START=true sh -
@@ -86,7 +88,7 @@ sudo systemctl start k3s
 
 ### Aplicar patches do SO
 
-```yaml
+```bash
 sudo apt update && sudo apt upgrade -y
 sudo reboot
 ```
@@ -95,27 +97,30 @@ K3s reinicia automaticamente após o reboot.
 
 ### Substituir hardware
 
-Se o nó está danificado, você pode desligá-lo sem impactar o cluster:
+Se o nó está danificado e não vai voltar, remova-o do cluster antes de desligá-lo definitivamente:
 
-```yaml
-# Remover o nó do cluster (não apenas drenar, mas remover)
+```bash
 kubectl delete node agente-1
-
-# Desligar o nó
 ssh admin@agente-1 'sudo shutdown -h now'
 ```
+
+**Atenção:** `kubectl delete node` remove o registro do nó da API imediatamente, não apenas o
+marca como indisponível. Use esse comando apenas quando o nó realmente não vai retornar; se houver
+qualquer chance de repará-lo, prefira apenas drenar e desligar sem remover o registro, e liberá-lo
+de volta com `kubectl uncordon` quando ele voltar. Um nó removido precisa ser reingressado do zero,
+seguindo [Adicionar um agente K3s](../../../tasks/kubernetes/join-k3s-agent/).
 
 ## Passo 3: Uncordon o nó
 
 Depois que manutenção termina e o nó está saudável, libere-o para receber workloads novamente:
 
-```yaml
+```bash
 kubectl uncordon agente-1
 ```
 
 **Saída esperada:**
 
-```yaml
+```text
 node/agente-1 uncordoned
 ```
 
@@ -123,7 +128,7 @@ node/agente-1 uncordoned
 
 Aguarde ~10 segundos e verifique:
 
-```yaml
+```bash
 kubectl get nodes
 
 # Esperado: agente-1 volta a "Ready"
@@ -133,7 +138,7 @@ kubectl get nodes
 
 Se o nó fica `NotReady`, confira logs:
 
-```yaml
+```bash
 kubectl describe node agente-1
 kubectl logs -n kube-system <kubelet-log-pod>
 ```
@@ -142,7 +147,7 @@ kubectl logs -n kube-system <kubelet-log-pod>
 
 Drenar um servidor é similar, mas com mais impacto:
 
-```yaml
+```bash
 # Drenar servidor-0
 kubectl drain servidor-0 \
   --ignore-daemonsets \
@@ -164,11 +169,12 @@ kubectl uncordon servidor-0
 
 ## Problemas comuns
 
-### "cannot evict pod — it doesn't have a replication controller"
+### "cannot evict pod: it doesn't have a replication controller"
 
-Pod não é gerenciado por Deployment/StatefulSet/DaemonSet — é um pod solo. Solução:
+O pod não é gerenciado por Deployment, StatefulSet ou DaemonSet: é um pod solo, que o `drain`
+recusa remover por padrão porque não há um controlador que vá recriá-lo depois. Solução:
 
-```yaml
+```bash
 # Opção A: deletar o pod (é solo, recreável)
 kubectl delete pod <nome-pod> -n <namespace>
 
@@ -180,7 +186,7 @@ kubectl drain <nó> --force --ignore-daemonsets --delete-emptydir-data
 
 Pods não terminam em tempo. Aumentar `--grace-period` ou investigar por quê:
 
-```yaml
+```bash
 # Checar status de pods em drain
 kubectl get pods --all-namespaces | grep <nó>
 
@@ -192,7 +198,7 @@ kubectl drain <nó> --grace-period=5 --force --ignore-daemonsets
 
 Logs indicam falha ao reiniciar K3s. Conferir:
 
-```yaml
+```bash
 # No nó
 sudo journalctl -u k3s-agent -n 50
 
@@ -209,7 +215,7 @@ Para atualizar o cluster inteiro (ex.: K3s 1.35 → 1.36):
 2. Depois atualizar os agentes um por um
 3. Verificar que cluster está `Ready` após cada nó
 
-```yaml
+```bash
 # Script para atualizar todos os servidores
 for server in servidor-0 servidor-1 servidor-2; do
   echo "Updating $server..."
@@ -233,9 +239,9 @@ echo "Cluster updated successfully"
 
 ## Próximo passo
 
-- [Falha e recuperação](../failure-and-recovery/) — runbooks para cenários inesperados.
+- [Falha e recuperação](../failure-and-recovery/): runbooks para cenários inesperados.
 
 ## Fontes e leitura adicional
 
-- [Kubernetes — Safely Drain a Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/): guia oficial.
-- [K3s — Upgrades](https://docs.k3s.io/upgrades): informações de versão e procedimento.
+- [Kubernetes: Safely Drain a Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/): guia oficial.
+- [K3s: Upgrades](https://docs.k3s.io/upgrades): informações de versão e procedimento.

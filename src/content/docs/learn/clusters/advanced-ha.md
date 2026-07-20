@@ -1,63 +1,31 @@
 ---
-title: Alta Disponibilidade Avançada — Além de multinode
+title: Alta disponibilidade avançada
+description: Explica o que fica fora do escopo de um cluster K3s multinó comum (multi-zona, datastore externo replicado, load balancer de API) e quando vale a pena adotar.
 sidebar:
   order: 10
 ---
 
-> **Para quém é:** operadores com clusters produção que precisam de SLA 99.9%+ e resiliência a múltiplos pontos de falha.
+> **Para quem é:** operadores com um cluster K3s multinó já funcionando (veja o [blueprint K3s multinó](../../../guides/blueprints/k3s-multinode/)) que precisam de resiliência além da perda de um único servidor.
 
-Multinode (Fase 5) oferece redundância básica. HA avançada elimina single points of failure:
+Um cluster K3s multinó com três ou mais servidores (veja [quorum em clusters distribuídos](../quorum/)) já tolera a perda de um servidor sem interrupção. Alta disponibilidade avançada vai além disso: tolera a perda de um datacenter ou zona inteira, remove o endpoint único da API como ponto de falha, e desacopla o datastore do ciclo de vida dos próprios servidores K3s. Nenhum desses três pontos é coberto pelas páginas de instalação padrão deste notebook; esta página explica o que cada um resolve e por que a maioria dos clusters não precisa deles.
 
-- Control plane geograficamente disperso
-- Datastore externo com replicação
-- Load balancing e failover automático
+## Distribuição geográfica dos servidores
 
-## Além de multinode (Fase 5)
-
-Fase 5 cobriu:
-
-- N servidores K3s (quorum raft)
-- Etcd distribuído
-- Perde 1 servidor, cluster continua
-
-**HA avançada vai além:**
-
-- Zona de falha múltipla (cloud regions, data centers)
-- Datastore externo (PostgreSQL HA, etcd cluster)
-- API server loadbalanced
-- Kubelet self-healing automático
-
----
-
-## Arquitetura multi-zona
+Em um cluster multinó comum, os três servidores tipicamente ficam na mesma rede local ou no mesmo datacenter: perder o datacenter inteiro (energia, rede, ou o provedor de nuvem) derruba o cluster mesmo com quorum interno saudável. Distribuir os servidores entre zonas ou datacenters diferentes, com um load balancer multi-zona na frente do endpoint da API, remove esse domínio de falha único:
 
 ```mermaid
 graph TB
-    subgraph DC_A["Data Center A"]
-        S1["K3s Server 1<br/>etcd, API 6443"]
-        W1["Worker 1"]
-        W2["Worker 4"]
-        S1 --> W1
-        S1 --> W2
+    subgraph DC_A["Zona A"]
+        S1["Servidor 1<br/>etcd, API"]
     end
-    
-    subgraph DC_B["Data Center B"]
-        S2["K3s Server 2<br/>etcd, API 6443"]
-        W3["Worker 2"]
-        W4["Worker 5"]
-        S2 --> W3
-        S2 --> W4
+    subgraph DC_B["Zona B"]
+        S2["Servidor 2<br/>etcd, API"]
     end
-    
-    subgraph DC_C["Data Center C"]
-        S3["K3s Server 3<br/>etcd, API 6443"]
-        W5["Worker 3"]
-        W6["Worker 6"]
-        S3 --> W5
-        S3 --> W6
+    subgraph DC_C["Zona C"]
+        S3["Servidor 3<br/>etcd, API"]
     end
-    
-    LB["Cloud LB (multi-zona)<br/>6443 API servers"]
+
+    LB["Load balancer multi-zona<br/>porta 6443"]
     LB --> S1
     LB --> S2
     LB --> S3
@@ -66,163 +34,32 @@ graph TB
     S1 <--> S3
 ```
 
-Perder DC A inteiro → cluster continua (quorum em B+C).
+Perder a zona A inteira ainda deixa quorum entre B e C (dois de três), então o cluster continua operando. O custo dessa topologia é a latência de replicação do etcd entre zonas fisicamente distantes: o algoritmo Raft usado pelo etcd exige confirmação da maioria antes de cada escrita, então zonas com latência de rede alta entre si tornam cada escrita mais lenta. Essa topologia só compensa quando a infraestrutura já opera em múltiplas zonas ou datacenters; replicar um cluster de laboratório entre duas VPCs só para simular HA multi-zona adiciona complexidade sem o benefício real de isolamento físico.
 
----
+## Load balancer na frente da API
 
-## Datastore externo com replicação
+Sem um load balancer, o kubeconfig aponta para o endereço de um único servidor (`server: https://k3s-1:6443`), que volta a ser um ponto único de falha mesmo em um cluster com três servidores saudáveis: perder exatamente esse servidor interrompe o acesso administrativo, ainda que o cluster continue funcionando internamente. Um load balancer de camada 4 na frente dos três servidores (um balanceador do provedor de nuvem, ou Nginx/HAProxy com um IP flutuante em ambientes on-premises) redireciona o kubeconfig e os agents para qualquer servidor saudável, eliminando esse ponto único sem afetar o quorum do etcd, que continua sendo um mecanismo separado entre os próprios servidores.
 
-**K3s com PostgreSQL HA:**
+## Datastore desacoplado do control plane
 
-```yaml
-K3s 1 → PostgreSQL Primary (DC-A)
-K3s 2 →   ↓ (async replication)
-K3s 3 → PostgreSQL Replica (DC-B)
-        Replica (DC-C)
-```
+O etcd embarcado do K3s liga o quorum de dados ao número de servidores em execução (veja [etcd embarcado versus datastore externo](../embedded-vs-external-datastore/) para o trade-off completo). Um datastore externo replicado (PostgreSQL em modo HA, ou um cluster etcd dedicado fora dos servidores K3s) desacopla essas duas responsabilidades: os servidores K3s passam a ser stateless, e a resiliência do datastore é gerenciada separadamente, com suas próprias ferramentas de failover (Patroni, para PostgreSQL, por exemplo). Isso soma uma segunda superfície de operação a manter, então normalmente só compensa quando o datastore externo já é operado por uma equipe dedicada ou uma oferta gerenciada.
 
-Vantagens:
+## Backup permanece obrigatório
 
-- Etcd não é bottleneck
-- PostgreSQL clustering (já testado em production)
-- Failover automático com ferramentas como Patroni
+Nenhuma das três medidas acima substitui backup: elas reduzem a chance de indisponibilidade por falha de infraestrutura, não protegem contra um erro lógico (exclusão acidental, corrupção, um `kubectl delete` no namespace errado). Continue com o snapshot do etcd e, para dados de workloads e volumes, o [Velero](../../backup/velero-overview/), independentemente de qual topologia de HA for adotada.
 
----
+## Quando adotar HA avançada
 
-## Control plane load balancing
+Quando o cluster precisa sobreviver à perda de um datacenter inteiro, não apenas de um servidor, ou quando o SLA contratado com os usuários do cluster já exige esse nível de tolerância. Para a maioria dos clusters de equipe pequena ou de laboratório, o quorum de três servidores na mesma rede já cobre o cenário de falha mais provável (perda de uma máquina), e a complexidade operacional adicional de distribuir zonas, gerenciar um load balancer dedicado e operar um datastore externo raramente se paga.
 
-**Sem LB:**
+## Tópicos relacionados
 
-```yaml
-kubeconfig:
-  server: https://k3s-1:6443  # Single point
-```
+- [Quorum em clusters distribuídos](../quorum/): a base para entender por que perder mais da metade dos servidores é o cenário que qualquer topologia de HA precisa evitar.
+- [etcd embarcado versus datastore externo](../embedded-vs-external-datastore/): o trade-off central por trás de desacoplar o datastore do control plane.
+- [Blueprint K3s multinó](../../../guides/blueprints/k3s-multinode/): a topologia de HA básica (três servidores, mesma rede) que esta página assume como ponto de partida.
 
-**Com LB:**
+## Fontes e leitura adicional
 
-```mermaid
-graph TB
-    Config["kubeconfig:<br/>server: https://api.cluster.local:6443"]
-    
-    LB["Cloud LB"]
-    S1["k3s-1:6443"]
-    S2["k3s-2:6443"]
-    S3["k3s-3:6443"]
-    
-    Config --> LB
-    LB --> S1
-    LB --> S2
-    LB --> S3
-```
-
-Perder K3s 1 → LB roteia para 2 ou 3.
-
-**Opções:**
-
-- Cloud provider LB (AWS NLB, GCP LB) — automático
-- Nginx + keepalived (on-prem, manual failover)
-
----
-
-## Distributed etcd cluster
-
-**K3s embedded etcd:**
-
-- 3 servidores K3s = 3 etcd instances
-- Bom, mas acoplado
-
-**Etcd cluster externo:**
-
-- Etcd em VMs dedicadas (ou 3 pods K3s só pra isso)
-- K3s como datastore-endpoint
-- Desacoplado do control plane
-
-Trade-off:
-
-- Mais complexo (etcd troubleshooting separado)
-- Mais resiliente (falha etcd ≠ falha K3s)
-
----
-
-## Node health checks e auto-repair
-
-**Kubelet pode remover node faltando:**
-
-```yaml
-apiVersion: kubelet.config.k8s.io/v1beta1
-evictionHard:
-  memory.available: "5%"
-  disk.available: "10%"
-nodeStatusUpdateFrequency: 10s
-nodeStatusReportFrequency: 5m
-```
-
-**Node Problem Detector + auto-removal:**
-
-- Monitora node (disk, memory, PID exhaustion)
-- Marca unhealthy
-- Workloads migram automaticamente
-
----
-
-## Backup + Disaster Recovery
-
-**Velero para snapshots:**
-
-```bash
-velero backup create my-backup
-# Se disaster: velero restore create --from-backup my-backup
-```
-
-**Etcd snapshot + restore:**
-
-```bash
-etcdctl snapshot save backup.db
-etcdctl snapshot restore backup.db --data-dir=/var/lib/etcd-restored
-```
-
-Recomendação: ambos (app-level + datastore-level).
-
----
-
-## SLA e RTO/RPO
-
-| Métrica    | Objetivo  | Significado               |
-| ---------- | --------- | ------------------------- |
-| **Uptime** | 99.9%     | 8.7h downtime/ano         |
-| **RTO**    | < 15 min  | Tempo para voltar online  |
-| **RPO**    | < 1 min   | Perda máxima de 1 min     |
-
-Para 99.9%:
-
-- Multi-zone (3 AZs)
-- Etcd externo com replicação
-- Velero com snapshots frequentes (a cada 1h)
-
----
-
-## Checklist HA avançado
-
-- [ ] 3+ K3s servidores em AZs diferentes
-- [ ] Etcd externo ou replicado
-- [ ] API server atrás de cloud LB
-- [ ] Velero instalado + teste de restore
-- [ ] Node Problem Detector rodando
-- [ ] Monitoring de etcd disk/memory
-- [ ] Runbook de disaster recovery testado
-
----
-
-## Próximas seções
-
-- [Instalar etcd externo](../../../guides/tasks/kubernetes/install-external-etcd/) — step-by-step.
-- [Velero setup](../../../guides/tasks/kubernetes/install-velero/) — backup automático.
-- [Control plane LB](../../../guides/tasks/kubernetes/install-api-loadbalancer/) — multi-zona.
-
----
-
-## Referências
-
-- [K3s HA docs](https://docs.k3s.io/datastore): datastore externo + HA.
-- [Etcd clustering](https://etcd.io/docs/v3.5/op-guide/clustering/): etcd setup.
-- [Velero docs](https://velero.io/docs/): backup + restore.
+- [K3s: High Availability with Embedded DB](https://docs.k3s.io/datastore/ha-embedded): referência oficial de HA com etcd embarcado.
+- [etcd: Clustering Guide](https://etcd.io/docs/v3.5/op-guide/clustering/): configuração de um cluster etcd, incluindo topologias distribuídas.
+- [Velero: documentação oficial](https://velero.io/docs/): backup de workloads e volumes, complementar a qualquer topologia de HA.

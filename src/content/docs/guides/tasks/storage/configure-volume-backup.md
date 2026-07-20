@@ -1,13 +1,14 @@
 ---
 title: Configurar backup de volumes do Longhorn
+description: Como configurar um backup target externo, criar um backup manual e agendar backups recorrentes de volumes Longhorn via RecurringJob.
 sidebar:
-  order: 6
+  order: 7
 ---
 
 > **Pré-requisitos:** [Longhorn instalado](../install-longhorn/), destino de backup (object storage compatível com S3 ou servidor NFS) disponível.
 > **Versões testadas:** Longhorn 1.12.0.
 
-Um backup do Longhorn copia os blocos de um volume para um backupstore externo — distinto das réplicas síncronas, que permanecem no mesmo cluster. Veja [replicação não é backup](../../../../learn/storage/replication-is-not-backup/) antes de tratar réplicas como proteção suficiente.
+Um backup do Longhorn copia os blocos de um volume para um backupstore externo, distinto das réplicas síncronas, que permanecem no mesmo cluster. Veja [replicação não é backup](../../../../learn/storage/replication-is-not-backup/) antes de tratar réplicas como proteção suficiente.
 
 ## Configurar o backup target
 
@@ -104,9 +105,9 @@ kubectl --namespace longhorn-system delete recurringjob daily-backup
 
 ## Próximo passo
 
-Teste a restauração — um backup nunca testado não é um backup confiável. Veja [restaurar backup de volume](../restore-volume-backup/).
+Teste a restauração: um backup nunca testado não é um backup confiável. Veja [restaurar backup de volume](../restore-volume-backup/).
 
 ## Fontes e leitura adicional
 
-- [Longhorn — Backup and Restore](https://longhorn.io/docs/1.12.0/snapshots-and-backups/backup-and-restore/): referência oficial de backup target, criação e agendamento.
-- [Longhorn — Set up Recurring Jobs](https://longhorn.io/docs/1.12.0/snapshots-and-backups/scheduling-backups-and-snapshots/): documenta `RecurringJob`, grupos e retenção.
+- [Longhorn: Backup and Restore](https://longhorn.io/docs/1.12.0/snapshots-and-backups/backup-and-restore/): referência oficial de backup target, criação e agendamento.
+- [Longhorn: Set up Recurring Jobs](https://longhorn.io/docs/1.12.0/snapshots-and-backups/scheduling-backups-and-snapshots/): documenta `RecurringJob`, grupos e retenção.

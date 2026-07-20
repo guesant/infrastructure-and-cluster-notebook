@@ -1,5 +1,6 @@
 ---
 title: Configurar um PodMonitor
+description: Como criar um PodMonitor para coletar métricas de Pods que não têm um Service estável correspondente.
 sidebar:
   order: 3
 ---
@@ -7,7 +8,7 @@ sidebar:
 > **Pré-requisitos:** [Prometheus stack instalado](../install-prometheus-stack/), Pods expondo métricas em formato Prometheus sem um Service estável.
 > **Versões testadas:** Prometheus Operator 0.86.
 
-Um `PodMonitor` seleciona Pods diretamente, sem depender de um `Service` — útil quando os Pods não têm (ou não deveriam ter) um Service correspondente. Veja [arquitetura do Prometheus](../../../../learn/observability/prometheus-architecture/) para quando preferir `PodMonitor` a [ServiceMonitor](../configure-service-monitor/).
+Um `PodMonitor` seleciona Pods diretamente, sem depender de um `Service`: útil quando os Pods não têm (ou não deveriam ter) um Service correspondente. Veja [arquitetura do Prometheus](../../../../learn/observability/prometheus-architecture/) para quando preferir `PodMonitor` a [ServiceMonitor](../configure-service-monitor/).
 
 ## Criar o PodMonitor
 
@@ -58,7 +59,7 @@ Confirme nos targets do Prometheus que os Pods selecionados aparecem com estado 
 
 ## Troubleshooting
 
-Se nenhum target aparecer, confirme que `podMonitorSelector` da instância do Prometheus aceita este objeto (mesmo `release` label) e que os Pods realmente têm os labels usados no seletor — `kubectl get pods --namespace "${APP_NAMESPACE}" --show-labels`.
+Se nenhum target aparecer, confirme que `podMonitorSelector` da instância do Prometheus aceita este objeto (mesmo `release` label) e que os Pods realmente têm os labels usados no seletor: `kubectl get pods --namespace "${APP_NAMESPACE}" --show-labels`.
 
 ## Rollback
 
@@ -72,4 +73,4 @@ kubectl --namespace monitoring delete podmonitor "${POD_MONITOR_NAME}"
 
 ## Fontes e leitura adicional
 
-- [PodMonitor — Prometheus Operator API reference](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PodMonitor): referência completa dos campos.
+- [Prometheus Operator: PodMonitor API reference](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.PodMonitor): referência completa dos campos.

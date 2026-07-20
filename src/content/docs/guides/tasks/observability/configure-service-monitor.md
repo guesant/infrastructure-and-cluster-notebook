@@ -1,5 +1,6 @@
 ---
 title: Configurar um ServiceMonitor
+description: Como criar um ServiceMonitor para que o Prometheus Operator colete métricas de uma aplicação que já tem um Service com porta nomeada.
 sidebar:
   order: 2
 ---
@@ -20,7 +21,7 @@ read -r -p "Nome do Service: " APP_SERVICE_NAME
 kubectl --namespace "${APP_NAMESPACE}" get service "${APP_SERVICE_NAME}" -o yaml | grep -A3 ports
 ```
 
-A porta usada para métricas precisa ter um `name` (ex.: `metrics`) — o `ServiceMonitor` referencia a porta pelo nome, não pelo número.
+A porta usada para métricas precisa ter um `name` (ex.: `metrics`): o `ServiceMonitor` referencia a porta pelo nome, não pelo número.
 
 ## Criar o ServiceMonitor
 
@@ -57,7 +58,7 @@ spec:
 EOF
 ```
 
-O label `release: kube-prometheus-stack` precisa corresponder ao `serviceMonitorSelector` configurado na instância do Prometheus — confirme o valor real se a instalação usou um nome de release diferente.
+O label `release: kube-prometheus-stack` precisa corresponder ao `serviceMonitorSelector` configurado na instância do Prometheus: confirme o valor real se a instalação usou um nome de release diferente.
 
 ## Validação
 
@@ -71,7 +72,7 @@ Confirme também nos targets do Prometheus (via port-forward para a interface we
 
 ## Troubleshooting
 
-Um manifesto aceito pela API não prova que o target foi descoberto — veja a tabela de diagnóstico em [observabilidade e alertas](../../../../operations/observability/observability-and-alerting/#limitações-e-diagnóstico) para os pontos de verificação (labels do Service, porta nomeada, RBAC, NetworkPolicy).
+Um manifesto aceito pela API não prova que o target foi descoberto: veja a tabela de diagnóstico em [observabilidade e alertas](../../../../operations/observability/observability-and-alerting/#limitações-e-diagnóstico) para os pontos de verificação (labels do Service, porta nomeada, RBAC, NetworkPolicy).
 
 ## Rollback
 
@@ -81,8 +82,8 @@ kubectl --namespace monitoring delete servicemonitor "${SERVICE_MONITOR_NAME}"
 
 ## Próximo passo
 
-Configure um alerta para a aplicação recém-instrumentada — veja o exemplo de `PrometheusRule` em [observabilidade e alertas](../../../../operations/observability/observability-and-alerting/#alerta-mínimo-com-prometheusrule).
+Configure um alerta para a aplicação recém-instrumentada; veja o exemplo de `PrometheusRule` em [observabilidade e alertas](../../../../operations/observability/observability-and-alerting/#alerta-mínimo-com-prometheusrule).
 
 ## Fontes e leitura adicional
 
-- [ServiceMonitor — Prometheus Operator API reference](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.ServiceMonitor): referência completa dos campos.
+- [Prometheus Operator: ServiceMonitor API reference](https://prometheus-operator.dev/docs/api-reference/api/#monitoring.coreos.com/v1.ServiceMonitor): referência completa dos campos.
