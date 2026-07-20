@@ -375,14 +375,14 @@ Regras do repositório: nunca execute comandos no host, use `./jail-exec.sh`; ze
 - [x] src/content/docs/toolbox/tools/overview.md
 
 ### toolbox/tools/remote-access
-- [ ] src/content/docs/toolbox/tools/remote-access/index.md
-- [ ] src/content/docs/toolbox/tools/remote-access/ssh-clients.md
+- [x] src/content/docs/toolbox/tools/remote-access/index.md
+- [x] src/content/docs/toolbox/tools/remote-access/ssh-clients.md
 
 ### toolbox/tools/security
-- [ ] src/content/docs/toolbox/tools/security/index.md
+- [x] src/content/docs/toolbox/tools/security/index.md
 
 ### toolbox/tools/troubleshooting
-- [ ] src/content/docs/toolbox/tools/troubleshooting/index.md
+- [x] src/content/docs/toolbox/tools/troubleshooting/index.md
 
 ## Pendências
 
