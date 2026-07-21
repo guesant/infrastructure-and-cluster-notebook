@@ -75,6 +75,10 @@ export default defineConfig({
 							label: 'Backups',
 							items: [{ autogenerate: { directory: 'learn/backups' } }],
 						},
+						{
+							label: 'Unix',
+							items: [{ autogenerate: { directory: 'learn/unix' } }],
+						},
 					],
 				},
 				{
