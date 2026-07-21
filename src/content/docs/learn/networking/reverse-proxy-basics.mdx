@@ -65,7 +65,7 @@ Nginx e Apache HTTP Server são proxies de propósito geral, configurados por ar
 
 ## Certificados para múltiplos domínios internos
 
-Um proxy que roteia por host precisa de um certificado TLS válido para cada domínio que atende. Três abordagens resolvem isso: um certificado wildcard (`*.internal`) cobre qualquer subdomínio sob esse sufixo com um único certificado, ao custo de exigir validação DNS (a maioria das autoridades certificadoras não emite wildcards por validação HTTP); um certificado único com múltiplos SANs (Subject Alternative Names) lista explicitamente cada domínio coberto, mas precisa ser reemitido sempre que um domínio novo é adicionado; e a emissão automatizada via cert-manager, que solicita e renova certificados por domínio conforme os recursos do cluster declaram a necessidade, é a abordagem recomendada quando o proxy já roda dentro do Kubernetes, porque elimina a gestão manual de renovação. A escolha entre essas opções está detalhada em [emissão de certificados com cert-manager](../../guides/tasks/certificates/install-cert-manager/).
+Um proxy que roteia por host precisa de um certificado TLS válido para cada domínio que atende. Três abordagens resolvem isso: um certificado wildcard (`*.internal`) cobre qualquer subdomínio sob esse sufixo com um único certificado, ao custo de exigir validação DNS (a maioria das autoridades certificadoras não emite wildcards por validação HTTP); um certificado único com múltiplos SANs (Subject Alternative Names) lista explicitamente cada domínio coberto, mas precisa ser reemitido sempre que um domínio novo é adicionado; e a emissão automatizada via cert-manager, que solicita e renova certificados por domínio conforme os recursos do cluster declaram a necessidade, é a abordagem recomendada quando o proxy já roda dentro do Kubernetes, porque elimina a gestão manual de renovação. A escolha entre essas opções está detalhada em [emissão de certificados com cert-manager](../../../guides/tasks/certificates/install-cert-manager/).
 
 ## Quando um reverse proxy é a ferramenta certa
 
@@ -74,8 +74,8 @@ Um reverse proxy resolve bem o problema de consolidar múltiplos serviços inter
 ## Páginas relacionadas
 
 - [Split-horizon DNS](./split-horizon-dns/)
-- [Configurar CoreDNS interno (procedimento)](../../guides/tasks/networking/setup-coredns-internal/)
-- [Configurar reverse proxy em localhost (procedimento)](../../guides/tasks/networking/setup-reverse-proxy-localhost/)
+- [Configurar CoreDNS interno (procedimento)](../../../guides/tasks/networking/setup-coredns-internal/)
+- [Configurar reverse proxy em localhost (procedimento)](../../../guides/tasks/networking/setup-reverse-proxy-localhost/)
 
 ## Referências
 

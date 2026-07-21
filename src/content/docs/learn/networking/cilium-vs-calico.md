@@ -81,7 +81,7 @@ Quando as políticas exigem controle além do que `NetworkPolicy` padrão oferec
 ## Páginas relacionadas
 
 - [Fundamentos de firewall no Linux](./firewalls/linux-firewall-fundamentals/)
-- [Configurar network policies (procedimento)](../../guides/tasks/networking/configure-network-policies/)
+- [Configurar network policies (procedimento)](../../../guides/tasks/networking/configure-network-policies/)
 
 ## Referências
 

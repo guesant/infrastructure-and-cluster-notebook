@@ -18,7 +18,7 @@ O modelo TCP/IP, descrito formalmente em RFCs como a 1122, nasceu do trabalho pr
 A tabela a seguir mapeia as camadas de um modelo no outro. O mapeamento não é exato: a camada de aplicação do TCP/IP absorve as camadas 5, 6 e 7 do OSI, porque a distinção entre sessão, apresentação e aplicação raramente aparece como protocolos separados na prática.
 
 | Camada OSI | Função | Camada TCP/IP | Exemplos no notebook |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 7. Aplicação | Protocolos usados diretamente por aplicações | Aplicação | HTTP, DNS, TLS (acima do transporte) |
 | 6. Apresentação | Codificação, serialização, criptografia | Aplicação | Sem correspondência isolada de protocolo |
 | 5. Sessão | Controle de sessões de comunicação | Aplicação | Sem correspondência isolada de protocolo |
@@ -62,7 +62,7 @@ flowchart TB
 
 ## Onde a numeração do OSI aparece neste notebook
 
-O vocabulário "camada 3", "camada 4" e "camada 7" sobrevive porque é preciso e curto, mesmo quando o sistema descrito não implementa o OSI. Um balanceador de "camada 4" decide para onde encaminhar um pacote olhando IP de destino e porta, sem entender o protocolo transportado; ele opera no nível de TCP/UDP, que no OSI corresponde à camada de transporte. Um reverse proxy de "camada 7", como o [Traefik](../reverse-proxy-basics/), lê o conteúdo da requisição HTTP (o host, o caminho, os cabeçalhos) para decidir a rota, o que exige entender o protocolo de aplicação inteiro, não só endereço e porta.
+O vocabulário "camada 3", "camada 4" e "camada 7" sobrevive porque é preciso e curto, mesmo quando o sistema descrito não implementa o OSI. Um balanceador de "camada 4" decide para onde encaminhar um pacote olhando IP de destino e porta, sem entender o protocolo transportado; ele opera no nível de TCP/UDP, que no OSI corresponde à camada de transporte. Um reverse proxy de "camada 7", como o [Traefik](../../reverse-proxy-basics/), lê o conteúdo da requisição HTTP (o host, o caminho, os cabeçalhos) para decidir a rota, o que exige entender o protocolo de aplicação inteiro, não só endereço e porta.
 
 Essa diferença de camada explica uma limitação prática: um balanceador de camada 4 pode encaminhar qualquer tráfego TCP, incluindo protocolos que não são HTTP, mas não consegue tomar decisões baseadas em conteúdo (como rotear por caminho de URL). Um proxy de camada 7 pode tomar essas decisões, mas só entende o protocolo que sabe interpretar; TLS passthrough é a técnica de encaminhar bytes de TLS sem terminá-los, quando o proxy precisa se comportar como camada 4 para esse tráfego específico mesmo operando majoritariamente em camada 7.
 
@@ -74,8 +74,8 @@ Usar a numeração de camadas ajuda a comunicar rapidamente em que nível uma fe
 
 ## Páginas relacionadas
 
-- [Modelo mental de reverse proxy](../reverse-proxy-basics/): onde a distinção entre camada 4 e camada 7 aparece na prática, com o Traefik.
-- [Cilium vs. Calico](../cilium-vs-calico/): CNIs que operam em diferentes combinações de camada 3 e camada 4 dentro da rede de pods.
+- [Modelo mental de reverse proxy](../../reverse-proxy-basics/): onde a distinção entre camada 4 e camada 7 aparece na prática, com o Traefik.
+- [Cilium vs. Calico](../../cilium-vs-calico/): CNIs que operam em diferentes combinações de camada 3 e camada 4 dentro da rede de pods.
 
 ## Referências
 
