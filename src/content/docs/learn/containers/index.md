@@ -21,8 +21,8 @@ Esta seção segue uma ordem deliberada: primeiro os fundamentos de isolamento d
 
 ## Imagem e distribuição
 
-8. [Ciclo de vida de imagens](image-lifecycle/) — tags, digests, reprodutibilidade, atualização e rollback de um workload em produção.
-9. [Registries de containers](container-registries/) — panorama de registries OCI e gerenciadores universais de artefatos, com critérios de escolha.
+1. [Ciclo de vida de imagens](image-lifecycle/) — tags, digests, reprodutibilidade, atualização e rollback de um workload em produção.
+2. [Registries de containers](container-registries/) — panorama de registries OCI e gerenciadores universais de artefatos, com critérios de escolha.
 
 ## Próximas seções
 

@@ -401,6 +401,11 @@ Regras do repositório: nunca execute comandos no host, use `./jail-exec.sh`; ze
   para kubectl, mantive a opção de usar `stable.txt` (comportamento já descrito no texto original)
   com uma nota explicando como fixar uma versão específica em vez disso. Também corrigidos os
   fences ```yaml que continham bash, para ```bash.
+  **Atualização (pesquisa de rede autorizada):** o Helm v4 tornou-se a série estável e o v3 entrou
+  em modo de manutenção; o script de instalação foi trocado de `get-helm-3` para `get-helm-4`,
+  com uma nota explicando a mudança de série. As versões placeholder de Helm e Argo CD CLI foram
+  preenchidas com o padrão "até a escrita, é X; confira o changelog" (Helm `v4.2.3`, Argo CD CLI
+  `v3.4.5`), conforme preferência registrada pelo usuário para não fixar números sem esse aviso.
 - `src/content/docs/toolbox/tools/host-management/cluster-tools.md`: página duplicava quase
   integralmente `learn/tools/visual-management.md` (k9s, Lens, Rancher, Portainer, Headlamp), com
   informação pior e desatualizada. Corrigido: reescrita como o companheiro de instalação rápida,
@@ -415,6 +420,9 @@ Regras do repositório: nunca execute comandos no host, use `./jail-exec.sh`; ze
   versão do chart; corrigido para exigir `--version` explícito. Mantida a mesma ressalva sobre
   licenciamento incerto do Lens já registrada na página `learn/` correspondente, sem repetir os
   detalhes, só linkando para lá.
+  **Atualização (pesquisa de rede autorizada):** versões placeholder preenchidas no padrão "até a
+  escrita, é X; confira o changelog": Rancher chart `2.14.3`, Portainer CE `2.39.5` (LTS), Headlamp
+  chart `0.43.0`.
 - `src/content/docs/toolbox/tools/file-transfer/transfer-tools.md`: bug técnico real corrigido. O
   texto original descrevia `rsync -avz --delete ...` como "Bidirecional (cuidado!)", mas rsync é,
   por natureza, uma ferramenta unidirecional; `--delete` apenas faz o destino espelhar exatamente a
@@ -494,13 +502,10 @@ Regras do repositório: nunca execute comandos no host, use `./jail-exec.sh`; ze
   previstos na árvore alvo original, nunca foram criados como seções do site; scripts vivem em
   `src/scripts/` e são incorporados via `ScriptHelper`/`FileWriter`. O mesmo ajuste foi refletido em
   `content-policy.md` (a linha sobre `toolbox/` citava `scripts/` como subseção, o que não existe).
-- `src/content/docs/project/disclaimer.md`: o aviso citava "especificamente o ChatGPT" como a
-  ferramenta de IA usada, o que está desatualizado dado que esta própria sessão de revisão editorial
-  (e presumivelmente outras) usa Claude. Generalizado para "assistentes de inteligência artificial
-  (incluindo, ao longo do desenvolvimento do projeto, ferramentas como ChatGPT e Claude)" em vez de
-  nomear uma única ferramenta como a fonte exclusiva. Se o usuário preferir uma atribuição diferente
-  (mais específica, ou sem nomear ferramentas), ajustar manualmente; não assumi qual é a intenção
-  exata de divulgação.
+- ~~`src/content/docs/project/disclaimer.md`~~: resolvido. O aviso citava "especificamente o
+  ChatGPT" como a ferramenta de IA usada, desatualizado já que a própria revisão editorial usa
+  Claude. Por decisão explícita do usuário, o texto não nomeia nenhuma ferramenta específica;
+  usa apenas "assistentes de inteligência artificial" de forma genérica.
 - `src/content/docs/operations/upgrades/upgrade-k3s-multinode.mdx`: reescrito por completo (era o
   único arquivo do lote `operations/upgrades`; `upgrade-k3s-single-node.mdx` já estava excelente e
   não precisou de edição). Problemas do original: blocos ```yaml contendo bash; emoji ✅/❌; script de
@@ -555,57 +560,69 @@ Regras do repositório: nunca execute comandos no host, use `./jail-exec.sh`; ze
   a versão instalada antes de escrever regras de alerta. Como as demais páginas do lote, mantém a
   postura de "Velero como ferramenta a avaliar" já estabelecida em `backup-and-recovery.md`, em vez de
   presumir que Velero já é a escolha definitiva do projeto.
-- `src/content/docs/learn/tools/visual-management.md`: o repositório Helm do Headlamp
+- ~~`src/content/docs/learn/tools/visual-management.md`~~: resolvido. O repositório Helm do Headlamp
   (`https://kubernetes-sigs.github.io/headlamp/`) e a existência do chart `headlamp/headlamp`
   não foram confirmados por acesso direto ao repositório nesta sessão (sem rede habilitada no
   runner); a URL segue o padrão esperado após a doação do projeto à CNCF/kubernetes-sigs, mas
   deve ser validada antes de tratar o comando como copiável sem revisão. Nenhuma versão de
   referência do chart do Headlamp está fixada em `reference/conventions.md`; o texto já orienta
   o leitor a confirmar a versão nas releases do projeto antes de instalar.
+  **Atualização (pesquisa de rede autorizada):** confirmado que
+  `https://kubernetes-sigs.github.io/headlamp/` é um repositório Helm real com o chart
+  `headlamp/headlamp` publicado (versão mais recente `0.43.0` no Artifact Hub, até a escrita).
+  Texto atualizado para citar essa versão no padrão "até a escrita, confira o changelog".
 - ~~`src/content/docs/guides/tasks/networking/setup-coredns-internal.mdx` e
   `setup-reverse-proxy-localhost.mdx`~~: resolvido neste lote. Os links quebrados para
   `../validate-dns-and-proxy/` foram removidos; cada página já tem sua própria seção de
   Validação, consistente com o que `dns-and-reverse-proxy/index.mdx` já documentava
   ("não existe uma página de validação separada").
-- `src/content/docs/guides/blueprints/dns-and-reverse-proxy/index.mdx` (já revisado em lote
-  anterior, fora do escopo deste lote): o texto afirma que `.cluster.local` é "um domínio
-  arbitrário de uso interno, não o `.local` reservado por multicast DNS". Isso ignora que
-  `cluster.local` é o domínio real usado pelo próprio Kubernetes/K3s para resolução de
-  Services e Pods (via plugin `kubernetes` do CoreDNS); declarar uma zona adicional para
-  exatamente esse sufixo no CoreDNS pode ter prioridade sobre esse plugin e quebrar a
-  resolução real do cluster. As páginas `guides/tasks/networking/setup-coredns-internal.mdx`
-  e `setup-reverse-proxy-localhost.mdx` foram corrigidas neste lote para usar o sufixo
-  `.internal` (reservado pela IANA para esse uso, RFC 9476) em vez de `.cluster.local`, o que
-  as deixa tecnicamente corretas mas divergentes da terminologia do blueprint. Revisar o
-  blueprint para alinhar com `.internal` na próxima vez que a seção `guides/blueprints` for
-  reaberta.
+- ~~`src/content/docs/guides/blueprints/dns-and-reverse-proxy/index.mdx`~~: resolvido. O
+  blueprint usava `.cluster.local` como domínio administrativo de exemplo (`grafana.cluster.local`
+  etc.), o mesmo sufixo que o Kubernetes/K3s usa de verdade para resolver Services e Pods via
+  plugin `kubernetes` do CoreDNS; declarar uma zona adicional para esse sufixo pode sobrepor esse
+  plugin e quebrar a resolução real do cluster. Todos os exemplos e diagramas foram atualizados
+  para `.internal` (RFC 9476), alinhando com o que `setup-coredns-internal.mdx` e
+  `setup-reverse-proxy-localhost.mdx` já usavam. O parágrafo de segurança que justificava a
+  escolha do sufixo foi reescrito para explicar a colisão real com `cluster.local`, em vez de
+  tratá-lo como "um domínio arbitrário".
 - ~~`src/content/docs/guides/blueprints/k3s-multinode/index.mdx`~~: corrigido neste lote
   (link tinha um `../` a mais; profundidade correta confirmada no HTML gerado).
-- `src/content/docs/guides/blueprints/k3s-multinode/first-server.mdx` e `validation.mdx`:
-  o texto original assumia que o etcd do K3s roda como pod em `kube-system` (comandos como
-  `kubectl exec ... etcdctl member list` e `k3s check-etcd`), o que não corresponde ao etcd
-  embarcado do K3s (roda dentro do processo `k3s`, sem pod dedicado). Suavizado neste lote para
-  não afirmar um comando específico não verificado; a forma confiável documentada é `kubectl get
-  nodes` mostrando todos os servidores `Ready`. Se um comando exato de inspeção do Raft for
-  necessário, verificar contra a versão de K3s do projeto antes de documentá-lo.
-- `src/content/docs/guides/tasks/backup/install-velero.md` e `velero-complete-setup.md`:
-  corrigidos bugs reais confirmados via documentação oficial (verificado com WebFetch): repositório
-  Helm `https://charts.velero.io` não resolve (DNS inexistente), substituído por
-  `https://vmware-tanzu.github.io/helm-charts` (oficial); chaves `--set
-  configuration.schedules.daily...` estavam com prefixo errado (deveria ser `schedules.daily...`,
-  sem `configuration.`); flag `--default-volumes-to-restic` está desatualizada, substituída por
-  `--default-volumes-to-fs-backup`. Não foi possível confirmar com certeza se
-  `configuration.backupStorageLocation.bucket` (forma "achatada", sem índice de array) é válida na
-  versão de Velero/chart que o projeto pretende usar (o chart mudou para array em versões mais
-  recentes); nenhuma versão de Velero está fixada em `reference/conventions.md`. Se ao testar a
-  instalação real o `--set configuration.backupStorageLocation.bucket=...` falhar, trocar para
-  `configuration.backupStorageLocation[0].bucket=...` conforme a versão do chart instalada.
-- `src/content/docs/learn/secrets-management/openbao-high-availability.mdx`: o texto original
-  listava PostgreSQL, etcd, S3+DynamoDB e MySQL como storage backends do OpenBao para HA, além de
-  Consul. Não foi possível confirmar com segurança, sem acesso à documentação oficial atualizada
-  do OpenBao nesta sessão, que todos esses backends são de fato suportados e mantidos oficialmente
-  (Vault removeu suporte a alguns backends de armazenamento ao longo do tempo, e o OpenBao pode não
-  ter herdado todos). A reescrita manteve apenas os dois backends de que há confiança razoável
-  (Integrated Storage/Raft, o caminho recomendado atualmente, e Consul, a opção externa
-  tradicional). Antes de recomendar qualquer outro backend específico, confirmar contra
-  <https://openbao.org/docs/configuration/storage/>.
+- ~~`src/content/docs/guides/blueprints/k3s-multinode/first-server.mdx` e `validation.mdx`~~:
+  resolvido. O texto original assumia que o etcd do K3s roda como pod em `kube-system` (comandos
+  como `kubectl exec ... etcdctl member list` e `k3s check-etcd`), o que não corresponde ao etcd
+  embarcado do K3s (roda dentro do processo `k3s`, sem pod dedicado). Em lote anterior isso foi
+  suavizado para não afirmar um comando não verificado. **Atualização (pesquisa de rede
+  autorizada):** confirmado, contra a wiki oficial do Rancher (mantenedor do K3s) sobre uso de
+  `etcdctl` com o etcd embarcado, o comando real de inspeção usando os certificados que o K3s já
+  gera em `/var/lib/rancher/k3s/server/tls/etcd/`. `validation.mdx` agora traz o comando completo
+  (`etcdctl member list` com `--cacert`/`--cert`/`--key` apontando para esses caminhos) e o
+  resultado esperado; `first-server.mdx` aponta para esse comando em vez de repeti-lo.
+- ~~`src/content/docs/guides/tasks/backup/install-velero.md` e `velero-complete-setup.md`~~:
+  resolvido. Bugs reais corrigidos em lote anterior via documentação oficial (verificado com
+  WebFetch): repositório Helm `https://charts.velero.io` não resolve (DNS inexistente), substituído
+  por `https://vmware-tanzu.github.io/helm-charts` (oficial); chaves `--set
+  configuration.schedules.daily...` estavam com prefixo errado (corrigido para `schedules.daily...`,
+  sem `configuration.`); flag `--default-volumes-to-restic` estava desatualizada, substituída por
+  `--default-volumes-to-fs-backup`. **Atualização (pesquisa de rede autorizada):** confirmado
+  contra o `README.md` e o `values.yaml` reais do chart (`vmware-tanzu/helm-charts`) que
+  `backupStorageLocation` é uma lista; a forma achatada (`configuration.backupStorageLocation.bucket`,
+  sem índice) estava errada e foi corrigida em todos os `--set` do arquivo para
+  `configuration.backupStorageLocation[0].bucket` (e o mesmo para `volumeSnapshotLocation[0]`).
+  Também identificado que o backup por sistema de arquivos (`--default-volumes-to-fs-backup`)
+  depende do DaemonSet `node-agent`, que o chart não instala por padrão (`deployNodeAgent: false`);
+  adicionado o `helm upgrade --set deployNodeAgent=true` que faltava antes do exemplo de uso da
+  flag, sem o qual o comando documentado não teria efeito real. A métrica
+  `velero_backup_failure_total`, citada no checklist de `velero-complete-setup.md`, foi confirmada
+  como um nome real exposto pelo Velero.
+- ~~`src/content/docs/learn/secrets-management/openbao-high-availability.mdx`~~: resolvido. O
+  texto original listava PostgreSQL, etcd, S3+DynamoDB e MySQL como storage backends do OpenBao
+  para HA, além de Consul; em lote anterior isso foi reduzido a Raft e Consul por falta de
+  confirmação. **Atualização (pesquisa de rede autorizada):** confirmado contra a documentação
+  oficial (`openbao.org/docs/configuration/storage/`) que os backends atualmente documentados são
+  Filesystem, In-Memory, Integrated Storage (Raft) e PostgreSQL (este último com suporte a HA).
+  Também confirmado que o Consul deixou de ser o backend de armazenamento primário recomendado
+  depois que o projeto Consul mudou para uma licença não aprovada pela OSI; hoje ele aparece
+  principalmente como coordenador de lock (`ha_storage`) combinado com outro backend de dados, não
+  mais como opção padrão de armazenamento. O texto foi corrigido para não apresentar o Consul como
+  alternativa equivalente ao Integrated Storage, e passou a linkar a página oficial de storage para
+  o leitor conferir o estado atual antes de adotar um backend externo.
