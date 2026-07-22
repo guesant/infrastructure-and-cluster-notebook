@@ -23,6 +23,8 @@ ansible --version
 
 **Riscos:** um playbook mal escrito, sem os módulos declarativos corretos (veja [idempotência como contrato](../../../learn/automation/ansible-model/#idempotência-como-contrato)), pode reexecutar uma ação destrutiva a cada rodada em vez de convergir para um estado estável. Rode com `--check --diff` antes de aplicar de fato contra hosts de produção, para revisar o que mudaria sem alterar nada ainda.
 
+**Licença e plataformas:** `ansible-core` é GPL-3.0. O control node roda em Linux/macOS/WSL; hosts gerenciados via SSH podem ser qualquer sistema com um interpretador Python compatível, incluindo a maioria das distribuições Linux e BSD.
+
 ---
 
 ## just: executor de tarefas (task runner)
@@ -37,25 +39,27 @@ cargo install just
 # releases do projeto e validar o checksum publicado antes de instalar
 ```
 
-O próprio `justfile` deste repositório é um exemplo real:
+Um `justfile` típico, com uma recipe padrão e uma dependência entre recipes:
 
 ```just
 default:
     @just --list
 
-up:
-    just _compose up --detach app
+build:
+    npm run build
 
-down:
-    just _compose down
+test: build
+    npm test
 
-shell: up
-    just _compose exec app bash
+lint:
+    npm run lint
 ```
 
-**Quando usar:** documentar e padronizar os comandos do dia a dia de um projeto (subir um ambiente, rodar testes, abrir um shell dentro de um container) como atalhos nomeados, descobríveis com `just --list`, em vez de manter esses comandos espalhados apenas em um README.
+**Quando usar:** documentar e padronizar os comandos do dia a dia de um projeto (build, testes, lint) como atalhos nomeados, descobríveis com `just --list`, em vez de manter esses comandos espalhados apenas em um README.
 
-**Considerações:** a recipe `default` (sem argumento, como no exemplo acima) roda quando `just` é chamado sem nenhum nome de recipe; `shell: up` declara uma dependência, então `just shell` executa `up` antes de `shell` automaticamente. `just` não substitui um orquestrador de automação como o Ansible: ele roda comandos locais ao host onde é invocado, sem inventário, sem SSH e sem o conceito de convergência para um estado declarado.
+**Considerações:** a recipe `default` (sem argumento, como no exemplo acima) roda quando `just` é chamado sem nenhum nome de recipe; `test: build` declara uma dependência, então `just test` executa `build` antes de `test` automaticamente. `just` não substitui um orquestrador de automação como o Ansible: ele roda comandos locais ao host onde é invocado, sem inventário, sem SSH e sem o conceito de convergência para um estado declarado.
+
+**Licença e plataformas:** licença CC0 (domínio público); binário único em Rust, disponível para Linux, macOS e Windows.
 
 ## Referências
 

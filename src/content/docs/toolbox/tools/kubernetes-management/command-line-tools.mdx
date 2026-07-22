@@ -15,6 +15,8 @@ Os scripts deste repositório instalam binários em `/usr/local/bin` e usam `sud
 
 `kubectl` é o cliente principal da API Kubernetes. Ele cria, consulta, altera e remove objetos, acompanha logs e eventos e auxilia no diagnóstico de workloads. O comando lê o kubeconfig para decidir com qual cluster e identidade trabalhar; portanto, confira o contexto antes de qualquer alteração. O `kubectl` não acessa diretamente o banco do K3s nem os containers: suas operações passam pela API e pelas regras de autorização do Kubernetes. Referência: [introdução ao kubectl](https://kubernetes.io/docs/reference/kubectl/introduction/).
 
+**Modelo de acesso e privilégios:** toda operação passa pelo RBAC do Kubernetes associado à identidade ativa no kubeconfig; `kubectl` não tem privilégio próprio além do que essa identidade já tem na API. **Riscos:** um kubeconfig com contexto de produção selecionado por engano é a causa mais comum de um comando destrutivo aplicado no cluster errado; confira `kubectl config current-context` antes de qualquer alteração. **Licença e plataformas:** Apache 2.0. Linux, macOS e Windows.
+
 A instalação oficial baixa o binário publicado em `dl.k8s.io` e valida seu checksum antes de instalá-lo, em vez de confiar apenas no download:
 
 > **Executar em:** máquina onde a CLI será instalada.
@@ -38,6 +40,8 @@ Helm é um gerenciador de pacotes para Kubernetes. Um **chart** reúne templates
 
 Helm renderiza manifests e os envia à API Kubernetes usando o kubeconfig, mas não mantém um controller próprio reconciliando continuamente a release. Depois da instalação, uma alteração manual no cluster não é corrigida por Helm até uma nova operação; essa é uma diferença importante em relação ao Argo CD. Referência: [introdução ao Helm](https://helm.sh/docs/intro/introduction/).
 
+**Modelo de acesso e privilégios:** mesmo modelo do `kubectl` (RBAC via kubeconfig); um chart mal revisado pode criar qualquer recurso que a identidade ativa tenha permissão de criar, incluindo RBAC mais permissivo para si mesmo. **Riscos:** instalar um chart de um repositório não confiável equivale a rodar manifests arbitrários com os privilégios da identidade ativa; revise o `values.yaml` e, quando possível, o conteúdo do chart antes de instalar. **Licença e plataformas:** Apache 2.0. Linux, macOS e Windows.
+
 Desde o lançamento do Helm v4, o v3 passou a receber apenas manutenção por um período limitado; novas instalações devem usar o v4. Confirme o estado atual de suporte do v3 na [política de releases do Helm](https://helm.sh/docs/topics/release_policy/) antes de optar por instalar a série anterior. A instalação oficial usa o script mantido pelo próprio projeto Helm:
 
 > **Executar em:** máquina onde a CLI será instalada.
@@ -55,6 +59,8 @@ Fixe `DESIRED_VERSION` com uma versão específica das [releases do Helm](https:
 ## Argo CD CLI
 
 `argocd` é o cliente da API do Argo CD. Ele permite autenticar no servidor Argo CD, cadastrar repositórios, consultar diferenças e controlar sincronizações. Não substitui `kubectl`: a CLI `argocd` opera os conceitos do Argo CD, enquanto `kubectl` opera qualquer recurso exposto pela API Kubernetes, inclusive os CRDs `Application`.
+
+**Modelo de acesso e privilégios:** autentica contra o servidor Argo CD (usuário local, SSO ou token de API), com autorização controlada pelo RBAC próprio do Argo CD, separado do RBAC do Kubernetes que `kubectl` usa. **Riscos:** um token de API do Argo CD com escopo amplo, vazado, dá controle sobre a sincronização de todas as `Application`s que esse escopo alcança; trate-o com o mesmo cuidado dado a uma credencial de deploy. **Licença e plataformas:** Apache 2.0. Linux, macOS e Windows.
 
 A instalação oficial baixa o binário publicado nas releases do projeto no GitHub:
 
@@ -83,6 +89,8 @@ Não use a antiga imagem `cert-manager-ctl` como alternativa atual em Docker: o 
 
 Os procedimentos de `check api`, diagnóstico e renovação ficam na página do [cert-manager](../../../../guides/tasks/certificates/install-cert-manager/).
 
+**Modelo de acesso e privilégios:** mesmo modelo do `kubectl` (RBAC via kubeconfig); operações de reemissão manual exigem permissão de escrita sobre os recursos `Certificate`/`CertificateRequest` do cert-manager. **Riscos:** nenhum além do já coberto por `kubectl`; é somente uma interface mais direta para operações que já seriam possíveis manipulando os CRDs do cert-manager. **Licença e plataformas:** Apache 2.0. Linux, macOS e Windows.
+
 ## longhornctl
 
 `longhornctl` auxilia na preparação e no diagnóstico do Longhorn, principalmente por meio dos testes de preflight usados neste guia. Ele não monta volumes para as aplicações e não substitui a interface CSI; os Pods continuam solicitando armazenamento por PVCs Kubernetes.
@@ -96,6 +104,8 @@ Fixe a CLI na mesma versão do chart Longhorn:
     { var: 'LONGHORNCTL_VERSION', label: 'Versão do longhornctl', defaultValue: 'v1.12.0' },
   ]}
 />
+
+**Modelo de acesso e privilégios:** mesmo modelo do `kubectl` para operações no cluster; os testes de preflight também podem exigir acesso direto aos discos do host quando avaliam requisitos de storage local. **Riscos:** nenhum além do já coberto por `kubectl`; os testes de preflight são somente leitura por padrão. **Licença e plataformas:** Apache 2.0. Linux, macOS e Windows.
 
 Depois de instalar as ferramentas, valide as versões:
 

@@ -25,6 +25,10 @@ Dentro do `psql`, os comandos internos mais usados são `\dt` (listar tabelas), 
 
 **Quando usar:** scripts, automação e qualquer situação em que uma interface gráfica seria desnecessária. É a opção mais leve das listadas aqui, sem dependências além do próprio pacote cliente.
 
+**Modelo de acesso e privilégios:** autentica com usuário/senha (ou certificado, dependendo da configuração `pg_hba.conf` do servidor); os privilégios dentro do banco são os da role usada para conectar, não algo que o `psql` controla.
+
+**Licença e plataformas:** licença PostgreSQL (permissiva, similar a MIT/BSD). Linux, macOS e Windows.
+
 ## CLI: cliente MySQL
 
 ```bash
@@ -37,6 +41,10 @@ Alternativa com destaque de sintaxe e autocompletar, útil para uso interativo:
 mycli -h localhost -u root -p
 ```
 
+**Modelo de acesso e privilégios:** mesmo modelo do `psql` acima, adaptado ao controle de acesso do MySQL/MariaDB (usuário/senha ou certificado, privilégios de acordo com a conta usada).
+
+**Licença e plataformas:** o cliente `mysql` é GPL-2.0 (parte do MySQL, licenciamento dual GPL/comercial conforme o uso); `mycli` é BSD-3-Clause. Ambos disponíveis para Linux, macOS e Windows.
+
 ## GUI multi-banco: DBeaver
 
 Cliente universal com suporte a PostgreSQL, MySQL, Oracle e diversos outros bancos através de drivers JDBC.
@@ -46,6 +54,10 @@ Instalação: baixe em [dbeaver.io/download](https://dbeaver.io/download/), ou i
 Funcionalidades principais: navegação visual de schema, construtor de queries, importação/exportação de dados, geração de diagrama entidade-relacionamento (ERD) e comparação/sincronização entre bancos.
 
 **Quando usar:** administração de múltiplos tipos de banco com uma única ferramenta. A edição Community é gratuita e cobre a maior parte do uso comum; a edição Enterprise adiciona recursos pagos (colaboração em equipe, alguns drivers adicionais). Confira o [comparativo oficial de edições](https://dbeaver.io/edition/) antes de decidir, já que a divisão exata entre gratuito e pago muda entre versões.
+
+**Modelo de acesso e privilégios:** cada conexão configurada guarda suas próprias credenciais (usuário/senha, certificado, ou túnel SSH embutido); os privilégios dentro do banco são os da conta usada em cada conexão, não algo que o DBeaver controla.
+
+**Licença e plataformas:** Community Edition Apache 2.0; Enterprise Edition comercial. Linux, macOS e Windows.
 
 ## GUI web: pgAdmin
 
@@ -62,11 +74,21 @@ A imagem oficial exige `PGADMIN_DEFAULT_EMAIL` e `PGADMIN_DEFAULT_PASSWORD` defi
 
 Funcionalidades principais: criação e remoção de databases e roles, execução de queries, backup e restauração pela interface, e monitoramento básico do servidor.
 
+**Modelo de acesso e privilégios:** duas camadas de autenticação distintas: o login no próprio pgAdmin (`PGADMIN_DEFAULT_EMAIL`/`PGADMIN_DEFAULT_PASSWORD` no exemplo acima) e, separadamente, as credenciais de cada servidor PostgreSQL cadastrado dentro dele.
+
+**Riscos:** como visto na nota de publicação de porta acima, o pgAdmin é uma interface administrativa completa; além de restringir a porta a `127.0.0.1`, troque a senha padrão do exemplo antes de qualquer uso além de teste local.
+
+**Licença e plataformas:** licença PostgreSQL. Distribuído como imagem Docker oficial (portanto qualquer host com Docker); também disponível como pacote Python instalável diretamente em Linux, macOS ou Windows.
+
 ## IDE profissional: DataGrip (JetBrains)
 
 IDE dedicada a bancos de dados, paga, com autocompletar orientado a schema, profiling de queries, refatoração de schema e integração com Git.
 
 **Quando usar:** quem já trabalha com outras ferramentas JetBrains (IntelliJ, PyCharm) e quer a mesma experiência de edição aplicada a SQL, ou equipes que precisam de refatoração de schema assistida. Consulte o [preço atual](https://www.jetbrains.com/datagrip/buy/) diretamente na JetBrains antes de decidir: o modelo de licenciamento (standalone ou incluído em um plano All Products) muda com frequência.
+
+**Modelo de acesso e privilégios:** mesmo modelo do DBeaver acima (credenciais por conexão configurada, privilégios herdados da conta usada no banco).
+
+**Licença e plataformas:** comercial (JetBrains), com licença gratuita para uso educacional e projetos open source qualificados via [JetBrains para não-comerciais](https://www.jetbrains.com/community/education/). Linux, macOS e Windows.
 
 ## Situações comuns
 

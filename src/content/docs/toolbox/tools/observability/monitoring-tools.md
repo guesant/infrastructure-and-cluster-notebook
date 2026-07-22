@@ -26,6 +26,10 @@ logcli query '{namespace="monitoring"}' --limit=50
 
 **Modelo de acesso:** `promtool query` e `logcli query` precisam alcançar a API do Prometheus/Loki (porta `9090`/`3100` por padrão) com as mesmas credenciais ou política de rede que qualquer outro cliente; `promtool check rules` sozinho não faz nenhuma chamada de rede, só valida a sintaxe do arquivo local.
 
+**Riscos:** nenhum específico; ambos são clientes de leitura (consulta), sem operação destrutiva sobre o Prometheus ou o Loki.
+
+**Licença e plataformas:** `promtool` é Apache 2.0 (projeto Prometheus). `logcli` é AGPLv3 (Loki foi relicenciado de Apache 2.0 para AGPLv3 em 2021, junto com o Grafana e o Tempo). Ambos disponíveis para Linux, macOS e Windows.
+
 ## Exportador adicional: blackbox-exporter
 
 Os componentes já cobertos por este notebook (CloudNativePG, node-exporter, kube-state-metrics) expõem métricas Prometheus nativamente; a maioria dos serviços não precisa de um exportador dedicado. O `blackbox-exporter` cobre o caso oposto: sondar um endpoint HTTP, TCP, ICMP ou DNS que não expõe métricas próprias, transformando o resultado (respondeu, código de status, tempo de resposta) em métricas Prometheus.
@@ -38,6 +42,12 @@ helm upgrade --install blackbox-exporter prometheus-community/prometheus-blackbo
 
 **Quando usar:** monitorar, a partir de dentro do cluster, a disponibilidade de um endpoint interno (outro Service, um endpoint de terceiros) sem instrumentar esse endpoint. Isso é diferente de [configurar monitoramento externo de disponibilidade](../../../guides/tasks/observability/configure-external-availability-monitoring/): o `blackbox-exporter` roda dentro do cluster e falha junto com ele em uma perda total do host, então não substitui uma verificação externa, apenas complementa a cobertura interna de disponibilidade.
 
+**Modelo de acesso e privilégios:** roda como Pod comum no cluster, sondando os endpoints configurados na sua própria configuração; não precisa de credenciais especiais além do que os próprios endpoints sondados exigem (ex.: um endpoint HTTP com autenticação exigiria configurar isso no módulo de sondagem).
+
+**Riscos:** sondagens configuradas contra hosts externos ao cluster geram tráfego de rede recorrente e podem ser confundidas, do lado do destino, com varredura ou abuso, se muito frequentes; ajuste o intervalo de sondagem ao necessário, não ao mínimo tecnicamente possível.
+
+**Licença e plataformas:** Apache 2.0. Distribuído como imagem de container; roda em qualquer cluster Kubernetes.
+
 ## Backend de traces: Grafana Tempo
 
 [Jaeger](../../../learn/observability/distributed-tracing/#jaeger-como-backend) já é o backend de tracing tratado em profundidade em `learn/observability/`. O Grafana Tempo é uma alternativa que se integra diretamente ao Grafana já instalado neste notebook (mesmo painel usado para métricas e logs), recebendo spans via OTLP do mesmo jeito que qualquer backend compatível com OpenTelemetry.
@@ -48,6 +58,12 @@ helm upgrade --install tempo grafana/tempo --namespace monitoring
 ```
 
 **Quando usar:** quando manter um único painel Grafana para métricas, logs e traces pesa mais na decisão do que os recursos específicos de exploração de traces do Jaeger; a escolha entre os dois depende mais de onde a equipe já centraliza a observação do que de uma diferença técnica decisiva entre eles.
+
+**Modelo de acesso e privilégios:** roda como componente comum do cluster (Helm chart), recebendo spans via OTLP de qualquer aplicação instrumentada; o acesso de consulta é o mesmo acesso já configurado para o Grafana.
+
+**Riscos:** nenhum específico além do já coberto pelo restante da stack de observabilidade (Prometheus/Grafana); armazenamento de traces cresce proporcionalmente ao volume de spans recebidos, o mesmo cuidado de amostragem já descrito em [distributed tracing](../../../learn/observability/distributed-tracing/#amostragem) se aplica aqui.
+
+**Licença e plataformas:** AGPLv3 (Tempo foi relicenciado junto com Grafana e Loki em 2021). Distribuído como imagem de container; roda em qualquer cluster Kubernetes.
 
 ## Monitoramento externo (uptime e checagem sintética)
 

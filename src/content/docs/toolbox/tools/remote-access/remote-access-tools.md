@@ -23,6 +23,12 @@ ssh user@host
 
 **Considerações:** além da sessão interativa, o mesmo pacote inclui `scp` (cópia pontual de arquivos) e `sftp` (sessão de transferência interativa); veja [transferência de arquivos](../file-transfer/transfer-tools/) para uma comparação entre os dois. No Windows, a alternativa mais usada historicamente é o PuTTY, com interface gráfica própria; para acesso multiplataforma (desktop e mobile) com catálogo de hosts, o Termius é uma opção comercial (veja a linha correspondente na [tabela de acesso remoto](../overview/#acesso-remoto-e-administração-dos-hosts) do catálogo geral).
 
+**Modelo de acesso, privilégios e autenticação:** a sessão herda os privilégios da conta usada para autenticar no host remoto; a autenticação pode ser por senha (desaconselhada para hosts administrativos) ou por par de chaves pública/privada, o padrão recomendado (veja [reforçar o SSH](../../../guides/tasks/host/harden-ssh/)). Não há um servidor central: cada host mantém sua própria lista de chaves autorizadas.
+
+**Riscos:** uma chave privada sem senha (`passphrase`) copiada para uma máquina comprometida dá acesso direto a todo host que a aceita; proteja a chave privada com passphrase e, em ambientes com múltiplos operadores, prefira certificados de curta duração (como os do Teleport, abaixo) a chaves estáticas de longa duração.
+
+**Licença e plataformas:** licença BSD/ISC (OpenSSH é mantido pelo projeto OpenBSD). Nativo em Linux, macOS e BSD; incluído por padrão no Windows 10 e superior.
+
 ## Teleport: acesso Zero Trust com auditoria
 
 Framework que centraliza acesso, auditoria e conformidade para infraestrutura com muitos operadores. Em vez de distribuir chaves SSH estáticas para cada pessoa, o Teleport emite certificados de curta duração a partir de uma identidade autenticada centralmente, o que elimina a necessidade de gerenciar `authorized_keys` em cada host e revoga o acesso automaticamente quando o certificado expira.
@@ -30,6 +36,12 @@ Framework que centraliza acesso, auditoria e conformidade para infraestrutura co
 **Quando usar:** ambientes com múltiplos operadores onde é necessário registrar quem acessou qual host e quando, especialmente em infraestrutura multi-cloud ou híbrida onde manter um inventário de chaves SSH por host se torna inviável.
 
 **Considerações:** a auditoria completa e o RBAC granular exigem operar o próprio cluster do Teleport (ou a versão gerenciada como serviço), o que adiciona um componente central à infraestrutura de acesso; avalie esse custo operacional contra o ganho de auditoria antes de adotar em um cluster pequeno com poucos operadores.
+
+**Modelo de acesso, privilégios e autenticação:** o operador autentica uma vez contra o Teleport (SSO, MFA ou usuário local), que emite um certificado de curta duração usado para acessar os hosts autorizados por RBAC; não há chave SSH estática de longo prazo para gerenciar ou revogar manualmente.
+
+**Riscos:** o próprio Teleport vira o ponto único de autenticação e autorização para todo o parque de hosts; comprometer o cluster do Teleport (ou a identidade usada para autenticar nele) equivale a comprometer o acesso a tudo que ele controla, o mesmo raciocínio de risco concentrado já aplicado ao bastion host, abaixo.
+
+**Licença e plataformas:** a partir da versão 16, a Community Edition segue uma licença comercial restrita (uso livre para pessoa física; empresas com menos de 100 funcionários e US$ 10 milhões de receita anual podem usar sem custo, mas não revender nem embutir em produto próprio); versões anteriores à 16 permanecem sob Apache 2.0. Confirme o modelo vigente na [página de licenciamento oficial](https://goteleport.com/pricing/) antes de adotar. Servidor multiplataforma (Linux principalmente); clientes disponíveis para Linux, macOS e Windows.
 
 ## Bastion host: ponto único de entrada
 
@@ -52,6 +64,10 @@ ssh private-server
 
 **Considerações:** o bastion concentra risco: qualquer comprometimento dele expõe a rota para todos os hosts privados alcançáveis a partir dele. Trate o bastion com o mesmo rigor de hardening aplicado a qualquer host exposto publicamente (veja [reforçar o SSH](../../../guides/tasks/host/harden-ssh/)), e restrinja por firewall quais origens podem alcançá-lo.
 
+**Modelo de acesso, privilégios e riscos:** não é um produto instalável, é um papel que qualquer host com OpenSSH já assume; os privilégios e riscos são os do próprio OpenSSH descritos acima, concentrados em um único ponto de entrada. Esse é o principal risco adicional: o bastion é o alvo de maior valor da rede, porque comprometê-lo dá rota para tudo atrás dele.
+
+**Licença e plataformas:** as mesmas do OpenSSH, que implementa o papel de bastion.
+
 ## Acesso via navegador
 
 ### Cockpit
@@ -67,6 +83,12 @@ Guacamole não implementa um servidor RDP ou VNC próprio: ele se conecta como c
 **Quando usar:** acesso remoto centralizado a múltiplos protocolos (RDP, VNC e SSH ao mesmo tempo) sem depender de um cliente instalado em cada estação, e quando um registro centralizado de quem acessou qual destino é necessário.
 
 **Considerações:** o setup exige orquestrar `guacd`, a aplicação web e o banco de dados, normalmente via Docker Compose; é significativamente mais complexo de operar do que os clientes diretos acima. Como o Guacamole passa a ser o único ponto de autenticação para todos os destinos cadastrados nele, proteja o próprio Guacamole com autenticação forte e TLS antes de cadastrar qualquer host administrativo.
+
+**Modelo de acesso, privilégios e autenticação:** o operador autentica na aplicação web do Guacamole (usuário/senha local, ou LDAP/SSO via extensão); a partir daí, o Guacamole guarda as credenciais de cada destino (RDP/VNC/SSH) e as usa por trás dos panos, sem expô-las de volta ao operador.
+
+**Riscos:** o banco de credenciais de destino guardado pelo Guacamole é um alvo de alto valor, equivalente a um cofre de senhas administrativas; a mesma concentração de risco do bastion host se aplica aqui, mas sobre credenciais em vez de rota de rede.
+
+**Licença e plataformas:** Apache License 2.0. `guacd` roda em Linux; o acesso do operador é via navegador, portanto multiplataforma por definição.
 
 ## Referências
 
