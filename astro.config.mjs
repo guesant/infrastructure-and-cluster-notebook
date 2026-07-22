@@ -49,43 +49,60 @@ export default defineConfig({
 				{
 					label: 'Aprender',
 					items: [
-						{ label: 'Clusters', items: [{ autogenerate: { directory: 'learn/clusters' } }] },
-						{ label: 'Containers', items: [{ autogenerate: { directory: 'learn/containers' } }] },
-						{
-							label: 'Virtualização',
-							items: [{ autogenerate: { directory: 'learn/virtualization' } }],
-						},
-						{
-							label: 'Rede',
-							items: [{ autogenerate: { directory: 'learn/networking' } }],
-						},
-						{
-							label: 'Armazenamento',
-							items: [{ autogenerate: { directory: 'learn/storage' } }],
-						},
-						{
-							label: 'Segredos',
-							items: [{ autogenerate: { directory: 'learn/secrets-management' } }],
-						},
-						{
-							label: 'Observabilidade',
-							items: [{ autogenerate: { directory: 'learn/observability' } }],
-						},
-						{
-							label: 'Backups',
-							items: [{ autogenerate: { directory: 'learn/backups' } }],
-						},
 						{
 							label: 'Unix',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'learn/unix' } }],
 						},
 						{
-							label: 'Automação',
-							items: [{ autogenerate: { directory: 'learn/automation' } }],
+							label: 'Virtualização',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/virtualization' } }],
+						},
+						{
+							label: 'Containers',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/containers' } }],
+						},
+						{
+							label: 'Rede',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/networking' } }],
+						},
+						{
+							label: 'Clusters',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/clusters' } }],
+						},
+						{
+							label: 'Armazenamento',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/storage' } }],
+						},
+						{
+							label: 'Backups',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/backups' } }],
+						},
+						{
+							label: 'Segredos',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/secrets-management' } }],
 						},
 						{
 							label: 'Segurança',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'learn/security' } }],
+						},
+						{
+							label: 'Observabilidade',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/observability' } }],
+						},
+						{
+							label: 'Automação',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'learn/automation' } }],
 						},
 					],
 				},
@@ -94,97 +111,144 @@ export default defineConfig({
 					items: [
 						{
 							label: 'Blueprints',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/blueprints' } }],
 						},
 						{
-							label: 'Automação',
-							items: [{ autogenerate: { directory: 'guides/tasks/automation' } }],
-						},
-						{
-							label: 'Segurança',
-							items: [{ autogenerate: { directory: 'guides/tasks/security' } }],
-						},
-						{
 							label: 'Host',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/host' } }],
 						},
 						{
 							label: 'Kubernetes',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/kubernetes' } }],
 						},
 						{
 							label: 'Rede',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/networking' } }],
 						},
 						{
 							label: 'Certificados',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/certificates' } }],
 						},
 						{
 							label: 'Armazenamento',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/storage' } }],
 						},
 						{
 							label: 'Bancos de dados',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/databases' } }],
 						},
 						{
 							label: 'GitOps',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/gitops' } }],
 						},
 						{
+							label: 'Segredos',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'guides/tasks/secrets' } }],
+						},
+						{
 							label: 'Observabilidade',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'guides/tasks/observability' } }],
 						},
 						{
-							label: 'Secrets',
-							items: [{ autogenerate: { directory: 'guides/tasks/secrets' } }],
+							label: 'Backup',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'guides/tasks/backup' } }],
+						},
+						{
+							label: 'Segurança',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'guides/tasks/security' } }],
+						},
+						{
+							label: 'Automação',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'guides/tasks/automation' } }],
 						},
 					],
 				},
 				{
 					label: 'Operação',
 					items: [
-						{ label: 'Checklists', items: [{ autogenerate: { directory: 'operations/checklists' } }] },
-						{ label: 'Manutenção', items: [{ autogenerate: { directory: 'operations/maintenance' } }] },
-						{ label: 'Atualizações', items: [{ autogenerate: { directory: 'operations/upgrades' } }] },
-						{ label: 'Backups', items: [{ autogenerate: { directory: 'operations/backups' } }] },
+						{
+							label: 'Checklists',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'operations/checklists' } }],
+						},
+						{
+							label: 'Observabilidade',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'operations/observability' } }],
+						},
+						{
+							label: 'Manutenção',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'operations/maintenance' } }],
+						},
+						{
+							label: 'Atualizações',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'operations/upgrades' } }],
+						},
+						{
+							label: 'Backups',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'operations/backups' } }],
+						},
 						{
 							label: 'Disaster recovery',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'operations/disaster-recovery' } }],
 						},
 						{
 							label: 'Troubleshooting',
+							collapsed: true,
 							items: [{ autogenerate: { directory: 'operations/troubleshooting' } }],
-						},
-						{
-							label: 'Observabilidade',
-							items: [{ autogenerate: { directory: 'operations/observability' } }],
 						},
 					],
 				},
 				{
 					label: 'Toolbox',
-					items: [{ autogenerate: { directory: 'toolbox/tools' } }],
-				},
-				{
-					label: 'Tecnologias',
-					items: [{ autogenerate: { directory: 'technologies' } }],
+					items: [
+						{
+							label: 'Ferramentas',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'toolbox/tools' } }],
+						},
+						{
+							label: 'Comandos',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'toolbox/commands' } }],
+						},
+						{
+							label: 'Snippets',
+							collapsed: true,
+							items: [{ autogenerate: { directory: 'toolbox/snippets' } }],
+						},
+					],
 				},
 				{
 					label: 'Recursos',
+					collapsed: true,
 					items: [{ autogenerate: { directory: 'resources' } }],
 				},
 				{
-					label: 'Referência',
-					items: [{ autogenerate: { directory: 'reference' } }],
-				},
-				{
 					label: 'Projeto',
+					collapsed: true,
 					items: [{ autogenerate: { directory: 'project' } }],
 				},
 				{
 					label: 'Contribuição',
+					collapsed: true,
 					items: [{ autogenerate: { directory: 'contributing' } }],
 				},
 			],
