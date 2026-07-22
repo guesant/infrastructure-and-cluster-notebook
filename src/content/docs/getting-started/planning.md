@@ -2,7 +2,7 @@
 title: Planejamento do K3s
 description: Decisões que precisam ser tomadas antes de instalar o K3s (nomenclatura de nós, endpoint da API, quantidade de servidores e custódia do token) e por que revisá-las depois é caro.
 sidebar:
-  order: 2
+  order: 3
 ---
 
 Cada decisão desta página é mais barata de tomar agora do que de corrigir depois. Nome de nó,

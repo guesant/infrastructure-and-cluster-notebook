@@ -2,7 +2,7 @@
 title: Criar um cluster K3s
 description: Roteiro com caminho comum, escolha de topologia, checkpoints e módulos opcionais para criar um cluster K3s.
 sidebar:
-  order: 1
+  order: 2
 ---
 
 Este ensaio organiza o conteúdo existente em um único percurso para criar um cluster K3s de nó único ou multinó. Ele apresenta as decisões, a ordem das etapas e os pontos de verificação; os conceitos, comandos e scripts permanecem nas páginas temáticas indicadas.
